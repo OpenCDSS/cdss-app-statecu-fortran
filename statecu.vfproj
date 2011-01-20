@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="9.10" ProjectIdGuid="{39D47C73-FAFA-43FB-A69F-BCF01EB3674B}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" Version="13.0" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\annuacrp.for"/>
+		<File RelativePath=".\bindat.inc"/>
+		<File RelativePath=".\calpcrop.for"/>
+		<File RelativePath=".\clndr.for"/>
+		<File RelativePath=".\dayhrs.for"/>
+		<File RelativePath=".\dread.for"/>
+		<File RelativePath=".\dsum.for"/>
+		<File RelativePath=".\dxcrain.for"/>
+		<File RelativePath=".\etascer.for"/>
+		<File RelativePath=".\etref.for"/>
+		<File RelativePath=".\etrref.for"/>
+		<File RelativePath=".\fall.for"/>
+		<File RelativePath=".\findsta.for"/>
+		<File RelativePath=".\flyfilld.for"/>
+		<File RelativePath=".\flyfillf.for"/>
+		<File RelativePath=".\flyfillp.for"/>
+		<File RelativePath=".\flyfillt.for"/>
+		<File RelativePath=".\foutput.for"/>
+		<File RelativePath=".\frost.for"/>
+		<File RelativePath=".\frostall.for"/>
+		<File RelativePath=".\gcommon.inc"/>
+		<File RelativePath=".\getcommandline_intel.for"/>
+		<File RelativePath=".\growth.for"/>
+		<File RelativePath=".\indcrop.for"/>
+		<File RelativePath=".\init.for"/>
+		<File RelativePath=".\interkc.for"/>
+		<File RelativePath=".\intertd.for"/>
+		<File RelativePath=".\julian.for"/>
+		<File RelativePath=".\kbasal.for"/>
+		<File RelativePath=".\kcpm.for"/>
+		<File RelativePath=".\kcpm2.for"/>
+		<File RelativePath=".\lw_ccu.for"/>
+		<File RelativePath=".\lw_init.for"/>
+		<File RelativePath=".\lw_update.for"/>
+		<File RelativePath=".\lw_write.for"/>
+		<File RelativePath=".\mainxc.for"/>
+		<File RelativePath=".\myexit.for"/>
+		<File RelativePath=".\perencrp.for"/>
+		<File RelativePath=".\pmclim.for"/>
+		<File RelativePath=".\pmcommon.inc"/>
+		<File RelativePath=".\pmdata.inc"/>
+		<File RelativePath=".\proj.for"/>
+		<File RelativePath=".\proto.for"/>
+		<File RelativePath=".\rain.for"/>
+		<File RelativePath=".\readfn.for"/>
+		<File RelativePath=".\readin.for"/>
+		<File RelativePath=".\sb_final.for"/>
+		<File RelativePath=".\sb_init.for"/>
+		<File RelativePath=".\sbgetdist.for"/>
+		<File RelativePath=".\sbupdate.for"/>
+		<File RelativePath=".\skipln.for"/>
+		<File RelativePath=".\skipn.for"/>
+		<File RelativePath=".\slimit.for"/>
+		<File RelativePath=".\spring.for"/>
+		<File RelativePath=".\stable.for"/>
+		<File RelativePath=".\statecu.for"/>
+		<File RelativePath=".\summary.for"/>
+		<File RelativePath=".\table.for"/>
+		<File RelativePath=".\wbuild.for"/>
+		<File RelativePath=".\wbuildall.for"/>
+		<File RelativePath=".\wsupply.for"/>
+		<File RelativePath=".\wsupsum.for"/>
+		<File RelativePath=".\xccommon.inc"/>
+		<File RelativePath=".\xcrain.for"/></Filter></Files>
+	<Globals/></VisualStudioProject>
