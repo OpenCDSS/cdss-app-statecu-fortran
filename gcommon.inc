@@ -66,6 +66,7 @@ c                major redesign of log file
 c                added several new data filling options (diversion and climate data) using new imiss values
 c                adjusted shortage based filling logic to be more robust
 c                tweaked typout values to designate whether to put district and basin totals in BD1 file
+c jhb 12/08      increased error log array (DIM_NLWS) size from 500 to 800
 c                
 c                
 C***************************************************************************
@@ -79,7 +80,7 @@ C                     number of county hucs                 = 200
 C                     number of sub basins (districts)      = 100
 C***************************************************************************
 C                     number of log file warnings               = 100
-C                     max number of log file warning structures = 20
+C                     max number of log file warning structures = 800
 C                        (per warning)
 C***************************************************************************
 
@@ -124,7 +125,7 @@ C jhb          but it could be any subgrouping
       PARAMETER (DIM_NSB = 100)
 c _____________________________________________________
       PARAMETER (DIM_NLW = 100)
-      PARAMETER (DIM_NLWS =500)
+      PARAMETER (DIM_NLWS = 800)
 c _____________________________________________________
 
 C-----Global Variable Declaration
