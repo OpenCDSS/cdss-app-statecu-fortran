@@ -426,12 +426,12 @@ Cjhb=&=====4============================================================
 Cjhb    Real*4 Total Acreage, t_area
         WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Acreage           ',0,
-     &    'Acres     '
+     &    'ACRE      '
 Cjhb=&=====5============================================================
 Cjhb    Real*4 Modeled Acreage, m_area
         WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Acreage         ',0,
-     &    'Acres     '
+     &    'ACRE      '
 Cjhb=&=====6============================================================
 Cjhb    Real*4 Potential Crop ET  , ET
         WRITE(UNIT=IBD1UN)'R',4,

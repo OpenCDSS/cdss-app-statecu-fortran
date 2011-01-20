@@ -1336,12 +1336,12 @@ Cjhb=&=====5============================================================
 Cjhb       Real*4 Total Crop Acreage - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====6============================================================
 Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====7============================================================
 Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
@@ -1381,7 +1381,7 @@ Cjhb=&=====14===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====15===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1426,17 +1426,17 @@ Cjhb=&=====22===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Application Effic   , sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====23===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc SW Applic Effic    , effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====24===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====25===========================================================
 Cjhb       Real*4 Soil Moisture Contents, soiltott(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1548,12 +1548,12 @@ Cjhb=&=====5============================================================
 Cjhb       Real*4 Total Irrigated Acreage  - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====6============================================================
 Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====7============================================================
 Cjhb       Char*10 Analysis Method         - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
@@ -1608,7 +1608,7 @@ Cjhb=&=====17===========================================================
 Cjhb       Real*4 Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====18===========================================================
 Cjhb       Real*4 Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1698,17 +1698,17 @@ Cjhb=&=====34===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====35===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====36===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====37===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1854,12 +1854,12 @@ Cjhb=&=====5============================================================
 Cjhb       Real*4 Total Crop Acreage - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====6============================================================
 Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====7============================================================
 Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
@@ -1914,7 +1914,7 @@ Cjhb=&=====17===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====18===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2004,17 +2004,17 @@ Cjhb=&=====34===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====35===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====36===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====37===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2226,12 +2226,12 @@ Cjhb=&=====5============================================================
 Cjhb       Real*4 'Total Irrigated Acreage ' - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====6============================================================
 Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====7============================================================
 Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
@@ -2271,7 +2271,7 @@ Cjhb=&=====14===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====15===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2296,7 +2296,7 @@ Cjhb=&=====19===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====20===========================================================
 Cjhb       Real*4 River Diversion Acct. - Destination: CU, crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2316,12 +2316,12 @@ Cjhb=&=====23===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====24===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====25===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2331,7 +2331,7 @@ Cjhb=&=====26===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc GW Application Eff ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====27===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2457,12 +2457,12 @@ Cjhb=&=====5============================================================
 Cjhb       Real*4 'Total Irrigated Acreage ' - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====6============================================================
 Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
-     &    'ACRES     '
+     &    'ACRE      '
 Cjhb=&=====7============================================================
 Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
@@ -2502,7 +2502,7 @@ Cjhb=&=====14===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====15===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2527,7 +2527,7 @@ Cjhb=&=====19===========================================================
 Cjhb       Real*4 River Diversion Acct. - 'Max Application Effic   ', sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====20===========================================================
 Cjhb       Real*4 River Diversion Acct. - SW to CU         , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2547,12 +2547,12 @@ Cjhb=&=====23===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====24===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====25===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2562,7 +2562,7 @@ Cjhb=&=====26===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc GW Application Eff ',0,
-     &    'Percent   '
+     &    'PERCENT   '
 Cjhb=&=====27===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,

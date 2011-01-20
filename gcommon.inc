@@ -68,7 +68,9 @@ c                adjusted shortage based filling logic to be more robust
 c                tweaked typout values to designate whether to put district and basin totals in BD1 file
 c jhb 12/08      increased error log array (DIM_NLWS) size from 500 to 800
 c jhb 06/09      version 13.01
-c                modified binary output (bd1) to change units descriptor string from "AF" top "ACFT" so TSTOOL can utilize it properly
+c                modified binary output (bd1) to change units descriptor string from "AF" to "ACFT" so TSTOOL can utilize it properly
+c                modified binary output (bd1) to change units descriptor string from "ACRES" to "ACRE" so TSTOOL can utilize it properly
+c                modified binary output (bd1) to change units descriptor string from "Percent" to "PERCENT"
 c                
 c                
 C***************************************************************************
