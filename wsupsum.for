@@ -34,6 +34,7 @@ c                   added 4th irrigated land category (surface water-sprinkler);
 c                   changed input file format to include 4 acreages;
 c                   added detailed water budget output for one structure
 c jhb 2007/09/25    temporarily remove warning message for extra structures in the DRA (drain) file
+c jhb 2011/01/19    changed the ISUPLY=2 DWB output back to farm deliv (seniorf(), etc.).  the new values (changed in Dec 08) were not working
 C
 C   Calling program : statecu.f
 C   Called programs : none
@@ -1585,17 +1586,17 @@ Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
      &    'IWR After Winter Precip ',1,
      &    'ACFT      '
 Cjhb=&=====13===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdps
+Cjhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Senior  ',1,
      &    'ACFT      '
 Cjhb=&=====14===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdpj
+Cjhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Junior  ',1,
      &    'ACFT      '
 Cjhb=&=====15===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT*** - 12/19/08 replaced with holdpo
+Cjhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Other   ',1,
      &    'ACFT      '
@@ -6945,8 +6946,8 @@ C=====================================================
      :           reqt(i,m,l),wbu(i,m,l),reqreqts(m,l)
 c                12/18/08 these are farm deliveries, do not match the label
 c                12/18/08 change to river diversions
-c     :          ,seniorf(m,l),juniorf(m,l),otherf(m,l)
-     :          ,holdps,holdpj,holdpo
+c                01/19/11 change back to farm deliveries
+     :          ,seniorf(m,l),juniorf(m,l),otherf(m,l)
      :          ,ddhmonot(m,l),crop_cus(m,l),crop_cuj(m,l)
      :          ,crop_cuo(m,l),crop_cut(m,l),soil_cus(m,l)
      :          ,soil_cuj(m,l),soil_cuo(m,l),soil_cu(m,l)
@@ -6991,14 +6992,14 @@ Cjhb  10 REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
 Cjhb  11 REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
 Cjhb  12 REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
      :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
-Cjhb  13 REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT*** - 12/19/08 replaced with holdps
-Cjhb  14 REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT*** - 12/19/08 replaced with holdpj
-Cjhb  15 REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT*** - 12/19/08 replaced with holdpo
+Cjhb  13 REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l)
+Cjhb  14 REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l)
+Cjhb  15 REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l)
 Cjhb  16 REAL ddhmonot(m,l) - River Diversion Acct. - Div By Priority - Total  ***REPORT***
 c                12/18/08 these are farm deliveries, do not match the label
 c                12/18/08 change to river diversions
-c     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
-     :            holdps,holdpj,holdpo,ddhmonot(m,l),
+c                01/19/11 changed back to river diversions
+     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
 Cjhb  17 REAL ceff(i,m) - River Diversion Acct. - Conveyance Efficiency   
 Cjhb  18 REAL closs(m,l) - River Diversion Acct. - Conveyance Loss         
 Cjhb  19 REAL fdiv(m,l) - River Diversion Acct. - Farm Headgate Delivery  

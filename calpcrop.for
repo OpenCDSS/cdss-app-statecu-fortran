@@ -52,6 +52,11 @@ C-----------------------------------------------------------------------
       character*40 method(DIM_NC)
       dimension icf(5)
       character rec5*5
+C----------------------------------------------------------------------------
+C jhb090309 for outputting season begin/end date
+C   jhb111510 - re-enabled and added to official release - Erin Wilson Nov 2010
+C----------------------------------------------------------------------------
+      Character*10 MYCHAR1,MYCHAR2,MYCHAR3
 C-----------------------------------------------------------------------
 C     main loop that computes usage for all crops in the study
 C-----------------------------------------------------------------------
@@ -72,6 +77,18 @@ C--------Get Growing Season (Begin and End Dates)
           call lw_update(64,cpname(icrop))
           nbeg = jbeg(IP,nyr)
           nend = jend(IP,nyr)
+C----------------------------------------------------------------------------
+C jhb090309 for outputting season begin/end date
+C   jhb111510 - re-enabled and added to official release - Erin Wilson Nov 2010
+C----------------------------------------------------------------------------
+        WRITE(MYCHAR1,'(I4)') NYR
+        WRITE(MYCHAR2,'(I4)') nbeg
+        WRITE(MYCHAR3,'(I4)') nend
+        WRITE(914,*)trim(BAS_ID(IB)),',',
+     :  trim(MYCHAR1),',',
+     :  trim(cpname(icrop)),',',
+     :  trim(MYCHAR2),',',trim(MYCHAR3)
+C----------------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C  start calculating potential crop evapotranspiration by blaney-criddle
 C-----------------------------------------------------------------------

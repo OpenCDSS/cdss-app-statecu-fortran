@@ -71,11 +71,17 @@ c jhb 06/09      version 13.01
 c                modified binary output (bd1) to change units descriptor string from "AF" to "ACFT" so TSTOOL can utilize it properly
 c                modified binary output (bd1) to change units descriptor string from "ACRES" to "ACRE" so TSTOOL can utilize it properly
 c                modified binary output (bd1) to change units descriptor string from "Percent" to "PERCENT"
+c jhb 07/10      version 13.02
+c                increased DIM_NA to 1200
+c jhb 11/10      version 13.03
+c                re-enabled season.csv output
+c jhb 01/11      version 13.04
+c                fixed diversion by priority monthly output (for ISUPLY=2 case) in wsupsum.for - changed back to outputting seniorf(), juniorf() and otherf()
 c                
 c                
 C***************************************************************************
 C   Notes           : Current Dimensions of the program.
-C                     number of subareas (or structures)    = 800 
+C                     number of subareas (or structures)    = 1200
 C                     number of parcels per structure       = 50
 C                     number of years                       = 130 
 C                     number of crop types                  = 70
@@ -95,10 +101,11 @@ C-----should be changed)
       CHARACTER*16 RDATE
       REAL VERS
 c grb new version number 
-      PARAMETER (VERS = 13.01)
-      PARAMETER (RDATE = '06/22/09 11:11AM')
-c dim_na used to be 1999
-      PARAMETER (DIM_NA = 800)
+      PARAMETER (VERS = 13.04)
+      PARAMETER (RDATE = '01/19/11 11:11AM')
+c     jhb 07/10
+c     PARAMETER (DIM_NA = 800)
+      PARAMETER (DIM_NA = 1200)
       PARAMETER (DIM_NP = 50)
       PARAMETER (DIM_NY = 130)
       PARAMETER (DIM_NC = 70)
