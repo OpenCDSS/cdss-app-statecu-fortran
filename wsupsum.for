@@ -1351,32 +1351,32 @@ Cjhb=&=====8============================================================
 Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====9============================================================
 Cjhb       Real*4  Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====10============================================================
 Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====11===========================================================
 Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====12===========================================================
 Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====13===========================================================
 Cjhb       Real*4 River Diversion Acct. - Historic Diversion, ddhmonot(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====14===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1386,42 +1386,42 @@ Cjhb=&=====15===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====16===========================================================
 Cjhb       Real*4 River Diversion Acct. - Farm Headgate Diversion, fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====17===========================================================
 Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
-     &    'AF        '
+     &    'ACFT      '
 C removed Cjhb=&=====16===========================================================
 C removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
 C removed            WRITE(UNIT=IBD1UN)'R',4,
 C removed      &    'Sprinkler FHG (Not Appl)',0,
-C removed      &    'AF        '
+C removed      &    'ACFT      '
 Cjhb=&=====18===========================================================
 Cjhb       Real*4 River Diversion Acct. - SW to CU                , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU                ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====19===========================================================
 Cjhb       Real*4 River Diversion Acct. - SW to Soil              , soil_cu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil              ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====21===========================================================
 Cjhb       Real*4 River Diversion Acct. - SW to CU & Soil         , divcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU & Soil         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====21===========================================================
 Cjhb       Real*4 River Diversion Acct. - SW_Non_Consumed         , ulagt(m,l)-closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====22===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Application Effic   , sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1441,28 +1441,28 @@ Cjhb=&=====25===========================================================
 Cjhb       Real*4 Soil Moisture Contents, soiltott(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====26===========================================================
 Cjhb       Real*4 Crop CU from SW         , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====27===========================================================
 Cjhb       Real*4 Crop CU from Soil       , cropcusoil(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====28===========================================================
 Cjhb       Real*4 Total Crop CU           , estcrpt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====29===========================================================
 Cjhb       Real*4 CU Shortage             , SHORTAGE
 Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&==================================================================
 Cjhb       Total record size = 3*4+3+4+4+10+22*4 = 121 bytes
 Cjhb=&==================================================================
@@ -1563,47 +1563,47 @@ Cjhb=&=====8============================================================
 Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====9============================================================
 Cjhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====10===========================================================
 Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====11===========================================================
 Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====12===========================================================
 Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====13===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT***
+Cjhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdps
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Senior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====14===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT***
+Cjhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdpj
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Junior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====15===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT***
+Cjhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT*** - 12/19/08 replaced with holdpo
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Other   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====16===========================================================
 Cjhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Total   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====17===========================================================
 Cjhb       Real*4 Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1613,87 +1613,87 @@ Cjhb=&=====18===========================================================
 Cjhb       Real*4 Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====19===========================================================
 Cjhb       Real*4 Farm Headgate Delivery  , fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====20===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Senior, crop_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Senior         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====21===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Junior, crop_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Junior         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====22===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Other, crop_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Other          ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====23===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Total, crop_cut(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Total          ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====24===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Senior, soil_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Senior       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====25===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Junior, soil_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Junior       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====26===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Other, soil_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Other        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====27===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Total, soil_cu(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Total        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====28===========================================================
 Cjhb       Real*4 River Diversion Acct. - Total Div to CU & Soil  , divcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU & Soil_Total   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====29===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Senior, ulags(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Senior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====30===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Junior, ulagj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Junior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====31===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Other, ulago(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Other   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====32===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Total, ulagt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Total   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====33===========================================================
 Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
-     &    'AF        '
+     &    'ACFT      '
 C removed Cjhb=&=====31===========================================================
 C removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
 C removed            WRITE(UNIT=IBD1UN)'R',4,
 C removed      &    'Sprinkler FHG (Not Appl)',0,
-C removed      &    'AF        '
+C removed      &    'ACFT      '
 Cjhb=&=====34===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1713,63 +1713,63 @@ Cjhb=&=====37===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Senior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====38===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Junior, soiltottj(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Junior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====39===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Other, soiltotto(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Other   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====40===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Total   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====41===========================================================
 Cjhb       Real*4 Tot Crop CU from Div    , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====42===========================================================
 Cjhb       Real*4 Tot Crop CU from Soil   , cropcusoil(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====43===========================================================
 Cjhb       Real*4 Estimated Crop CU - By Water Rights - Senior, estcrps(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU_Senior    ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====44===========================================================
 Cjhb       Real*4 Estimated Crop CU - By Water Rights - Junior, estcrpj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU_Junior    ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====45===========================================================
 Cjhb       Real*4 Estimated Crop CU - By Water Rights - Other, estcrpo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU_Other     ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====46===========================================================
 Cjhb       Real*4 Estimated Crop CU - By Water Rights - Total, estcrpt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====47===========================================================
 Cjhb       Real*4 Replacement Requirement, estcrpj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Replacement Requirement ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====48===========================================================
 Cjhb       Real*4 Calculated CU shortage, SHORTAGE
 Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&==================================================================
 Cjhb       Total record size = 3*4+3+4+4+10+41*4 = 197 bytes
 Cjhb=&==================================================================
@@ -1869,47 +1869,47 @@ Cjhb=&=====8============================================================
 Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====9============================================================
 Cjhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====10===========================================================
 Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====11===========================================================
 Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====12===========================================================
 Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====13===========================================================
 Cjhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Senior',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====14===========================================================
 Cjhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Junior',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====15===========================================================
 Cjhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Other ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====16===========================================================
 Cjhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Total ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====17===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -1919,87 +1919,87 @@ Cjhb=&=====18===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====19===========================================================
 Cjhb       Real*4 River Diversion Acct. - Farm Headgate Delivery  , fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====20===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Senior, crop_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Senior',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====21===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Junior, crop_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Junior',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====22===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Other, crop_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Other ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====23===========================================================
 Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Total, crop_cut(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Total ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====24===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Senior, soil_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Senior',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====25===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Junior, soil_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Junior',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====26===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Other, soil_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Other ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====27===========================================================
 Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Total, soil_cu(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Total ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====28===========================================================
 Cjhb       Real*4 River Diversion Acct. - Total Div to CU & Soil  , divcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Div to CU & Soil  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====29===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Senior, ulags(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Senior ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====30===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Junior, ulagj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Junior ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====31===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Other, ulago(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Other  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====32===========================================================
 Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Total, ulagt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Total  ',1,
-     &    'AF        '
+     &    'ACFT      '
 C removed Cjhb=&=====31===========================================================
 C removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
 C removed            WRITE(UNIT=IBD1UN)'R',4,
 C removed      &    'Sprinkler FHG (Not Appl)',0,
-C removed      &    'AF        '
+C removed      &    'ACFT      '
 Cjhb=&=====33===========================================================
 Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====34===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2019,128 +2019,128 @@ Cjhb=&=====37===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Senior ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====38===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Junior, soiltottj(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Junior ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====39===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Other, soiltotto(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Other  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====40===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Total  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====41===========================================================
 Cjhb       Real*4 Tot Crop CU from Div    , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Tot Crop CU from Div    ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====42===========================================================
 Cjhb       Real*4 Total Crop from Soil    , cropcusoil(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop from Soil    ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====43===========================================================
 Cjhb       Real*4 Total Crop CU - Senior  , estcrps(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU - Senior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====44===========================================================
 Cjhb       Real*4 Total Crop CU - Junior  , estcrpj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU - Junior  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====45===========================================================
 Cjhb       Real*4 Total Crop CU - Other   , estcrpo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU - Other   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====46===========================================================
 Cjhb       Real*4 Total Crop CU           , estcrpt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====47===========================================================
 Cjhb       Real*4 Months Return Flows - From This Months Div - Senior, lagrets(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Sen',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====48===========================================================
 Cjhb       Real*4 Months Return Flows - From This Months Div - Junior, lagretj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Jun',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====49===========================================================
 Cjhb       Real*4 Months Return Flows - From This Months Div - Other, lagreto(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Oth',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====50===========================================================
 Cjhb       Real*4 Months Return Flows - From This Months Div - Total, lagrett(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Tot',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====51===========================================================
 Cjhb       Real*4 Months Return Flows - From Prev Months Div - Senior, laglates(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Sen',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====52===========================================================
 Cjhb       Real*4 Months Return Flows - From Prev Months Div - Junior, laglatej(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Jun',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====53===========================================================
 Cjhb       Real*4 Months Return Flows - From Prev Months Div - Other, laglateo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Oth',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====54===========================================================
 Cjhb       Real*4 Months Return Flows - From Prev Months Div - Total, laglatet(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Tot',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====55===========================================================
 Cjhb       Real*4 Months Return Flows - Total, totret(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Return Flow - Total     ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====56===========================================================
 Cjhb       Real*4 River Depl(+)/Accr(-) - By Priority - Senior, deps(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Sen ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====57===========================================================
 Cjhb       Real*4 River Depl(+)/Accr(-) - By Priority - Junior, depj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Jun ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====58===========================================================
 Cjhb       Real*4 River Depl(+)/Accr(-) - By Priority - Other, depo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Oth ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====59===========================================================
 Cjhb       Real*4 River Depl(+)/Accr(-) - Total, dept(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Tot ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====60===========================================================
 Cjhb       Real*4 Replacement Requirement, depj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Replacement Requirement ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====61===========================================================
 Cjhb       Real*4 Calculated CU shortage, SHORTAGE
 Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&==================================================================
 Cjhb       Total record size = 3*4+3+4+4+10+54*4 = 249 bytes
 Cjhb=&==================================================================
@@ -2241,32 +2241,32 @@ Cjhb=&=====8============================================================
 Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====9============================================================
 Cjhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====10===========================================================
 Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====11===========================================================
 Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====12===========================================================
 Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====13===========================================================
 Cjhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====14===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2276,22 +2276,22 @@ Cjhb=&=====15===========================================================
 Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====16===========================================================
 Cjhb       Real*4 River Diversion Acct. - Farm Headgate Diversion, fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====17===========================================================
 Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====18===========================================================
 Cjhb       Real*4 River Diversion Acct. - 'Farm Deliver to Recharge', arech(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Recharge          ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====19===========================================================
 Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2301,17 +2301,17 @@ Cjhb=&=====20===========================================================
 Cjhb       Real*4 River Diversion Acct. - Destination: CU, crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU                ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====21===========================================================
 Cjhb       Real*4 River Diversion Acct. - Destination: Soil Zone, soil_cu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil              ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====22===========================================================
 Cjhb       Real*4 River Diversion Acct. - Destination: Non-Consumed, ulagt(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====23===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2326,7 +2326,7 @@ Cjhb=&=====25===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Diversion            ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====26===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2336,43 +2336,43 @@ Cjhb=&=====27===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW CU                   ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====28===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW - Non-Consumed       ', gwro(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW_Non-Consumed         ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====29===========================================================
 Cjhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====30===========================================================
 Cjhb       Real*4 Estimated Crop CU - From SW/GW Diversion, cutot, ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW and GW  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====31===========================================================
 Cjhb       Real*4 Estimated Crop CU - From Soil Moisture, cropcusoil(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====32===========================================================
 Cjhb       Real*4 Estimated Crop CU - Total, custot(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====33===========================================================
 Cjhb       Real*4 Total Month Non-Consumed, tdp(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW & GW Non_Consumed    ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====34===========================================================
 Cjhb       Real*4 Calculated CU shortage, SHORTAGE
 Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&==================================================================
 Cjhb       Total record size = 3*4+3+4+4+10+27*4 = 137 bytes
 Cjhb=&==================================================================
@@ -2472,32 +2472,32 @@ Cjhb=&=====8============================================================
 Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====9============================================================
 Cjhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====10===========================================================
 Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====11===========================================================
 Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====12===========================================================
 Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====13===========================================================
 Cjhb       Real*4 River Diversion Acct - River Diversion         , ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====14===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2507,22 +2507,22 @@ Cjhb=&=====15===========================================================
 Cjhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====16===========================================================
 Cjhb       Real*4 River Diversion Acct. - 'Farm Headgate Delivery  ', fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====17===========================================================
 Cjhb       Real*4 Supply_Tail Water_Drains, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====18===========================================================
 Cjhb       Real*4 River Diversion Acct. - 'Farm Deliver to Recharge', arech(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Recharge          ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====19===========================================================
 Cjhb       Real*4 River Diversion Acct. - 'Max Application Effic   ', sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2532,17 +2532,17 @@ Cjhb=&=====20===========================================================
 Cjhb       Real*4 River Diversion Acct. - SW to CU         , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU                ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====21===========================================================
 Cjhb       Real*4 River Diversion Acct. - SW to Soil              , soil_cu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil              ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====22===========================================================
 Cjhb       Real*4 River Diversion Acct. - 'SW_Non_Consumed         ', ulagt(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====23===========================================================
 Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2557,7 +2557,7 @@ Cjhb=&=====25===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Diversion            ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====26===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
@@ -2567,53 +2567,53 @@ Cjhb=&=====27===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW CU                   ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====28===========================================================
 Cjhb       Real*4 GW Diversion Acct. - 'GW - Non-Consumed       ', gwro(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW_Non-Consumed         ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====29===========================================================
 Cjhb       Real*4 EOM SW Soil Content - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content         ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====30===========================================================
 Cjhb       Real*4 Estimated Crop CU - From SW/GW Diversion, cutot, ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW and GW  ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====31===========================================================
 Cjhb       Real*4 Estimated Crop CU - From Soil Moisture, cropcusoil(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====32===========================================================
 Cjhb       Real*4 Estimated Crop CU - Total, custot(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====33===========================================================
 Cjhb       Real*4 Total Month Non-Consumed, tdp(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW & GW Non_Consumed    ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====34===========================================================
 Cjhb       Real*4 Calculated CU shortage, SHORTAGE
 Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====35===========================================================
 Cjhb       Real*4 GW div to Sprinkler, gsdiv(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Applied by Sprinklers',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====36===========================================================
 Cjhb       Real*4 GW div to Flood, gfdiv(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Applied by Flood Irr ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====37-??========================================================
            DO I=1,IFLOOD
            CHTMP1=subname(i) // ' IWR               '
@@ -2621,13 +2621,13 @@ Cjhb=&=====37-??========================================================
 Cjhb       Real*4 Grass Pasture IWR, grass(i,m,l,ifx)
            WRITE(UNIT=IBD1UN)'R',4,
      &     CHTMP1,0,
-     &    'AF        '
+     &    'ACFT      '
            CHTMP1=subname(i) // ' Acreage            '
            CHTMP1=CHTMP1//REPEAT(' ',24-LEN(CHTMP1))
 Cjhb       Real*4 Grass Pasture IWR, grass(i,m,l,ifx)
            WRITE(UNIT=IBD1UN)'R',4,
      &     CHTMP1,0,
-     &    'AF        '
+     &    'ACFT      '
            END DO
 Cjhb=&==================================================================
 Cjhb       Total record size = 3*4+3+4+4+10+29*4+IFLOOD2*4 = ?? bytes
@@ -2693,7 +2693,7 @@ c jhb add header lines to 4WB output file
         write(413,*)"Four Land Category Report for Structure ",s4catid
 c     1111X2223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000"
 c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-c         |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |      SW River Diversion       |       SW River Delivery       |  Tail |                                  SW Farm Headgate Delivery                    |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  | Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |
+c         |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |      SW River Diversion       |       SW River Delivery       |  Tail |                                  SW Farm Headgate Delivery                    |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  |Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |
 c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
 c         |   |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | Total |SW Only|SW Only|SW & GW|SW & GW|  re-  | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | junior| other | other | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total |SW & GW|SW & GW| Total |  Max  |SW & GW|SW & GW| Total |SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |
 c         |   |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr| charge|       | sw div| sw div| sw div|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       | by sr | by sr | by jr |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |  Flood|Sprnklr|       |  Rate |  Flood|Sprnklr|       |  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |
@@ -6723,22 +6723,22 @@ Cjhb====================================================================
      :                bdivcu(m,l)+divcu(m,l)
                   endif
                   if(ulags(m,l).gt.-999.0)then
-                    sbulags(sbsb(i),m,l)=
-     &                sbulags(sbsb(i),m,l)+ulags(m,l)
-                    bulags(m,l)=
-     &                bulags(m,l)+ulags(m,l)
+                    sbulags(sbsb(i),m,l)=sbulags(sbsb(i),m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
+                    bulags(m,l)=bulags(m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
                   endif
                   if(ulagj(m,l).gt.-999.0)then
-                    sbulagj(sbsb(i),m,l)=
-     &                sbulagj(sbsb(i),m,l)+ulagj(m,l)
-                    bulagj(m,l)=
-     &                bulagj(m,l)+ulagj(m,l)
+                    sbulagj(sbsb(i),m,l)=sbulagj(sbsb(i),m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
+                    bulagj(m,l)=bulagj(m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
                   endif
                   if(ulago(m,l).gt.-999.0)then
-                    sbulago(sbsb(i),m,l)=
-     &                sbulago(sbsb(i),m,l)+ulago(m,l)
-                    bulago(m,l)=
-     &                bulago(m,l)+ulago(m,l)
+                    sbulago(sbsb(i),m,l)=sbulago(sbsb(i),m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
+                    bulago(m,l)=bulago(m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
                   endif
                   if(ulagt(m,l).gt.-999.0)then
                     sbulagt(sbsb(i),m,l)=
@@ -6796,12 +6796,18 @@ c grb 05-20-00 set method descriptor
               method ='Prorated  '
               imiss=1
             endif
+            if((ulagt(m,13).lt.-998.0).or.(closs(m,13).lt.-998.0)) then
+              nonconsumed=-999.0
+            else
+              nonconsumed=ulagt(m,13)+closs(m,13)
+            endif
         write(256,835) nyr1+m-1,method,ettot(i,m,13),effppt(i,m,13),
      :   reqt(i,m,13),wbu(i,m,12),reqreqts(m,13),
      :    seniorf(m,13),juniorf(m,13),otherf(m,13),divsup(i,m,13),
      :    crop_cus(m,13),crop_cuj(m,13),crop_cuo(m,13),crop_cut(m,13),
      :    soil_cus(m,13),soil_cuj(m,13),soil_cuo(m,13),soil_cu(m,13),
-     :    ulags(m,13),ulagj(m,13),ulago(m,13),ulagt(m,13),divcu(m,13),
+c     :    ulags(m,13),ulagj(m,13),ulago(m,13),ulagt(m,13),divcu(m,13),
+     :    ulags(m,13),ulagj(m,13),ulago(m,13),nonconsumed,divcu(m,13),
      :    seffcu(m,13),soiltotts(m,12),soiltottj(m,12),
      :    soiltotto(m,12),soiltott(m,12),crop_cut(m,13),
      :    cropcusoil(m,13),estcrps(m,13),estcrpj(m,13),estcrpo(m,13),
@@ -6819,6 +6825,12 @@ c grb 05-20-00 set method descriptor
           if(imiss.eq.1) then
             method ='Prorated  '
           endif
+            if((ulagt(nyrs1,13).lt.-998.0).or.
+     &         (closs(nyrs1,13).lt.-998.0)) then
+              nonconsumed=-999.0
+            else
+              nonconsumed=ulagt(nyrs1,13)+closs(nyrs1,13)
+            endif
           write(256,836) method,ettot(i,nyrs1,13),effppt(i,nyrs1,13),
      :    reqt(i,nyrs1,13),wbu(i,nyrs1,13)/nyrs/12, reqreqts(nyrs1,13),
      :    seniorf(nyrs1,13),juniorf(nyrs1,13),
@@ -6828,7 +6840,8 @@ c grb 05-20-00 set method descriptor
      :    soil_cus(nyrs1,13),soil_cuj(nyrs1,13),
      :    soil_cuo(nyrs1,13),soil_cu(nyrs1,13),
      :    ulags(nyrs1,13),ulagj(nyrs1,13),
-     :    ulago(nyrs1,13),ulagt(nyrs1,13),
+c     :    ulago(nyrs1,13),ulagt(nyrs1,13),
+     :    ulago(nyrs1,13),nonconsumed,
      :    divcu(nyrs1,13),seffcu(nyrs1,13),
      :    soiltotts(nyrs1,13)/nyrs/12,soiltottj(nyrs1,13)/nyrs/12,
      :    soiltotto(nyrs1,13)/nyrs/12,soiltott(nyrs1,13)/nyrs/12,
@@ -6843,6 +6856,12 @@ c
             write(256,851) 
          enddo
          write(256,818) nyr1, nyr2
+            if((ulagt(nyrs1,l).lt.-998.0).or.
+     &         (closs(nyrs1,l).lt.-998.0)) then
+              nonconsumed=-999.0
+            else
+              nonconsumed=ulagt(nyrs1,l)+closs(nyrs1,l)
+            endif
          do l=1,12
            write(256,833) amn(l),method,ettot(i,nyrs1,l),
      :	 effppt(i,nyrs1,l),
@@ -6852,7 +6871,8 @@ c
      :    crop_cuo(nyrs1,l),crop_cut(nyrs1,l),soil_cus(nyrs1,l),
      :    soil_cuj(nyrs1,l),soil_cuo(nyrs1,l),soil_cu(nyrs1,l),
      :    ulags(nyrs1,l),ulagj(nyrs1,l),ulago(nyrs1,l),
-     :    ulagt(nyrs1,l),divcu(nyrs1,l),seffcu(nyrs1,l),
+c     :    ulagt(nyrs1,l),divcu(nyrs1,l),seffcu(nyrs1,l),
+     :    nonconsumed,divcu(nyrs1,l),seffcu(nyrs1,l),
      :    soiltotts(nyrs1,l),soiltottj(nyrs1,l),soiltotto(nyrs1,l),
      :    soiltott(nyrs1,l),crop_cut(nyrs1,l),cropcusoil(nyrs1,l),
      :    estcrps(nyrs1,l),
@@ -6865,6 +6885,12 @@ c
 c
 c  write annual average for all years (for structure i)
 c
+            if((ulagt(nyrs1,13).lt.-998.0).or.
+     &         (closs(nyrs1,13).lt.-998.0)) then
+              nonconsumed=-999.0
+            else
+              nonconsumed=ulagt(nyrs1,13)+closs(nyrs1,13)
+            endif
           write(256,851)
           write(256,837) method,ettot(i,nyrs1,13),effppt(i,nyrs1,13),
      :    reqt(i,nyrs1,13),wbu(i,nyrs1,13)/nyrs/12,reqreqts(nyrs1,13),
@@ -6875,7 +6901,8 @@ c
      :    soil_cus(nyrs1,13),soil_cuj(nyrs1,13),
      :    soil_cuo(nyrs1,13),soil_cu(nyrs1,13),
      :    ulags(nyrs1,13),ulagj(nyrs1,13),
-     :    ulago(nyrs1,13),ulagt(nyrs1,13),
+c     :    ulago(nyrs1,13),ulagt(nyrs1,13),
+     :    ulago(nyrs1,13),nonconsumed,
      :    divcu(nyrs1,13),seffcu(nyrs1,13),
      :    soiltotts(nyrs1,13)/nyrs/12,soiltottj(nyrs1,13)/nyrs/12,
      :    soiltotto(nyrs1,13)/nyrs/12,soiltott(nyrs1,13)/nyrs/12,
@@ -6909,13 +6936,22 @@ C=====================================================
 Cjhb          add shortage calculation to bd1 output
               SHORTAGE=reqreqts(m,l)-estcrpt(i,m,l)
 C=====================================================
+            if((ulagt(m,l).lt.-998.0).or.(closs(m,l).lt.-998.0)) then
+              nonconsumed=-999.0
+            else
+              nonconsumed=ulagt(m,l)+closs(m,l)
+            endif
               write(256,829) amn(l),method,ettot(i,m,l),effppt(i,m,l),
      :           reqt(i,m,l),wbu(i,m,l),reqreqts(m,l)
-     :          ,seniorf(m,l),juniorf(m,l),otherf(m,l)
+c                12/18/08 these are farm deliveries, do not match the label
+c                12/18/08 change to river diversions
+c     :          ,seniorf(m,l),juniorf(m,l),otherf(m,l)
+     :          ,holdps,holdpj,holdpo
      :          ,ddhmonot(m,l),crop_cus(m,l),crop_cuj(m,l)
      :          ,crop_cuo(m,l),crop_cut(m,l),soil_cus(m,l)
      :          ,soil_cuj(m,l),soil_cuo(m,l),soil_cu(m,l)
-     :          ,ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l)
+c     :          ,ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l)
+     :          ,ulags(m,l),ulagj(m,l),ulago(m,l),nonconsumed
      :          ,divcu(m,l),seffcu(m,l),soiltotts(m,l),soiltottj(m,l)
      :          ,soiltotto(m,l),soiltott(m,l),crop_cut(m,l)
      :          ,cropcusoil(m,l),estcrps(m,l),estcrpj(m,l)
@@ -6955,11 +6991,14 @@ Cjhb  10 REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
 Cjhb  11 REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
 Cjhb  12 REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
      :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
-Cjhb  13 REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT***
-Cjhb  14 REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT***
-Cjhb  15 REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT***
+Cjhb  13 REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT*** - 12/19/08 replaced with holdps
+Cjhb  14 REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT*** - 12/19/08 replaced with holdpj
+Cjhb  15 REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT*** - 12/19/08 replaced with holdpo
 Cjhb  16 REAL ddhmonot(m,l) - River Diversion Acct. - Div By Priority - Total  ***REPORT***
-     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
+c                12/18/08 these are farm deliveries, do not match the label
+c                12/18/08 change to river diversions
+c     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
+     :            holdps,holdpj,holdpo,ddhmonot(m,l),
 Cjhb  17 REAL ceff(i,m) - River Diversion Acct. - Conveyance Efficiency   
 Cjhb  18 REAL closs(m,l) - River Diversion Acct. - Conveyance Loss         
 Cjhb  19 REAL fdiv(m,l) - River Diversion Acct. - Farm Headgate Delivery  
@@ -6978,11 +7017,14 @@ Cjhb  27 REAL soil_cu(m,l) - River Diversion Acct. - Add to Soil Moisture - Tota
      :            soil_cuo(m,l),soil_cu(m,l),
 Cjhb  28 REAL divcu(m,l) - River Diversion Acct. - Total Div to CU & Soil  ***REPORT***
      :            divcu(m,l),
-Cjhb  29 REAL ulags(m,l) - River Diversion Acct. - Non-Consumed - Senior ***REPORT***
-Cjhb  30 REAL ulagj(m,l) - River Diversion Acct. - Non-Consumed - Junior ***REPORT***
-Cjhb  31 REAL ulago(m,l) - River Diversion Acct. - Non-Consumed - Other ***REPORT***
-Cjhb  32 REAL ulagt(m,l) - River Diversion Acct. - Non-Consumed - Total ***REPORT***
-     :            ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
+Cjhb  29 REAL ulags(m,l) - River Diversion Acct. - Non-Consumed - Senior ***REPORT*** includes canal losses - needs to be adjusted!!
+Cjhb  30 REAL ulagj(m,l) - River Diversion Acct. - Non-Consumed - Junior ***REPORT*** includes canal losses - needs to be adjusted!!
+Cjhb  31 REAL ulago(m,l) - River Diversion Acct. - Non-Consumed - Other ***REPORT*** includes canal losses - needs to be adjusted!!
+Cjhb  32 REAL ulagt(m,l) - River Diversion Acct. - Non-Consumed - Total ***REPORT*** does NOT include canal losses
+     :            ulags(m,l)-holdps*(1.-ceff(i,m)),
+     :            ulagj(m,l)-holdpj*(1.-ceff(i,m)),
+     :            ulago(m,l)-holdpo*(1.-ceff(i,m)),
+     :            ulagt(m,l),
 C removed Cjhb  31 REAL arech(m,l) - River Diversion Acct. - Eff Calc: Sprinkler FHG (Not Applied)
 C added   Cjhb  33 REAL tail(i,m,l) - River Diversion Acct. - Supply_Tail Water_Drains
 Cjhb  34 REAL sfeff(i,m) - River Diversion Acct. - Eff Calc: Max Application Effic   
@@ -7186,22 +7228,22 @@ Cjhb====================================================================
      &                bdivcu(m,l)+divcu(m,l)
                   endif
                   if(ulags(m,l).gt.-999.0)then
-                    sbulags(sbsb(i),m,l)=
-     &                sbulags(sbsb(i),m,l)+ulags(m,l)
-                    bulags(m,l)=
-     &                bulags(m,l)+ulags(m,l)
+                    sbulags(sbsb(i),m,l)=sbulags(sbsb(i),m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
+                    bulags(m,l)=bulags(m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
                   endif
                   if(ulagj(m,l).gt.-999.0)then
-                    sbulagj(sbsb(i),m,l)=
-     &                sbulagj(sbsb(i),m,l)+ulagj(m,l)
-                    bulagj(m,l)=
-     &                bulagj(m,l)+ulagj(m,l)
+                    sbulagj(sbsb(i),m,l)=sbulagj(sbsb(i),m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
+                    bulagj(m,l)=bulagj(m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
                   endif
                   if(ulago(m,l).gt.-999.0)then
-                    sbulago(sbsb(i),m,l)=
-     &                sbulago(sbsb(i),m,l)+ulago(m,l)
-                    bulago(m,l)=
-     &                bulago(m,l)+ulago(m,l)
+                    sbulago(sbsb(i),m,l)=sbulago(sbsb(i),m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
+                    bulago(m,l)=bulago(m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
                   endif
                   if(ulagt(m,l).gt.-999.0)then
                     sbulagt(sbsb(i),m,l)=
@@ -7699,22 +7741,22 @@ Cjhb====================================================================
      &                bdivcu(m,l)+divcu(m,l)
                   endif
                   if(ulags(m,l).gt.-999.0)then
-                    sbulags(sbsb(i),m,l)=
-     &                sbulags(sbsb(i),m,l)+ulags(m,l)
-                    bulags(m,l)=
-     &                bulags(m,l)+ulags(m,l)
+                    sbulags(sbsb(i),m,l)=sbulags(sbsb(i),m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
+                    bulags(m,l)=bulags(m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
                   endif
                   if(ulagj(m,l).gt.-999.0)then
-                    sbulagj(sbsb(i),m,l)=
-     &                sbulagj(sbsb(i),m,l)+ulagj(m,l)
-                    bulagj(m,l)=
-     &                bulagj(m,l)+ulagj(m,l)
+                    sbulagj(sbsb(i),m,l)=sbulagj(sbsb(i),m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
+                    bulagj(m,l)=bulagj(m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
                   endif
                   if(ulago(m,l).gt.-999.0)then
-                    sbulago(sbsb(i),m,l)=
-     &                sbulago(sbsb(i),m,l)+ulago(m,l)
-                    bulago(m,l)=
-     &                bulago(m,l)+ulago(m,l)
+                    sbulago(sbsb(i),m,l)=sbulago(sbsb(i),m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
+                    bulago(m,l)=bulago(m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
                   endif
                   if(ulagt(m,l).gt.-999.0)then
                     sbulagt(sbsb(i),m,l)=
@@ -8402,22 +8444,22 @@ Cjhb====================================================================
      &                btdp(m,l)+tdp(m,l)
                   endif
                   if(ulags(m,l).gt.-999.0)then
-                    sbulags(sbsb(i),m,l)=
-     &                sbulags(sbsb(i),m,l)+ulags(m,l)
-                    bulags(m,l)=
-     &                bulags(m,l)+ulags(m,l)
+                    sbulags(sbsb(i),m,l)=sbulags(sbsb(i),m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
+                    bulags(m,l)=bulags(m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
                   endif
                   if(ulagj(m,l).gt.-999.0)then
-                    sbulagj(sbsb(i),m,l)=
-     &                sbulagj(sbsb(i),m,l)+ulagj(m,l)
-                    bulagj(m,l)=
-     &                bulagj(m,l)+ulagj(m,l)
+                    sbulagj(sbsb(i),m,l)=sbulagj(sbsb(i),m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
+                    bulagj(m,l)=bulagj(m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
                   endif
                   if(ulago(m,l).gt.-999.0)then
-                    sbulago(sbsb(i),m,l)=
-     &                sbulago(sbsb(i),m,l)+ulago(m,l)
-                    bulago(m,l)=
-     &                bulago(m,l)+ulago(m,l)
+                    sbulago(sbsb(i),m,l)=sbulago(sbsb(i),m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
+                    bulago(m,l)=bulago(m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
                   endif
                   if(ulagt(m,l).gt.-999.0)then
                     sbulagt(sbsb(i),m,l)=
@@ -8757,22 +8799,22 @@ Cjhb====================================================================
      &                btdp(m,l)+tdp(m,l)
                   endif
                   if(ulags(m,l).gt.-999.0)then
-                    sbulags(sbsb(i),m,l)=
-     &                sbulags(sbsb(i),m,l)+ulags(m,l)
-                    bulags(m,l)=
-     &                bulags(m,l)+ulags(m,l)
+                    sbulags(sbsb(i),m,l)=sbulags(sbsb(i),m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
+                    bulags(m,l)=bulags(m,l)+
+     &                ulags(m,l)-holdps*(1.-ceff(i,m))
                   endif
                   if(ulagj(m,l).gt.-999.0)then
-                    sbulagj(sbsb(i),m,l)=
-     &                sbulagj(sbsb(i),m,l)+ulagj(m,l)
-                    bulagj(m,l)=
-     &                bulagj(m,l)+ulagj(m,l)
+                    sbulagj(sbsb(i),m,l)=sbulagj(sbsb(i),m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
+                    bulagj(m,l)=bulagj(m,l)+
+     &                ulagj(m,l)-holdpj*(1.-ceff(i,m))
                   endif
                   if(ulago(m,l).gt.-999.0)then
-                    sbulago(sbsb(i),m,l)=
-     &                sbulago(sbsb(i),m,l)+ulago(m,l)
-                    bulago(m,l)=
-     &                bulago(m,l)+ulago(m,l)
+                    sbulago(sbsb(i),m,l)=sbulago(sbsb(i),m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
+                    bulago(m,l)=bulago(m,l)+
+     &                ulago(m,l)-holdpo*(1.-ceff(i,m))
                   endif
                   if(ulagt(m,l).gt.-999.0)then
                     sbulagt(sbsb(i),m,l)=
@@ -9880,10 +9922,16 @@ c write annual totals for all structures
 c 
       if(isuply .eq. 1) then
         do m = 1,nyrs
+        if((ulagt(m,14).lt.-998.0).or.(closs(m,14).lt.-998.0)) then
+          nonconsumed=-999.0
+        else
+          nonconsumed=ulagt(m,14)+closs(m,14)
+        endif
        write(800,1712) percenta(m),method2,nyr1+m-1,ettot(nbasin+1,m,14)
      :  ,effppt(nbasin+1,m,14),reqt(nbasin+1,m,14),wbu(nbasin+1,m,14),
      :   reqreqts(m,14),divsup(nbasin+1,m,14),
-     :    crop_cut(m,14),soil_cu(m,14),ulagt(m,14),divcu(m,14),
+c     :    crop_cut(m,14),soil_cu(m,14),ulagt(m,14),divcu(m,14),
+     :    crop_cut(m,14),soil_cu(m,14),nonconsumed,divcu(m,14),
      :    seffcu(m,14),soiltott(m,14),crop_cut(m,14),
      :    cropcusoil(m,14),
      :    tcrpt(m,14)
@@ -9892,11 +9940,18 @@ c
 c
 c write average for all years for all structures
 c
+        if((ulagt(nyrs2,13).lt.-998.0).or.
+     &     (closs(nyrs2,13).lt.-998.0)) then
+          nonconsumed=-999.0
+        else
+          nonconsumed=ulagt(nyrs2,13)+closs(nyrs2,13)
+        endif
          write(800,1713) method2,ettot(nbasin+1,nyrs2,13),
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    divsup(nbasin+1,nyrs2,13),
-     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
+c     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
+     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),nonconsumed,
      :    divcu(nyrs2,13),seffcu(nyrs2,13),soiltott(nyrs,14),
      :    crop_cut(nyrs2,13),cropcusoil(nyrs2,13),tcrpt(nyrs2,13)
 
@@ -9908,11 +9963,18 @@ c  write monthly average for all years for all structures
 c
         write(800,1718) nyr1, nyr2
         do l=1,12
+         if((ulagt(nyrs2,l).lt.-998.0).or.
+     &      (closs(nyrs2,l).lt.-998.0)) then
+           nonconsumed=-999.0
+         else
+           nonconsumed=ulagt(nyrs2,l)+closs(nyrs2,l)
+         endif
          write(800,1710) method2,amn(l),ettot(nbasin+1,nyrs2,l),
      :    effppt(nbasin+1,nyrs2,l),reqt(nbasin+1,nyrs2,l),
      :    wbu(nbasin+1,nyrs2,l),reqreqts(nyrs2,l),
      :    divsup(nbasin+1,nyrs2,l),
-     :    crop_cut(nyrs2,l),soil_cu(nyrs2,l),ulagt(nyrs2,l),
+c     :    crop_cut(nyrs2,l),soil_cu(nyrs2,l),ulagt(nyrs2,l),
+     :    crop_cut(nyrs2,l),soil_cu(nyrs2,l),nonconsumed,
      :    divcu(nyrs2,l),seffcu(nyrs2,l),soiltott(nyrs2,l),
      :    crop_cut(nyrs2,l),cropcusoil(nyrs2,l),tcrpt(nyrs2,l)
         enddo
@@ -9921,11 +9983,18 @@ c
 c
 c write average for all years for all structures
 c
+        if((ulagt(nyrs2,13).lt.-998.0).or.
+     &     (closs(nyrs2,13).lt.-998.0)) then
+          nonconsumed=-999.0
+        else
+          nonconsumed=ulagt(nyrs2,13)+closs(nyrs2,13)
+        endif
          write(800,1714) method2,ettot(nbasin+1,nyrs2,13),
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    divsup(nbasin+1,nyrs2,13),
-     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
+c     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
+     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),nonconsumed,
      :    divcu(nyrs2,13),seffcu(nyrs2,13),soiltott(nyrs,14),
      :    crop_cut(nyrs2,13),cropcusoil(nyrs2,13),tcrpt(nyrs2,13)
         write(800,1751) 
@@ -9942,9 +10011,16 @@ c
           write(800,1745) (nu_sum(m,i),i=1,nu_dim),sum_y(m),
      :                    (as(k),k=1,id1)
             do l=1,12
+             if((tulagt(m,l).lt.-998.0).or.
+     &          (tcloss(m,l).lt.-998.0)) then
+               nonconsumed=-999.0
+             else
+               nonconsumed=tulagt(m,l)+tcloss(m,l)
+             endif
             write(800,1711) method2,amn(l),tet(m,l),teffr(m,l),
      :        treqt(m,l),twbu(m,l),treq(m,l),
-     :        tdiv(m,l),tcut(m,l),tscu(m,l),tulagt(m,l),
+c     :        tdiv(m,l),tcut(m,l),tscu(m,l),tulagt(m,l),
+     :        tdiv(m,l),tcut(m,l),tscu(m,l),nonconsumed,
      :        tdivcu(m,l),tseffcu(m,l),ttott(m,l),
      :        tcut(m,l),tcusoil(m,l),tcrpt(m,l)
             enddo
@@ -9956,6 +10032,11 @@ c
 c write annual totals for all structures combined
 c
         do m=1,nyrs
+        if((ulagt(m,14).lt.-998.0).or.(closs(m,14).lt.-998.0)) then
+          nonconsumed=-999.0
+        else
+          nonconsumed=ulagt(m,14)+closs(m,14)
+        endif
         write(800,1835) percenta(m),method2,nyr1+m-1,
      :	  ettot(nbasin+1,m,14),
      :  effppt(nbasin+1,m,14),reqt(nbasin+1,m,14),wbu(nbasin+1,m,14),
@@ -9963,7 +10044,8 @@ c
      :    seniorf(m,14),juniorf(m,14),otherf(m,14),divsup(nbasin+1,m,14)
      :,crop_cus(m,14),crop_cuj(m,14),crop_cuo(m,14),crop_cut(m,14),
      :    soil_cus(m,14),soil_cuj(m,14),soil_cuo(m,14),soil_cu(m,14),
-     :    ulags(m,14),ulagj(m,14),ulago(m,14),ulagt(m,14),divcu(m,14),
+c     :    ulags(m,14),ulagj(m,14),ulago(m,14),ulagt(m,14),divcu(m,14),
+     :    ulags(m,14),ulagj(m,14),ulago(m,14),nonconsumed,divcu(m,14),
      :    seffcu(m,14),soiltotts(m,14),soiltottj(m,14),
      :    soiltotto(m,14),soiltott(m,14),crop_cut(m,14),
      :    cropcusoil(m,14),estcrps(m,14),estcrpj(m,14),estcrpo(m,14),
@@ -9973,6 +10055,12 @@ c
 c
 c write average for all years for all structures
 c
+        if((ulagt(nyrs2,13).lt.-998.0).or.
+     &     (closs(nyrs2,13).lt.-998.0)) then
+          nonconsumed=-999.0
+        else
+          nonconsumed=ulagt(nyrs2,13)+closs(nyrs2,13)
+        endif
          write(800,1813) method2,ettot(nbasin+1,nyrs2,13),
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
@@ -9982,7 +10070,8 @@ c
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
      :    ulags(nyrs2,13),ulagj(nyrs2,13),ulago(nyrs2,13),
-     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
+c     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
+     :    nonconsumed,divcu(nyrs2,13),seffcu(nyrs2,13),
      :    soiltotts(nyrs,14),soiltottj(nyrs,14),soiltotto(nyrs,14),
      :    soiltott(nyrs,14),crop_cut(nyrs2,13),cropcusoil(nyrs2,13),
      :    estcrps(nyrs2,13),
@@ -9997,6 +10086,12 @@ c  write monthly average for all years for all structures
 c
          write(800,1818) nyr1, nyr2
          do l=1,12
+         if((ulagt(nyrs2,l).lt.-998.0).or.
+     &      (closs(nyrs2,l).lt.-998.0)) then
+           nonconsumed=-999.0
+         else
+           nonconsumed=ulagt(nyrs2,l)+closs(nyrs2,l)
+         endif
          write(800,1833) method2,amn(l),ettot(nbasin+1,nyrs2,l),
      :    effppt(nbasin+1,nyrs2,l),reqt(nbasin+1,nyrs2,l),
      :    wbu(nbasin+1,nyrs2,l),reqreqts(nyrs2,l),
@@ -10005,7 +10100,8 @@ c
      :    crop_cuo(nyrs2,l),crop_cut(nyrs2,l),soil_cus(nyrs2,l),
      :    soil_cuj(nyrs2,l),soil_cuo(nyrs2,l),soil_cu(nyrs2,l),
      :    ulags(nyrs2,l),ulagj(nyrs2,l),ulago(nyrs2,l),
-     :    ulagt(nyrs2,l),divcu(nyrs2,l),seffcu(nyrs2,l),
+c     :    ulagt(nyrs2,l),divcu(nyrs2,l),seffcu(nyrs2,l),
+     :    nonconsumed,divcu(nyrs2,l),seffcu(nyrs2,l),
      :    soiltotts(nyrs2,l),soiltottj(nyrs2,l),soiltotto(nyrs2,l),
      :    soiltott(nyrs2,l),crop_cut(nyrs2,l),cropcusoil(nyrs2,l),
      :    estcrps(nyrs2,l),
@@ -10015,6 +10111,12 @@ c
 c
 c write average for all years for all structures
 c
+        if((ulagt(nyrs2,13).lt.-998.0).or.
+     &     (closs(nyrs2,13).lt.-998.0)) then
+          nonconsumed=-999.0
+        else
+          nonconsumed=ulagt(nyrs2,13)+closs(nyrs2,13)
+        endif
          write(800,1814) method2,ettot(nbasin+1,nyrs2,13),
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
@@ -10024,7 +10126,8 @@ c
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
      :    ulags(nyrs2,13),ulagj(nyrs2,13),ulago(nyrs2,13),
-     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
+c     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
+     :    nonconsumed,divcu(nyrs2,13),seffcu(nyrs2,13),
      :    soiltotts(nyrs,14),soiltottj(nyrs,14),soiltotto(nyrs,14),
      :    soiltott(nyrs,14),crop_cut(nyrs2,13),cropcusoil(nyrs2,13),
      :    estcrps(nyrs2,13),
@@ -10054,6 +10157,12 @@ c
              teffcu(m,l) = 0
              tseffcu(m,l) = 0
            endif
+             if((tulagt(m,l).lt.-998.0).or.
+     &          (tcloss(m,l).lt.-998.0)) then
+               nonconsumed=-999.0
+             else
+               nonconsumed=tulagt(m,l)+tcloss(m,l)
+             endif
               write(800,1829) method2, amn(l),tet(m,l),teffr(m,l),
      :		treqt(m,l),
      :         twbu(m,l),treq(m,l)
@@ -10061,7 +10170,8 @@ c
      :          ,tdiv(m,l),tcus(m,l),tcuj(m,l)
      :          ,tcuo(m,l),tcut(m,l),tscus(m,l)
      :          ,tscuj(m,l),tscuo(m,l),tscu(m,l)
-     :          ,tulags(m,l),tulagj(m,l),tulago(m,l),tulagt(m,l)
+c     :          ,tulags(m,l),tulagj(m,l),tulago(m,l),tulagt(m,l)
+     :          ,tulags(m,l),tulagj(m,l),tulago(m,l),nonconsumed
      :          ,tdivcu(m,l),tseffcu(m,l),ttotts(m,l),ttottj(m,l)
      :          ,ttotto(m,l),ttott(m,l),tcut(m,l)
      :          ,tcusoil(m,l),tcrps(m,l),tcrpj(m,l)
@@ -10400,7 +10510,8 @@ c  600 series for when groundwater is considered
 603   Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
      :t|  Precip |   Winter  |',2x,
      : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',8x,'Diversion to',8x,'|','Calculated|Groundwater|',6x,'|',
+     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+     :'|',
      :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
      :,3x,'|',8x,'|',2x,'Total',3x,'|')
 604   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
@@ -10436,7 +10547,8 @@ c jhb 09-06-07 iflood = 1
 2603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
      :t|  Precip |   Winter  |',2x,
      : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',8x,'Diversion to',8x,'|','Calculated|Groundwater|',6x,'|',
+     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+     :'|',
      :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
      :,3x,'|',8x,'|',2x,'Total',3x,'|',
      :'  Diversion To   |        |                 |        |')
@@ -10477,7 +10589,8 @@ c jhb 09-06-07 iflood = 2
 3603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
      :t|  Precip |   Winter  |',2x,
      : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',8x,'Diversion to',8x,'|','Calculated|Groundwater|',6x,'|',
+     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+     :'|',
      :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
      :,3x,'|',8x,'|',2x,'Total',3x,'|',
      :'  Diversion To   |        |                 |',
@@ -10522,7 +10635,8 @@ c jhb 09-06-07 iflood = 3
 4603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
      :t|  Precip |   Winter  |',2x,
      : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',8x,'Diversion to',8x,'|','Calculated|Groundwater|',6x,'|',
+     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+     :'|',
      :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
      :,3x,'|',8x,'|',2x,'Total',3x,'|',
      :'  Diversion To   |        |                 |',
@@ -10567,7 +10681,8 @@ c jhb 09-06-07 iflood = 4 or more
 5603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
      :t|  Precip |   Winter  |',2x,
      : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',8x,'Diversion to',8x,'|','Calculated|Groundwater|',6x,'|',
+     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+     :'|',
      :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
      :,3x,'|',8x,'|',2x,'Total',3x,'|',
      :'  Diversion To   |        |                 |',
@@ -10706,7 +10821,7 @@ c
      : 'Moisture','|',30('-'),'|')
 703   Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
      :t|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',11x,'Destination',11x
+     : 'Historic',1x,'|',3x,'River Diversion To',4x
      :,'|',1x,'Efficiency Calc.',2x,'|',1x,'Contents','|',4x,'From'
      :,3x,'|',2x,'From',3x,'|',2x,'Total',1x,'|')
 704   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
@@ -10778,7 +10893,8 @@ c
      :Requirement|  Precip |
      :   Winter  |',13x,'Diversion By Priority'
      :,13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
-     :7x,'|',7x,'    Non-Consumed     ',7x,'|',2x,'Efficiency Calc.',
+     :7x,'|',3x,'Non-Consumed River Diversion',4x,'|',2x,'Efficiency Cal
+     :c.',
      :2x,'|',1x,'Senior',1x,'|',1x,'Junior',1x,'|',1x,'Other',2x,
      :'|',1x,'Total',2x,'|'3x,'From',2x,'|',3x,'From',2x,'|',9x,'By wate
      :r rights',8x,'|',2x,'Total',1x,'|',11x,'|')
@@ -10884,7 +11000,8 @@ c grb 5-12-00 revise format to reflect sign of depletions and accretions
      :Requiremen
      :t|  Precip |   Winter  |',13x,'Diversion By Priority',
      :13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil 
-     :Moisture',7x,'|',7x,'    Non-Consumed     ',7x,'|',2x,'Efficiency 
+     :Moisture',7x,'|',3x,'Non-Consumed River Diversion',4x,'|',2x,
+     :'Efficiency 
      :Calc.',2x,'|',1x,'Senior',1x,'|',1x,'Junior',1x,'|',1x,'Other',2x
      :,'|',1x,'Total',2x,'|'3x,'From',2x,'|',3x,'From',2x,'|',9x,'By 
      :water rights',8x,'|',2x,'Total',2x,'|',11x,'From this 
@@ -11013,8 +11130,8 @@ c grb 5-11-00 corrected following overflow line
 1603  Format ('| Calcd |  Method  |','Month','|',4x,'ET',5x,'| Precip|Re
      :quirement|  Precip |   Winter  |',2x,
      : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm   |Sprnklr|Maxim',1x,'|'
-     :,8x,'Diversion to',8x,'|','Calculated|Groundwater|',6x,'|',3x,
-     :'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
+     :,5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,'|',3x
+     :,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
      :3x,'|',8x,'|',2x,'Total',3x,'|')
 1604  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|   (IWR)   |Carryov
      :er|',3x,'Precip  |',3x,'River',3x,'|Conv',
@@ -11047,8 +11164,8 @@ c grb 5-11-00 corrected following overflow line
 6603  Format ('| Calcd |  Method  |','Month','|',4x,'ET',5x,'| Precip|Re
      :quirement|  Precip |   Winter  |',2x,
      : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm   |Sprnklr|Maxim',1x,'|'
-     :,8x,'Diversion to',8x,'|','Calculated|Groundwater|',6x,'|',3x,
-     :'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
+     :,5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,'|',3x
+     :,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
      :3x,'|',8x,'|',2x,'Total',3x,'|',
      :'  Diversion To   |')
 6604  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|   (IWR)   |Carryov
@@ -11136,7 +11253,7 @@ c     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',' gw spr   gw flood')
      : 1x,'Moisture','|',30('-'),'|')
 1703  Format('| Calcd |  Method  |','Month','|',4x,'ET',5x,'| Precip|Req
      :uirement|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',11x,'Destination',11x
+     : 'Historic',1x,'|',3x,'River Diversion To',4x
      :,'|',1x,'Efficiency Calc.',2x,'|',1x,'Contents','|',4x,'From'
      :,3x,'|',2x,'From',3x,'|',2x,'Total',1x,'|')
 1704  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|   (IWR)   |Carryov
@@ -11189,7 +11306,8 @@ c     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',' gw spr   gw flood')
      :Requirement|  Prec
      :ip |   Winter  |',13x,'Diversion By Priority'
      :,13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
-     :7x,'|',7x,'    Non-Consumed     ',7x,'|',2x,'Efficiency Calc.',
+     :7x,'|',3x,'Non-Consumed River Diversion',4x,'|',2x,'Efficiency Cal
+     :c.',
      :2x,'|',1x,'Senior',1x,'|',1x,'Junior',1x,'|',1x,'Other',2x,
      :'|',1x,'Total',2x,'|'3x,'From',2x,'|',3x,'From',2x,'|',9x,'By wate
      :r rights',8x,'|',2x,'Total',1x,'|',11x,'|')
@@ -11285,7 +11403,8 @@ c     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',' gw spr   gw flood')
      :|Requiremen
      :t|  Precip |   Winter  |',13x,'Diversion By Priority',
      :13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil', 
-     :' Moisture',7x,'|',7x,'    Non-Consumed     ',7x,'|',2x,'Efficienc 
+     :' Moisture',7x,'|',3x,'Non-Consumed River Diversion',4x,'|',2x,'Ef
+     :ficienc 
      :y Calc.',2x,'|',1x,'Senior',1x,'|',1x,'Junior',1x,'|',1x,'Other',
      :2x,'|',1x,'Total',2x,'|'3x,'From',2x,'|',3x,'From',2x,'|',9x,'By 
      :water rights',8x,'|',2x,'Total',2x,'|',11x,'From this 

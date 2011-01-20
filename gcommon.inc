@@ -67,6 +67,8 @@ c                added several new data filling options (diversion and climate d
 c                adjusted shortage based filling logic to be more robust
 c                tweaked typout values to designate whether to put district and basin totals in BD1 file
 c jhb 12/08      increased error log array (DIM_NLWS) size from 500 to 800
+c jhb 06/09      version 13.01
+c                modified binary output (bd1) to change units descriptor string from "AF" top "ACFT" so TSTOOL can utilize it properly
 c                
 c                
 C***************************************************************************
@@ -91,8 +93,8 @@ C-----should be changed)
       CHARACTER*16 RDATE
       REAL VERS
 c grb new version number 
-      PARAMETER (VERS = 13.00)
-      PARAMETER (RDATE = '10/01/08 11:11AM')
+      PARAMETER (VERS = 13.01)
+      PARAMETER (RDATE = '06/22/09 11:11AM')
 c dim_na used to be 1999
       PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NP = 50)

@@ -436,17 +436,17 @@ Cjhb=&=====6============================================================
 Cjhb    Real*4 Potential Crop ET  , ET
         WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====7============================================================
 Cjhb    Real*4  Effective Precip, effppt(i,m,l)
         WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&=====8============================================================
 Cjhb    Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
         WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
-     &    'AF        '
+     &    'ACFT      '
 Cjhb=&==================================================================
 Cjhb       Total record size = 3*4+5*4 = 32 bytes
 Cjhb=&==================================================================
