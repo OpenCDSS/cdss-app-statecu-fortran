@@ -3272,7 +3272,7 @@ c                 endif
                 case default !(ipresim)
                   write(*,*)'invalid ipresim value, ',ipresim
                   stop
-                end select ! (ipresim)
+              end select ! (ipresim)
 Cjhb=&==================================================================
               soiltot = soiltotj + soiltots +soiltoto
 c             remember initial soil capacities 
@@ -4327,6 +4327,9 @@ Cjhb=&==================================================================
             crop_cut(m,13)=crop_cut(m,13)+holdt
             crop_cut(nyrs1,l)=crop_cut(nyrs1,l)+holdt
 Cjhb=&==================================================================
+Cjhb Feb 2011 Ack - this was bad, bad nomenclature!!
+Cjhb Feb 2011   this is actually EXCESS EFFICIENT DELIVERIES, so the
+Cjhb Feb 2011   variables are BADLY named.  Should have been xseff or something similar
 C           Determine unused (inefficient) farm deliveries from surface water sources
 C           sfinefs - 's'w only, 'f'lood irrigated, 's'enior - 'inef'ficient farm deliveries
 C           sfinefsx- sw only, flood irrigated, senior - inef soil deliveries
@@ -4400,10 +4403,14 @@ c             pushed out jr sm = jr before - (spcapz-new sr total sm)
 c             pushed out jr sm = soiltotj - (spcapz-(soiltots+holds1))
               pojsm=max(0.0,soiltotj-(spcapz-(soiltots+holds1)))          !pushed out junior water by senior
 c             pushed out oth sm = oth before - max possible oth after
-c             pushed out oth sm = oth before - (spcapz-(new sr total sm+old jr total)
-c             pushed out oth sm = soiltoto - (spcapz-(soiltots+holds1+soiltotj))
+cjhb Feb 2011 FIXED a logic problem in the following code that occasionally caused
+cjhb Feb 2011   an errant "pushed out other" value that resulted in
+cjhb Feb 2011   negative soil moisture values
+c             pushed out oth sm = oth before - (spcapz-(new sr total sm+new jr total)
+c             pushed out oth sm = soiltoto - (spcapz-(soiltots+holds1+(soiltotj-pojsm))
               poosm=max(0.0,
-     &                  soiltoto-(spcapz-(soiltots+holds1+soiltotj)))    !pushed out other water by senior
+     &                  soiltoto-(spcapz-(soiltots+holds1+
+     &                                            (soiltotj-pojsm))))    !pushed out other water by senior
             else
               pojsm=0.0                                                  !pushed out junior water by senior
               poosm=0.0                                                  !pushed out other water by senior

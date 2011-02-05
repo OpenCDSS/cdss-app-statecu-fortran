@@ -84,8 +84,8 @@ Cjhb=&==================================================================
       integer tread,ttcrop,istart,tncrop,tnparce
       integer t1,t2,t3,t4,t5,t6,t7,t8,iloca(7),rept2,rept6
       INTEGER tbkey(20),T28_1,T28_2,T32_1,T32_2,ttypout
-      integer pyr1,pyr2,i1(700,DIM_NY),i2(700,DIM_NY)
-      integer i3(700,DIM_NY), i4(700,DIM_NY)
+      integer pyr1,pyr2,i1(DIM_NA,DIM_NY),i2(DIM_NA,DIM_NY)
+      integer i3(DIM_NA,DIM_NY), i4(DIM_NA,DIM_NY)
       character*100 theCWD
       integer(4) istat, itmp
       logical bUseAcreage

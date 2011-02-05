@@ -77,6 +77,8 @@ c jhb 11/10      version 13.03
 c                re-enabled season.csv output
 c jhb 01/11      version 13.04
 c                fixed diversion by priority monthly output (for ISUPLY=2 case) in wsupsum.for - changed back to outputting seniorf(), juniorf() and otherf()
+c jhb 02/11      version 13.05
+c                fixed logic error in priority based soil moisture code calculations
 c                
 c                
 C***************************************************************************
@@ -101,8 +103,8 @@ C-----should be changed)
       CHARACTER*16 RDATE
       REAL VERS
 c grb new version number 
-      PARAMETER (VERS = 13.04)
-      PARAMETER (RDATE = '01/19/11 11:11AM')
+      PARAMETER (VERS = 13.05)
+      PARAMETER (RDATE = '02/04/11 11:11AM')
 c     jhb 07/10
 c     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
