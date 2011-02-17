@@ -2946,9 +2946,15 @@ Cjhb  take ending sm and use it as initial sm, then run entire wsupsum water sup
 Cjhb=&==================================================================
       itime=1 !first time through this code (this is for missing data fill, NOT for ipresim!!!)
 Cjhb=&==================================================================
+Cjhb  jhb/emw Feb 17, 2011
+Cjhb  might have jumped back here after setting itime=2
+Cjhb  now handle the isuply 2,3 cases - water rights - call slimit again
+Cjhb  to re-prorate sr, jr, other
+Cjhb=&==================================================================
+45    if (itime.eq.2.and.(isuply.eq.2.or.isuply.eq.3)) call slimit
 c     begin nbasin loop (structure loop)
 Cjhb=&==================================================================
-45    do 578 i=1,nbasin
+      do 578 i=1,nbasin
 Cjhb=&==================================================================
         id=99
 c       grb 5-20-00 define aggregate and missing data structures up front in 1st pass for explicit structures
@@ -4902,14 +4908,19 @@ Cjhb                prorate historical pumping to fl and spr lands by unmet IWR
 Cjhb              ------------------------------------------------------
 Cjhb                12/07 change back to old method
 Cjhb              ------------------------------------------------------
-                  gsdiv(m,l)=
-     &              mprate(i,m,l)*gsreq(m,l)/(gsreq(m,l)+gfreq(m,l))
-                  gsdiv(m,l)=max(gsdiv(m,l),0.)
-                  gfdiv(m,l)=
-     &              mprate(i,m,l)*gfreq(m,l)/(gsreq(m,l)+gfreq(m,l))
-                  gfdiv(m,l)=max(gfdiv(m,l),0.)
+!                  gsdiv(m,l)=
+!     &              mprate(i,m,l)*gsreq(m,l)/(gsreq(m,l)+gfreq(m,l))
+!                  gsdiv(m,l)=max(gsdiv(m,l),0.)
+!                  gfdiv(m,l)=
+!     &              mprate(i,m,l)*gfreq(m,l)/(gsreq(m,l)+gfreq(m,l))
+!                  gfdiv(m,l)=max(gfdiv(m,l),0.)
 Cjhb              ------------------------------------------------------
-Cjhb                new way
+Cjhb 2/17/2011    distribute pvh (preset) pumping to spr first, then fl
+Cjhb              ------------------------------------------------------
+                  gsdiv(m,l)=min(mprate(i,m,l), gsreq(m,l)/speff(i,m))
+                  gfdiv(m,l)=mprate(i,m,l)-gsdiv(m,l)
+Cjhb              ------------------------------------------------------
+Cjhb                an unused way
 Cjhb              ------------------------------------------------------
 Cjhb                prorate historical pumping to fl and spr lands by acreage
 Cjhb              ------------------------------------------------------
@@ -5710,6 +5721,7 @@ c            grass(i,nyrs1,13) = grass(i,nyrs1,13)+grass(i,m,13)
         endif
 405   continue
            if(iyct .ge. 1) then
+
              ettot(i,nyrs1,13)=ettot(i,nyrs1,13)/iyct
              effppt(i,nyrs1,13)=effppt(i,nyrs1,13)/iyct
              reqt(i,nyrs1,13)=reqt(i,nyrs1,13)/iyct

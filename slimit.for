@@ -37,6 +37,7 @@ c grb 06-20-00 add variables for administration logic
       integer iyr,imo
       character*24 wdidt
       character*3 yrstr
+      if(itime.eq.2) goto 8
       if(isuply .ge. 1) then
       if(ddhfile .eq. '') then
         write(999,*) 'No water supply file defined in the '//
@@ -48,6 +49,7 @@ c grb 06-20-00 add variables for administration logic
         OPEN (UNIT=300,FILE=ddhfile,Status='old',iostat=ierr)
         IF (IERR.NE.0) CALL MYEXIT(6)
       endif
+8     continue
       if(isuply .eq. 2 .or. isuply .eq. 3) then
         OPEN (UNIT=400,FILE=ddrfile,Status='old',iostat=ierr)
         IF (IERR.NE.0) CALL MYEXIT(13)
@@ -163,6 +165,7 @@ c
           awcr(j)=0.0
         enddo
       endif
+      if(itime.eq.2) goto 9
       if(isuply .ge. 1) then 
         write(*,*) 'Reading in historic diversion file'
 C-----read in *.ddh file
@@ -241,13 +244,11 @@ c
               divsup(i,m,j)=tmpsup(i,m,j)
             endif
 191       continue
-
         if(divonfly.gt.0)then
           call flyfilld
         endif
-
       endif
-      
+9     continue
 
 c grb the following sections color the water supply by considering administration numbers
 c     if a daily diversion file is considered with daily administration numbers, then the 

@@ -79,6 +79,10 @@ c jhb 01/11      version 13.04
 c                fixed diversion by priority monthly output (for ISUPLY=2 case) in wsupsum.for - changed back to outputting seniorf(), juniorf() and otherf()
 c jhb 02/11      version 13.05
 c                fixed logic error in priority based soil moisture code calculations
+c jhb/emw 02/11  version 13.06
+c                revise distribution of pvh pumping to assign it to sprinkler first, flood second
+c                reprorate sr, jr, other when isuply=2,3 and when filling missing diversions (ifill)
+c                  (calls slimit again when itime=2) 
 c                
 c                
 C***************************************************************************
@@ -103,8 +107,8 @@ C-----should be changed)
       CHARACTER*16 RDATE
       REAL VERS
 c grb new version number 
-      PARAMETER (VERS = 13.05)
-      PARAMETER (RDATE = '02/04/11 11:11AM')
+      PARAMETER (VERS = 13.06)
+      PARAMETER (RDATE = '02/17/11 11:11AM')
 c     jhb 07/10
 c     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
@@ -248,7 +252,7 @@ c    that used to be written to tmp files
       REAL SMEF
       
 c ew 03/12/2004; Consider drain/tailwater supply
-      INTEGER IDRAIN
+      INTEGER IDRAIN, ITIME
       CHARACTER*200 DRAFILE
 c jhb declare/dimension sub-basin (sb) common block variables
       integer :: sbcount, sbsb(dim_na)
@@ -373,7 +377,7 @@ c rb- added fn_len to common
       COMMON /G0/ DAYONE,fn_len,rspck,fmode
 c grb add dddopt and admopt variables  06-29-00
       common /g1/ persen,peroth
-      COMMON /G1b/ admopt,dddopt,idaily,iclim,iwheat
+      COMMON /G1b/ admopt,dddopt,idaily,iclim,iwheat,itime
       COMMON /G1a/ FLAG1, FLAG2, FLAG3, ISUPLY, GWFLAG,ddcsw, iflood
       COMMON /G2/ WLAT,WELEV
       COMMON /G3/ N_STA, N_CRPS, N_CRP
