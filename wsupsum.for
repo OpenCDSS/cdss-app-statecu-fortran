@@ -2951,7 +2951,11 @@ Cjhb  might have jumped back here after setting itime=2
 Cjhb  now handle the isuply 2,3 cases - water rights - call slimit again
 Cjhb  to re-prorate sr, jr, other
 Cjhb=&==================================================================
-45    if (itime.eq.2.and.(isuply.eq.2.or.isuply.eq.3)) call slimit
+45    if (itime.eq.2.and.(isuply.eq.2.or.isuply.eq.3)) then
+        eyetime=2
+        call slimit
+        eyetime=0
+      endif
 c     begin nbasin loop (structure loop)
 Cjhb=&==================================================================
       do 578 i=1,nbasin

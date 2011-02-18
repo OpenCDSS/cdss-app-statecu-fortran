@@ -252,7 +252,7 @@ c    that used to be written to tmp files
       REAL SMEF
       
 c ew 03/12/2004; Consider drain/tailwater supply
-      INTEGER IDRAIN, ITIME
+      INTEGER IDRAIN, EYETIME
       CHARACTER*200 DRAFILE
 c jhb declare/dimension sub-basin (sb) common block variables
       integer :: sbcount, sbsb(dim_na)
@@ -377,7 +377,7 @@ c rb- added fn_len to common
       COMMON /G0/ DAYONE,fn_len,rspck,fmode
 c grb add dddopt and admopt variables  06-29-00
       common /g1/ persen,peroth
-      COMMON /G1b/ admopt,dddopt,idaily,iclim,iwheat,itime
+      COMMON /G1b/ admopt,dddopt,idaily,iclim,iwheat,eyetime
       COMMON /G1a/ FLAG1, FLAG2, FLAG3, ISUPLY, GWFLAG,ddcsw, iflood
       COMMON /G2/ WLAT,WELEV
       COMMON /G3/ N_STA, N_CRPS, N_CRP
