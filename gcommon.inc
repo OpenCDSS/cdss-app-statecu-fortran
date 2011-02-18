@@ -377,7 +377,7 @@ c rb- added fn_len to common
       COMMON /G0/ DAYONE,fn_len,rspck,fmode
 c grb add dddopt and admopt variables  06-29-00
       common /g1/ persen,peroth
-      COMMON /G1b/ admopt,dddopt,idaily,iclim,iwheat,eyetime
+      COMMON /G1b/ admopt,dddopt,idaily,iclim,iwheat, eyetime
       COMMON /G1a/ FLAG1, FLAG2, FLAG3, ISUPLY, GWFLAG,ddcsw, iflood
       COMMON /G2/ WLAT,WELEV
       COMMON /G3/ N_STA, N_CRPS, N_CRP
