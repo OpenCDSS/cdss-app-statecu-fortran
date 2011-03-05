@@ -1,16 +1,16 @@
        subroutine slimit
-C***************************************************************************C
-C*                                                                         *C
-C*    Function:  slimit.for                                                *C
-C*    Author:    Joanna M. Williams, Ross Bethel, Rick Parsons, Erin Wilson*C
-C*    Date:      12-20-97 (revised and renamed 3/1999 (ew)), 07-07-00 by RB*C
-C*    Purpose:   reads historic diversion, water rights, processes daily   *C 
-C*               or monthly or single administration number for determining*C
-C*               the coloring of water supply (daily or monthly) by admin #*C
-C*    Calling Program:  statecu                                            *C
-C*    Called Programs:  none                                               *C
-C*    Notes:                                                               *C
-C***************************************************************************C 
+!***************************************************************************C
+!*                                                                         *C
+!*    Function:  slimit.for                                                *C
+!*    Author:    Joanna M. Williams, Ross Bethel, Rick Parsons, Erin Wilson*C
+!*    Date:      12-20-97 (revised and renamed 3/1999 (ew)), 07-07-00 by RB*C
+!*    Purpose:   reads historic diversion, water rights, processes daily   *C 
+!*               or monthly or single administration number for determining*C
+!*               the coloring of water supply (daily or monthly) by admin #*C
+!*    Calling Program:  statecu                                            *C
+!*    Called Programs:  none                                               *C
+!*    Notes:                                                               *C
+!***************************************************************************C 
       INCLUDE 'gcommon.inc'
 
       CHARACTER headdum*1
@@ -20,7 +20,7 @@ C***************************************************************************C
       character*8 dlyt
       character*16 rtsave(20)
       character*8 tempdp
-c grb 06029-00 add line character variable
+! grb 06029-00 add line character variable
       character*12 ddhidt,ddridt,aspid,temp2,Line
       integer itmp,ifound(dim_na),iflag(DIM_NA,DIM_NY)
       integer t2,ndly(60)
@@ -29,7 +29,7 @@ c grb 06029-00 add line character variable
       real temp(13),rightt,twcr,eff2(20)
       real tmpsup(DIM_NA,DIM_NY,13),eff1,dlyp,dlyrat(20,60)
       real pcttot(20)
-c grb 06-20-00 add variables for administration logic
+! grb 06-20-00 add variables for administration logic
       real*4 divndata(31),divnmo
       integer iadmin, numright(dim_na)
       real rightss(dim_na,31)
@@ -54,9 +54,9 @@ c grb 06-20-00 add variables for administration logic
         OPEN (UNIT=400,FILE=ddrfile,Status='old',iostat=ierr)
         IF (IERR.NE.0) CALL MYEXIT(13)
       endif
-c
-c-----initialize variables to assure all structures are accounted for
-c
+!
+!-----initialize variables to assure all structures are accounted for
+!
       do j=1,DIM_NA
         do k=1,DIM_NY
            ifound(j)=0
@@ -71,9 +71,9 @@ c
       senadmint=0
       junadmint=0
 
-c
-c read in delay table file, if required
-c
+!
+! read in delay table file, if required
+!
       if(isuply .eq. 3) then
         ndlyt=0
         open(unit=40,file=dlyfile,status='old',iostat=ierr)
@@ -109,7 +109,7 @@ c
         close(40)
       endif
 
-C-----read in delay assignment file *.dla  (isuply .eq. 3)
+!-----read in delay assignment file *.dla  (isuply .eq. 3)
       if(isuply .eq. 3) then
       open (unit=100,file=dlafile,status='old',iostat=ierr)
       IF (IERR.NE.0) CALL MYEXIT(14)
@@ -136,7 +136,7 @@ C-----read in delay assignment file *.dla  (isuply .eq. 3)
      :                                 *dlyrat(k,im)/100
 311              continue
                endif
-c               goto 313
+!               goto 313
 312           continue
               if(iret.eq.0) then
                write(*,*) 'Return flow delay table not found for struct
@@ -151,15 +151,15 @@ c               goto 313
         endif
 25    continue
       goto 20
-c
-c  endif for read dla file
-c
+!
+!  endif for read dla file
+!
       endif
 
 
-c
-c----if consider soil moisture option is off, set awcr array to 0
-c
+!
+!----if consider soil moisture option is off, set awcr array to 0
+!
 27    if(ISM .eq. 0) then 
         do j=1,nbasin
           awcr(j)=0.0
@@ -168,7 +168,7 @@ c
       if(eyetime.eq.2) goto 9
       if(isuply .ge. 1) then 
         write(*,*) 'Reading in historic diversion file'
-C-----read in *.ddh file
+!-----read in *.ddh file
         call skipn(300)
         read(300,29) gnyr1, gnyr2, idum3
         if(idum3 .eq. 'WYR') then
@@ -192,19 +192,19 @@ C-----read in *.ddh file
             itmp2=itmp-nyr1+1
             iflag(i,itmp2) = 1
             do 32 j=1,12
-Cjhb=&==================================================================
-C     removed iagg and use imiss to prorate aggr data
-C      (i.e. set aggr diversion to -999 externally to get it prorated)
-Cjhb=&==================================================================
-C              if(twdid(4:5) .eq. 'AD' .or. twdid(3:4) .eq. 'AD') then
-C                if(iagg .eq. 1) then
-C                   tmpsup(i,itmp2,j)=-999
-C                else
-C                   tmpsup(i,itmp2,j)=temp(j)
-C                endif
-C              else
+!jhb=&==================================================================
+!     removed iagg and use imiss to prorate aggr data
+!      (i.e. set aggr diversion to -999 externally to get it prorated)
+!jhb=&==================================================================
+!              if(twdid(4:5) .eq. 'AD' .or. twdid(3:4) .eq. 'AD') then
+!                if(iagg .eq. 1) then
+!                   tmpsup(i,itmp2,j)=-999
+!                else
+!                   tmpsup(i,itmp2,j)=temp(j)
+!                endif
+!              else
                 tmpsup(i,itmp2,j)=temp(j)
-C              endif
+!              endif
 32          continue
             goto 30
           endif
@@ -217,18 +217,18 @@ C              endif
               twdid=bas_id(i)
               aspid=twdid(1:12)
               call lw_update(66,bas_id(i))
-c              if(twdid(3:5) .ne. 'URF') then
-c              write(*,*) 'Stop-no diversions found for structure ',aspid
-c            write(999,*) 'Stop-no diversions found for structure ',aspid
-c                stop
-c               endif
+!              if(twdid(3:5) .ne. 'URF') then
+!              write(*,*) 'Stop-no diversions found for structure ',aspid
+!            write(999,*) 'Stop-no diversions found for structure ',aspid
+!                stop
+!               endif
             endif
 41      continue
 
-c
-c----ew-convert diversions to calendar year to match all other calculations
-c     (if .ddh file is in water year)
-c
+!
+!----ew-convert diversions to calendar year to match all other calculations
+!     (if .ddh file is in water year)
+!
         do 191 i=1,nbasin
           do 191 m=1,nyrs
             divsup(i,m,13) = 0
@@ -250,21 +250,21 @@ c
       endif
 9     continue
 
-c grb the following sections color the water supply by considering administration numbers
-c     if a daily diversion file is considered with daily administration numbers, then the 
-c     daily diversion file is first converted to direct access file (scratch)
-c     Water rights by structure are then retrieved (arrays rights,rightss) and used
-c     in companion with diversion records and administration numbers to determine the 
-c     percent of water supply associated with the senior priorities.  The monthly summary of
-c     this value is written to the senper file.  For structures without monthly diversions
-c     (including aggregated structures) a negative of the senior cfs in a given monthly for a 
-c     given structure is written to the senper file under monthly administration number 
-c     consideration, or is written to the scratch file under daily administration # consideration
-c     These cfs values for structures with missing diversion data is then used in the wsupsum subroutine
+! grb the following sections color the water supply by considering administration numbers
+!     if a daily diversion file is considered with daily administration numbers, then the 
+!     daily diversion file is first converted to direct access file (scratch)
+!     Water rights by structure are then retrieved (arrays rights,rightss) and used
+!     in companion with diversion records and administration numbers to determine the 
+!     percent of water supply associated with the senior priorities.  The monthly summary of
+!     this value is written to the senper file.  For structures without monthly diversions
+!     (including aggregated structures) a negative of the senior cfs in a given monthly for a 
+!     given structure is written to the senper file under monthly administration number 
+!     consideration, or is written to the scratch file under daily administration # consideration
+!     These cfs values for structures with missing diversion data is then used in the wsupsum subroutine
       
-c
-c--- Don't read .ddr file or ddd file if isuply .lt. 2 (idaily=0),
-c     set senasp to large
+!
+!--- Don't read .ddr file or ddd file if isuply .lt. 2 (idaily=0),
+!     set senasp to large
 
       IF(IDAILY.EQ.0) then
         do 42 k=1,nbasin
@@ -306,7 +306,7 @@ c     set senasp to large
      : option (idaily) in the *.ccu file"
         stop
 
-c  check that daily diversion data is available for study period
+!  check that daily diversion data is available for study period
 44      if((nyr1 .lt. dbyear) .or. (nyr2 .gt. deyear)) then
           write(*,*) 'STOP-Daily diversions not available for all years'
         write(999,*) 'STOP-Daily diversions not available for all years'
@@ -336,19 +336,19 @@ c  check that daily diversion data is available for study period
 2020    continue
       endif
 
-c  end if idaily .lt 4
-c'
-c'C-----Read in *.ddr file
-c'      WRITE(*,*) 'Reading in water right information' 
-c'c
-c'c--- Initialize variables for water right
-c'c
+!  end if idaily .lt 4
+!'
+!'C-----Read in *.ddr file
+!'      WRITE(*,*) 'Reading in water right information' 
+!'c
+!'c--- Initialize variables for water right
+!'c
       senadmint=0
       junadmint=0
         call skipn(400)
 450     read(400,500,end = 55) temp2,namet,ddridt,admint,rightt
 500     format (a12,a24,a12,f16.0,f8.0)     
-c  Determine junior and senior water right amounts from ddr list
+!  Determine junior and senior water right amounts from ddr list
         do 470 j=1,nbasin
          twdid=bas_id(j)
          if (twdid(1:12) .eq. ddridt) then
@@ -369,15 +369,15 @@ c  Determine junior and senior water right amounts from ddr list
 55      senadmint = 0
         junadmint = 0
         do 56 j=1,nbasin
-c         if(ifound(j) .eq. 0) then
-c           twdid=bas_id(j)
-c           ddridt=twdid(1:12)
-c        write(*,*) 'stop-structure ',ddridt,' not in water rights file'
-c       write(999,*) 'stop-structure ',ddridt,' not in water rights file'
-c           stop
-c         endif
+!         if(ifound(j) .eq. 0) then
+!           twdid=bas_id(j)
+!           ddridt=twdid(1:12)
+!        write(*,*) 'stop-structure ',ddridt,' not in water rights file'
+!       write(999,*) 'stop-structure ',ddridt,' not in water rights file'
+!           stop
+!         endif
 
-c grb 09-13-00 add one location for determining total rights of structure
+! grb 09-13-00 add one location for determining total rights of structure
          trights(j)= 0
          senasp(j) = 0
          junasp(j) = 0
@@ -398,12 +398,12 @@ c grb 09-13-00 add one location for determining total rights of structure
 
 56      continue
 
-C     IDAILY=0      NO WATER RIGHTS CONSIDERED, NO COLORING OF DIVERSIONS
-c     idaily=1      use daily diversion with daily administrtion numbers
-c     idaily=2      use daily diversions with monthly administration numbers
-c     idaily=3      use daily diversions with single administration numbers
-c     idaily=4      use monthly diversions with montly administration numbers
-c     idaily=5      use monthly diversions with single administration numbers
+!     IDAILY=0      NO WATER RIGHTS CONSIDERED, NO COLORING OF DIVERSIONS
+!     idaily=1      use daily diversion with daily administrtion numbers
+!     idaily=2      use daily diversions with monthly administration numbers
+!     idaily=3      use daily diversions with single administration numbers
+!     idaily=4      use monthly diversions with montly administration numbers
+!     idaily=5      use monthly diversions with single administration numbers
 
       open(unit=502,file="senper",status='unknown')
        
@@ -420,9 +420,9 @@ c     idaily=5      use monthly diversions with single administration numbers
      1"   admin (-999) or senior cfs with monthly admin values."
       endif
 
-c grb add more adminsitration processing 06-29-00
-cc  set iadmin flag to -1 if single administration value, no admfile
-c        iadmin=-1
+! grb add more adminsitration processing 06-29-00
+!c  set iadmin flag to -1 if single administration value, no admfile
+!        iadmin=-1
         if (idaily.eq.2.or.idaily.eq.4) then 
         if(admfile .eq. '') then
         write(999,*) 'No monthly administration file defined in the '//
@@ -436,7 +436,7 @@ c        iadmin=-1
           READ(500,201) LINE
           READ(500,201) LINE
 201	    FORMAT(A12,A24,A12,F11.0,F13.0)
-c grb iadmin=0 = monthly iadmin=1 daily admfile data available
+! grb iadmin=0 = monthly iadmin=1 daily admfile data available
           IF(LINE(5:8).EQ."    ") IADMIN=0
           BACKSPACE(500)
           goto 204
@@ -490,7 +490,7 @@ c grb iadmin=0 = monthly iadmin=1 daily admfile data available
 
 206          do 550 i=1,nyrs
           if (idaily.eq.2.or.idaily.eq.4) then
-c      read monthly administration values
+!      read monthly administration values
  502        READ(500,250) IYR,(ADMnO(k),k=1,12)
       	  if (iyr.lt.(nyr1+i-1)) goto 502
 	      if (iyr.gt.(nyr1+i-1)) then
@@ -500,7 +500,7 @@ c      read monthly administration values
             endif
           endif
 
-c  month loop
+!  month loop
 	    do 650 j=1,12
 
              if (idaily.eq.1) then
@@ -524,7 +524,7 @@ c  month loop
 
 505            do 750 k=1,nbasin
 	        twdid=bas_id(k)
-c initialize arrays of monthly values for percent senior and other diversions in a month
+! initialize arrays of monthly values for percent senior and other diversions in a month
                 persen(k,i,j)=-999
 	        peroth(k,i,j)=-999
                 ifound(1)=0
@@ -553,8 +553,8 @@ c initialize arrays of monthly values for percent senior and other diversions in
               if (idaily.eq.1) then
                   do 8502 l=1,31
 	            divndata(l)=0
-c
-c determine amount of daily diversions that is senior to admday
+!
+! determine amount of daily diversions that is senior to admday
                   do 9502 m=1,numright(k)
                          IF(RIGHTS(K,M).LE.ADMDAY(L)) THEN
                              divndata(l)=divndata(l)-RIGHTSS(K,M)
@@ -588,7 +588,7 @@ c determine amount of daily diversions that is senior to admday
           endif             !end of missing diversion data
 
               if (idaily.le.3) then
-c  process daily diversion data with daily, monthly or constant admin date
+!  process daily diversion data with daily, monthly or constant admin date
               iddrec=ddindex+((nyr1-1-dbyear+i)*(ddstrctt*12))+
      1			 ((j-1)*ddstrctt)
 
@@ -640,14 +640,14 @@ c  process daily diversion data with daily, monthly or constant admin date
 
             endif !(imissflg.eq.1.or.twdid(4:5).eq.'AD'.or.twdid(3:4).eq.'AD')
 
-c  process monthly diversion data with monthly or constant admin date
+!  process monthly diversion data with monthly or constant admin date
               if(idaily.eq.4.or.idaily.eq.5) then
                 sumright=0
-c grb 09-13-00 remove initialization here, move prior
-c                trights(K)=0
+! grb 09-13-00 remove initialization here, move prior
+!                trights(K)=0
                 do 9500 m=1,numright(k)
-c grb 09-13-00 remove calculation of trights here, move prior				
-c	            trights(K)=trights(K)+rightss(k,m)
+! grb 09-13-00 remove calculation of trights here, move prior				
+!	            trights(K)=trights(K)+rightss(k,m)
                    if (idaily.eq.4) then
 	              if (admno(j).eq.-999) goto 507
 	              IF(RIGHTS(K,M).LE.ADMnO(J)) then 
@@ -668,7 +668,7 @@ c	            trights(K)=trights(K)+rightss(k,m)
      1          =othdivn+(divsup(K,I,J)-(trights(K)*1.9835*month(j)))
                 if (divsup(k,i,j).eq.0) persen(k,i,j)=1.0
                 if (divsup(k,i,j).eq.0) peroth(k,i,j)=0
-C GRB 11-08-00 MAKE SURE FOLLOWING LINES DO NOT EXTEND PAST 72 CHARACTERS
+! GRB 11-08-00 MAKE SURE FOLLOWING LINES DO NOT EXTEND PAST 72 CHARACTERS
           if (divsup(k,i,j).ne.0) persen(k,i,j)=sendivn/divsup(K,I,J)
           if (divsup(k,i,j).ne.0) peroth(k,i,j)=othdivn/divsup(K,I,J)
 	        endif

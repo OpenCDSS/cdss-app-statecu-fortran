@@ -1,63 +1,63 @@
          subroutine WSUPSUM
-C***************************************************************************
-C
-C   Function        : wsupsum.for
-C   Author          : LRCWE
-C   Date            : March 1999
-C   Purpose         : This subroutine performs the water budget and prepares
-C                     the *.dwb and *.swb output files when a water supply
-C                     limited analysis is requested. Water supply from direct
-C                     diversions and the soil moisture reservoir or tracked.
-C           
-c         If water rights are considered, water is colored to account
-C                     for junior, senior, and other diversions. If a river depletion
-C                     analysis is requested, return flow percents and timing are
-C                     accounted for.
-C
-C   January, 2000     Subroutine updated to handle groundwater pumping estimates
-c rrb* 2003/05/19; Revised dimension of grass from 3 to 4 dimensions.
-c rrb* 2003/05/19; Revised dimension of variables swmet and idcnt
-c                  from 12 to 14.
-c rrb* 2003/05/19; Revised the read statement for the variable grass
-c                  from 3 to 4 dimensions.
-c rrb* 2003/05/19; Revised the write statements for the variable grass
-c                  from 3 to 4 dimentions.
-c ew   2004/03/12; Revised to allow drain and tail water reuse
-c rrb* 2004/03/31; Revised to print SW return & drain reuse (tail) 
-c                  to *.dwb
-c rrb* 2004/04/06; Revised initilization of selected variables to occur
-c                  outside the year loop in order to allow position
-c                  14 to include the basin total.
-c rrb* 2004/05/11; Minor corrections related to Sw return reuse (tail)
-c ew/jhb 2005-2007; major upgrade; added binary file (BD1) output;
-c                   added 4th irrigated land category (surface water-sprinkler);
-c                   changed input file format to include 4 acreages;
-c                   added detailed water budget output for one structure
-c jhb 2007/09/25    temporarily remove warning message for extra structures in the DRA (drain) file
-c jhb 2011/01/19    changed the ISUPLY=2 DWB output back to farm deliv (seniorf(), etc.).  the new values (changed in Dec 08) were not working
-C
-C   Calling program : statecu.f
-C   Called programs : none
-C   Input arguments : none 
-C   Output arguments: none
-C   Assumptions     :
-C***************************************************************************
+!***************************************************************************
+!
+!   Function        : wsupsum.for
+!   Author          : LRCWE
+!   Date            : March 1999
+!   Purpose         : This subroutine performs the water budget and prepares
+!                     the *.dwb and *.swb output files when a water supply
+!                     limited analysis is requested. Water supply from direct
+!                     diversions and the soil moisture reservoir or tracked.
+!           
+!         If water rights are considered, water is colored to account
+!                     for junior, senior, and other diversions. If a river depletion
+!                     analysis is requested, return flow percents and timing are
+!                     accounted for.
+!
+!   January, 2000     Subroutine updated to handle groundwater pumping estimates
+! rrb* 2003/05/19; Revised dimension of grass from 3 to 4 dimensions.
+! rrb* 2003/05/19; Revised dimension of variables swmet and idcnt
+!                  from 12 to 14.
+! rrb* 2003/05/19; Revised the read statement for the variable grass
+!                  from 3 to 4 dimensions.
+! rrb* 2003/05/19; Revised the write statements for the variable grass
+!                  from 3 to 4 dimentions.
+! ew   2004/03/12; Revised to allow drain and tail water reuse
+! rrb* 2004/03/31; Revised to print SW return & drain reuse (tail) 
+!                  to *.dwb
+! rrb* 2004/04/06; Revised initilization of selected variables to occur
+!                  outside the year loop in order to allow position
+!                  14 to include the basin total.
+! rrb* 2004/05/11; Minor corrections related to Sw return reuse (tail)
+! ew/jhb 2005-2007; major upgrade; added binary file (BD1) output;
+!                   added 4th irrigated land category (surface water-sprinkler);
+!                   changed input file format to include 4 acreages;
+!                   added detailed water budget output for one structure
+! jhb 2007/09/25    temporarily remove warning message for extra structures in the DRA (drain) file
+! jhb 2011/01/19    changed the ISUPLY=2 DWB output back to farm deliv (seniorf(), etc.).  the new values (changed in Dec 08) were not working
+!
+!   Calling program : statecu.f
+!   Called programs : none
+!   Input arguments : none 
+!   Output arguments: none
+!   Assumptions     :
+!***************************************************************************
 
-Cjhb====================================================================
-Cjhb  note that initializing the variable values in the declarations probably causes
-Cjhb  variables to be included in the executable image at compile time instead
-Cjhb  of at execution time.  This potentially increases the exe file size.
-Cjhb  Avoided initializing larger arrays in the declarations.
-Cjhb====================================================================
+!jhb====================================================================
+!jhb  note that initializing the variable values in the declarations probably causes
+!jhb  variables to be included in the executable image at compile time instead
+!jhb  of at execution time.  This potentially increases the exe file size.
+!jhb  Avoided initializing larger arrays in the declarations.
+!jhb====================================================================
 
-Cjhb====================================================================
+!jhb====================================================================
       INCLUDE 'gcommon.inc'
-Cjhb====================================================================
+!jhb====================================================================
       INCLUDE 'bindat.inc'
-Cjhb====================================================================
-Cjhb  real variable to hold calculated monthly shortage value
+!jhb====================================================================
+!jhb  real variable to hold calculated monthly shortage value
       REAL :: SHORTAGE=0.0
-c     define common and local variables
+!     define common and local variables
       REAL :: divndata(31)=0.,wbu_used=0.
       character*10 :: crpname(DIM_NC,dim_ny),as(15)
       character*200 :: thefile1,thefile2,thefile3,thefile4
@@ -67,7 +67,7 @@ c     define common and local variables
       character*200 :: fline
       LOGICAL :: setswac=.FALSE.,bIPYNew=.TRUE.
       LOGICAL :: DistByPriority=.TRUE., FOLLOWUP=.FALSE.
-c grb 4-20-00 added flength and tempwd as character variables
+! grb 4-20-00 added flength and tempwd as character variables
       INTEGER :: m1=0,IDAYS=0,i=0,j=0,k=0,l=0,m=0
       character*524 :: tempwd
       REAL :: short=0.,GRASS(DIM_NA,DIM_NY,14,10)
@@ -76,7 +76,7 @@ c grb 4-20-00 added flength and tempwd as character variables
       character*24 :: twdid
       character*39 :: gwdesg
       character*84 :: comment(DIM_NY)
-C-----Return Flows
+!-----Return Flows
       REAL :: ulags(DIM_NY,14),ulagj(DIM_NY,14)
       REAL :: ulago(DIM_NY,14),ulagt(DIM_NY,14)
       REAL :: lagrets(DIM_NY,14),lagretj(DIM_NY,14)
@@ -86,17 +86,17 @@ C-----Return Flows
       REAL :: lagrett(DIM_NY,14),laglatet(DIM_NY,14)
       REAL :: totret(DIM_NY,14),rets=0.,retj=0.,rett=0.,reto=0.
 
-C-----River Depletion
+!-----River Depletion
       REAL :: deps(DIM_NY,14),depj(DIM_NY,14)
       REAL :: depo(DIM_NY,14),dept(DIM_NY,14)
       real :: total_adj=0.0,sen_adj=0.0,jun_adj=0.0,oth_adj=0.0
-C-----Crop and Soil CU
+!-----Crop and Soil CU
       REAL :: cropcusoils(DIM_NY,14)
       REAL :: cropcusoil(DIM_NY,14),cropcusoilj(DIM_NY,14)
       REAL :: soil_cus(DIM_NY,14),soil_cuj(DIM_NY,14)
-c   rkj 4-17-00 added variable soil_cujout
+!   rkj 4-17-00 added variable soil_cujout
       REAL :: soil_cuo(DIM_NY,14),soil_cujout(dim_ny,14)
-c   jhb 5-16-07 added variable soil_cuoout
+!   jhb 5-16-07 added variable soil_cuoout
       REAL :: soil_cuoout(dim_ny,14)
       REAL :: sxs=0.,pojsm=0.,poosm=0.,poosmbj=0.
       REAL :: crop_cus(DIM_NY,14),crop_cuj(DIM_NY,14)
@@ -115,13 +115,13 @@ c   jhb 5-16-07 added variable soil_cuoout
       REAL :: tsenmo=0.,tjunmo=0.,tothmo=0.
       REAL :: nonconsumed
 
-C-----General	
+!-----General	
       REAL :: spcapz=0.,reqreq(DIM_NY,14),tspcapz=0.
       REAL :: effcu(DIM_NY,14),comeff(12)=0.,seffcu(DIM_NY,14)
       REAL :: sumeff=0.,sumseff=0.,sumeffcnt=0.,sumseffcnt=0.
       REAL :: sumgwcu=0.
 	
-C-----Summary
+!-----Summary
       REAL :: percent(DIM_NY)=0.,holdcropo=0.
       REAL :: ddhmonot(DIM_NY,14),acret(DIM_NY)
       REAL :: reqreqts(DIM_NY,14)
@@ -140,7 +140,7 @@ C-----Summary
       REAL :: holdlago(DIM_NY,12)=0.,P1(12)=0.
       CHARACTER*20 :: crpnamet(DIM_NC)=''
       INTEGER ::  numcrop=0,cropy=0
-C---Parameters for ground water addition
+!---Parameters for ground water addition
       REAL :: ceff(DIM_NA,DIM_NY)
       REAL :: fleff(dim_na,dim_ny),speff(DIM_NA,DIM_NY)
       REAL :: gper(DIM_NA,DIM_NY),sper(dim_na,dim_ny)
@@ -165,10 +165,10 @@ C---Parameters for ground water addition
       REAL :: seniorf(DIM_NY,14),juniorf(DIM_NY,14)
       REAL :: otherf(DIM_NY,14)
       REAL :: gdiv(DIM_NY,14),gwcu(DIM_NY,14),gwro(DIM_NY,14)
-      REAL :: gwcuf,gwcus,gwrof,gwros
+      REAL :: gwcuf,gwcus,gwcusm,gwrof,gwros
       REAL :: tdp(DIM_NY,14),closs(DIM_NY,14),fdiv(DIM_NY,14)
       REAL :: tmp1=0.,tmp2=0.
-c     farm deliveries from surface sources
+!     farm deliveries from surface sources
       REAL :: swshare=0.,sfshare=0.,ssshare=0.
       REAL :: swshares=0.,swsharej=0.,swshareo=0.
       REAL :: sfshares=0.,sfsharej=0.,sfshareo=0.
@@ -177,9 +177,9 @@ c     farm deliveries from surface sources
       REAL :: gwshares=0.,gwsharej=0.,gwshareo=0.
       REAL :: gfshares=0.,gfsharej=0.,gfshareo=0.
       REAL :: gsshares=0.,gssharej=0.,gsshareo=0.
-c     farm deliveries from groundwater sources
+!     farm deliveries from groundwater sources
       REAL :: gwpump=0.,gfpump=0.,gspump=0.
-c     cu from soil moisture sources
+!     cu from soil moisture sources
       REAL :: swsoilcu=0.,sfsoilcu=0.,sssoilcu=0.
       REAL :: sfsoilcus=0.,sfsoilcuj=0.,sfsoilcuo=0.
       REAL :: sssoilcus=0.,sssoilcuj=0.,sssoilcuo=0.
@@ -188,7 +188,7 @@ c     cu from soil moisture sources
       REAL :: gfsoilcus=0.,gfsoilcuj=0.,gfsoilcuo=0.
       REAL :: gssoilcus=0.,gssoilcuj=0.,gssoilcuo=0.
       REAL :: gwsoilcus=0.,gwsoilcuj=0.,gwsoilcuo=0.
-c     cu from all sources
+!     cu from all sources
       REAL :: swcu=0.,sfcu=0.,sscu=0.,gcu=0.,gscu=0.,gfcu=0.
       REAL :: swsoil=0.,sfsoil=0.,sssoil=0.
       REAL :: gwsoil=0.,gfsoil=0.,gssoil=0.
@@ -198,10 +198,14 @@ c     cu from all sources
       REAL :: ssdiv(DIM_NY,14),sfdiv(DIM_NY,14)
       REAL :: gwdiv(DIM_NY,14)
       REAL :: gsdiv(DIM_NY,14),gfdiv(DIM_NY,14)
+! jhb 03-04-11 add variables for gw to sm calculations      
+      REAL :: gw2sm, smre_eff
+      REAL :: gwholdt1, gwholds1, gwholdj1, gwholdo1
+      REAL :: gwdivsm(DIM_NY,14)
       REAL :: sfeff(dim_na,dim_ny)=0., sfeffcnt=0.0
-c jhb 05-18-07 add a system efficiency for gw lands      
+! jhb 05-18-07 add a system efficiency for gw lands      
       REAL :: gfeff(dim_na,dim_ny)=0., gfeffcnt=0.0
-c grb 06-05-00 change dimension to 100 from 99
+! grb 06-05-00 change dimension to 100 from 99
       REAL :: swmet(100,dim_ny,14),met=0.,idcnt(100,dim_ny,14)
       REAL :: custot(dim_na,dim_ny,14)
       REAL :: LftOvr=0.,LftOvrSF=0.,LftOvrSS=0.
@@ -222,34 +226,34 @@ c grb 06-05-00 change dimension to 100 from 99
       REAL :: gfinefsx=0.,gfinefjx=0.,gfinefox=0.
       REAL :: gsinefsx=0.,gsinefjx=0.,gsinefox=0.
       REAL :: inefs=0.,inefj=0.,inefo=0.
-c ew 03/12/04 set dim for tailwater variable
+! ew 03/12/04 set dim for tailwater variable
       REAL :: tail(dim_na,dim_ny,14) !DIVSUP(DIM_NA,DIM_NY,14)
-Cjhb====================================================================
-Cjhb  11/2006 variables for acreages of the four irrigated land categories
-Cjhb====================================================================
+!jhb====================================================================
+!jhb  11/2006 variables for acreages of the four irrigated land categories
+!jhb====================================================================
       REAL :: swflac(dim_na,dim_ny),swspac(dim_na,dim_ny)
       REAL :: swgwflac(dim_na,dim_ny),swgwspac(dim_na,dim_ny)
       REAL :: SMTotAcr=0.0
-Cjhb====================================================================
-Cjhb  01/2007 variables for soil moisture contents of the four irrigated land categories
-Cjhb  (account separately, even though they are pooled at the end)
-Cjhb====================================================================
+!jhb====================================================================
+!jhb  01/2007 variables for soil moisture contents of the four irrigated land categories
+!jhb  (account separately, even though they are pooled at the end)
+!jhb====================================================================
       REAL :: swflsm(dim_na,dim_ny),swspsm(dim_na,dim_ny)
       REAL :: swgwflsm(dim_na,dim_ny),swgwspsm(dim_na,dim_ny)
-Cjhb====================================================================
-Cjhb  01/2007 variables for cu of the four irrigated land categories
-Cjhb  (account separately, even though they are pooled at the end)
-Cjhb====================================================================
+!jhb====================================================================
+!jhb  01/2007 variables for cu of the four irrigated land categories
+!jhb  (account separately, even though they are pooled at the end)
+!jhb====================================================================
       REAL :: swflcu(dim_na,dim_ny),swspcu(dim_na,dim_ny)
       REAL :: swgwflcu(dim_na,dim_ny),swgwspcu(dim_na,dim_ny)
-Cjhb====================================================================
+!jhb====================================================================
       INTEGER :: itail(dim_na)=0
       INTEGER :: imonth(14)=0,iyear(DIM_NY)=0,i9=0
       INTEGER :: iflag2(DIM_NA)=0,gmode(dim_na,dim_ny)
       INTEGER :: iflag(DIM_NA,DIM_NY)
-c
-c-- totals for scenario water budget
-c
+!
+!-- totals for scenario water budget
+!
       REAL :: treq(DIM_NY,14),tdiv(DIM_NY,14),tcus(DIM_NY,14)
       REAL :: ttail(DIM_NY,14)
       REAL :: tcuj(DIM_NY,14),tcuo(DIM_NY,14),tcut(DIM_NY,14)
@@ -282,47 +286,47 @@ c
 
       IOUTP=0
 
-Cjhb====================================================================
-Cjhb  always output a BD1 file in this routine
+!jhb====================================================================
+!jhb  always output a BD1 file in this routine
       LBD1OUT=.TRUE.  !create BD1 in this routine
       LBD2OUT=.FALSE.
       LBD3OUT=.FALSE.
       LBD4OUT=.FALSE.
       LBD5OUT=.FALSE.
-Cjhb====================================================================
+!jhb====================================================================
 
-Cjhb=&==================================================================
-c     initialize some large arrays
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!     initialize some large arrays
+!jhb=&==================================================================
       do i=1,dim_na
         do j=1,dim_ny
-Cjhb      ==============================================================
-Cjhb      set the deficit irrigation fraction the same for all structures
-Cjhb        and for all years...for now...eventually could read this from
-Cjhb        the IPY input file...
+!jhb      ==============================================================
+!jhb      set the deficit irrigation fraction the same for all structures
+!jhb        and for all years...for now...eventually could read this from
+!jhb        the IPY input file...
           def_irr_frac(i,j)=def_irr
-Cjhb      ==============================================================
+!jhb      ==============================================================
           ceff(i,j)=0.0
           fleff(i,j)=0.0
           gper(i,j)=0.0
           sper(i,j)=0.0
           speff(i,j)=0.0
-Cjhb      ==============================================================
+!jhb      ==============================================================
           swflac(i,j)=0.0
           swspac(i,j)=0.0
           swgwflac(i,j)=0.0
           swgwspac(i,j)=0.0
-Cjhb      ==============================================================
+!jhb      ==============================================================
           swflsm(i,j)=0.0
           swspsm(i,j)=0.0
           swgwflsm(i,j)=0.0
           swgwspsm(i,j)=0.0
-Cjhb      ==============================================================
+!jhb      ==============================================================
           swflcu(i,j)=0.0
           swspcu(i,j)=0.0
           swgwflcu(i,j)=0.0
           swgwspcu(i,j)=0.0
-Cjhb      ==============================================================
+!jhb      ==============================================================
           iflag(i,j)=0
           gmode(i,j)=0
           do k=1,14
@@ -475,13 +479,13 @@ Cjhb      ==============================================================
         enddo
       enddo
             
-c
-c rrb 2003/06/20; Allow multiple subirrigation crop types
+!
+! rrb 2003/06/20; Allow multiple subirrigation crop types
       iflood2=iflood*2
-Cjhb=&==================================================================
-c     check to see if ipy file has sufficient time seris data for the modeling period
-c     exit if not
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!     check to see if ipy file has sufficient time seris data for the modeling period
+!     exit if not
+!jhb=&==================================================================
       if(ipyfile.eq.'') goto 42
       open (unit=150,file=ipyfile,status='old',ERR=42)
       call skipn(150)
@@ -494,71 +498,71 @@ Cjhb=&==================================================================
         stop
       endif
 
-c
-c check to see if tsp data exists for all structures
-c and read data into array
-c
-Cjhb=&==================================================================
-Cjhb=&  IPY file format
-Cjhb=&==================================================================
-Cjhb=&  itmp1 - year
-Cjhb=&  tspid - structure id
-Cjhb=&  t1 - max delivery efficiency - fraction (0.01-1.00) or percentage (1.01 - 100.00)
-Cjhb=&  t2 - max flood irrigation efficiency  - fraction (0.01-1.00) or percentage (1.01 - 100.00)
-Cjhb=&  t3 - max sprinkler efficiency  - fraction (0.01-1.00) or percentage (1.01 - 100.00)
-Cjhb=&==================================================================
-Cjhb=&  changed to input the four irrigation type acreages directly
-Cjhb=&  in order to handle a fourth irrigated land category:
-Cjhb=&  t4 Surface water only source - flood irrigated acreage (acres)
-Cjhb=&  t5 Surface water only source - sprinkler irrigated acreage (acres)
-Cjhb=&  t6 Surface water and Groundwater source - flood irrigated acreage (acres)
-Cjhb=&  t7 Surface water and Groundwater source - sprinkler irrigated acreage (acres)
-Cjhb=&==================================================================
-Cjhb=&  t8 Maximum pumping volume (AF per month)
-Cjhb=&  i9 Ground water use mode (1=maximize supply,2=mutual ditch,3=mutual ditch w/ recharge)
-Cjhb=&  last value on record is total acreage, but is not used by StateCU (StateMod uses it)
-Cjhb=&  since total acreage, t_area(i,iyr), is already input from the CDS input file
-Cjhb=&==================================================================
-c30      read (150,31,end=32) itmp1,tspid,t1,t2,t3,t4,t5,t6,i7
-c31      format(i4,1x,a12,3f6.0,2f8.0,f12.0,i4)
-Cjhb=&==================================================================
-Cjhb=&  read the next record in the IPY file in the new format
-Cjhb=&==================================================================
-c30       read (150,'(a200)',end=32) fline
-Cjhb=&==================================================================
-Cjhb=&  check that the trimmed line has enough characters to match the NEW IPY file format
-Cjhb=&  new IPY format even without acreage is 4+1+12+6+6+6+8+8+8+8+12+3=82
-Cjhb=&    but the last integer could be in column 80, so 80 is the min for a new IPY file
-Cjhb=&  an OLD style IPY file, even including the acreage, is format: 4+1+12+6+6+6+8+8+12+3+8=74
-Cjhb=&    so 74 would be the max.  The min would be 64 (gwmode integer in first col of field)
-Cjhb=&  Therefore if a trimmed record has length 80 or greater, try reading it as NEW;
-Cjhb=&    if it is between 64 and 79, try reading it as OLD;
-Cjhb=&    otherwise generate and error and stop.
-Cjhb=&==================================================================
-Cjhb=& 03/21/07 IMPORTANT!!!!!!!
-Cjhb=& 03/21/07 Some older but important and circulated IPY files (e.g. RG2004)
-Cjhb=& 03/21/07 used a gwmode field width of 4.  Since the first character of the
-Cjhb=& 03/21/07 next field (total acreage) is almost always blank, the
-Cjhb=& 03/21/07 decision has been made to use a gwmode format spec of I4 instead of I3.
-Cjhb=& 03/21/07 This allows these IPY files to be read without error.
-Cjhb=& 03/21/07 Most current and ALL future IPY files use a field width of 3,
-Cjhb=& 03/21/07 but as long as the first character of the next field is blank,
-Cjhb=& 03/21/07 the I4 spec will work and not cause read errors...
-Cjhb=&==================================================================
-c      if(len_trim(fline).GE.80) then !new format
-c        setswac=.FALSE.
+!
+! check to see if tsp data exists for all structures
+! and read data into array
+!
+!jhb=&==================================================================
+!jhb=&  IPY file format
+!jhb=&==================================================================
+!jhb=&  itmp1 - year
+!jhb=&  tspid - structure id
+!jhb=&  t1 - max delivery efficiency - fraction (0.01-1.00) or percentage (1.01 - 100.00)
+!jhb=&  t2 - max flood irrigation efficiency  - fraction (0.01-1.00) or percentage (1.01 - 100.00)
+!jhb=&  t3 - max sprinkler efficiency  - fraction (0.01-1.00) or percentage (1.01 - 100.00)
+!jhb=&==================================================================
+!jhb=&  changed to input the four irrigation type acreages directly
+!jhb=&  in order to handle a fourth irrigated land category:
+!jhb=&  t4 Surface water only source - flood irrigated acreage (acres)
+!jhb=&  t5 Surface water only source - sprinkler irrigated acreage (acres)
+!jhb=&  t6 Surface water and Groundwater source - flood irrigated acreage (acres)
+!jhb=&  t7 Surface water and Groundwater source - sprinkler irrigated acreage (acres)
+!jhb=&==================================================================
+!jhb=&  t8 Maximum pumping volume (AF per month)
+!jhb=&  i9 Ground water use mode (1=maximize supply,2=mutual ditch,3=mutual ditch w/ recharge)
+!jhb=&  last value on record is total acreage, but is not used by StateCU (StateMod uses it)
+!jhb=&  since total acreage, t_area(i,iyr), is already input from the CDS input file
+!jhb=&==================================================================
+!30      read (150,31,end=32) itmp1,tspid,t1,t2,t3,t4,t5,t6,i7
+!31      format(i4,1x,a12,3f6.0,2f8.0,f12.0,i4)
+!jhb=&==================================================================
+!jhb=&  read the next record in the IPY file in the new format
+!jhb=&==================================================================
+!30       read (150,'(a200)',end=32) fline
+!jhb=&==================================================================
+!jhb=&  check that the trimmed line has enough characters to match the NEW IPY file format
+!jhb=&  new IPY format even without acreage is 4+1+12+6+6+6+8+8+8+8+12+3=82
+!jhb=&    but the last integer could be in column 80, so 80 is the min for a new IPY file
+!jhb=&  an OLD style IPY file, even including the acreage, is format: 4+1+12+6+6+6+8+8+12+3+8=74
+!jhb=&    so 74 would be the max.  The min would be 64 (gwmode integer in first col of field)
+!jhb=&  Therefore if a trimmed record has length 80 or greater, try reading it as NEW;
+!jhb=&    if it is between 64 and 79, try reading it as OLD;
+!jhb=&    otherwise generate and error and stop.
+!jhb=&==================================================================
+!jhb=& 03/21/07 IMPORTANT!!!!!!!
+!jhb=& 03/21/07 Some older but important and circulated IPY files (e.g. RG2004)
+!jhb=& 03/21/07 used a gwmode field width of 4.  Since the first character of the
+!jhb=& 03/21/07 next field (total acreage) is almost always blank, the
+!jhb=& 03/21/07 decision has been made to use a gwmode format spec of I4 instead of I3.
+!jhb=& 03/21/07 This allows these IPY files to be read without error.
+!jhb=& 03/21/07 Most current and ALL future IPY files use a field width of 3,
+!jhb=& 03/21/07 but as long as the first character of the next field is blank,
+!jhb=& 03/21/07 the I4 spec will work and not cause read errors...
+!jhb=&==================================================================
+!      if(len_trim(fline).GE.80) then !new format
+!        setswac=.FALSE.
         bIPYNew=.TRUE.
 30      read (150,31,end=32) itmp1,tspid,t1,t2,t3,t4,t5,t6,t7,t8,i9
-c        read(fline,31)itmp1,tspid,t1,t2,t3,t4,t5,t6,t7,t8,i9
+!        read(fline,31)itmp1,tspid,t1,t2,t3,t4,t5,t6,t7,t8,i9
 31      format(i4,1x,a12,3f6.0,4f8.0,f12.0,i4)
-Cjhb=&  ----------------------------------------------------------------
+!jhb=&  ----------------------------------------------------------------
 
-c ew  we don't know what "i" is when we're in here.  Need to determine for error messages
+! ew  we don't know what "i" is when we're in here.  Need to determine for error messages
 
-c       first thing - convert any negative acreages to 0
+!       first thing - convert any negative acreages to 0
 311     if(t4.lt.0.0) then
           t4=0.0
-c         catch this warning and record in new log file format...
+!         catch this warning and record in new log file format...
 
           if(ipresim .ne. 1) call lw_update(41,tspid)
           select case (scu_debug)
@@ -570,7 +574,7 @@ c         catch this warning and record in new log file format...
         endif
         if(t5.lt.0.0) then
           t5=0.0
-c         catch this warning and record in new log file format...
+!         catch this warning and record in new log file format...
           if(ipresim .ne. 1) call lw_update(42,tspid)
           select case (scu_debug)
           case (0)
@@ -581,7 +585,7 @@ c         catch this warning and record in new log file format...
         endif
         if(t6.lt.0.0) then
           t6=0.0
-c         catch this warning and record in new log file format...
+!         catch this warning and record in new log file format...
           if(ipresim .ne. 1) call lw_update(43,tspid)
           select case (scu_debug)
           case (0)
@@ -592,7 +596,7 @@ c         catch this warning and record in new log file format...
         endif
         if(t7.lt.0.0) then
           t7=0.0
-c         catch this warning and record in new log file format...
+!         catch this warning and record in new log file format...
           if(ipresim .ne. 1) call lw_update(44,tspid)
           select case (scu_debug)
           case (0)
@@ -601,150 +605,150 @@ c         catch this warning and record in new log file format...
           case default
           end select
         endif
-Cjhb=&  ----------------------------------------------------------------
-c      elseif(len_trim(fline).GE.64) then !old format
-Cjhb=&  set a flag to assign the missing acreage to the sw flood category t4 (later in the code)
-c        setswac=.TRUE.
-c        bIPYNew=.FALSE.
-c        read(fline,1131)itmp1,tspid,t1,t2,t3,t4,t5,t8,i9
-c 1131   format(i4,1x,a12,3f6.0,2f8.0,f12.0,i3)
-c 1131   format(i4,1x,a12,3f6.0,2f8.0,f12.0,i4)
-Cjhb=&  ----------------------------------------------------------------
-c       sometimes in the old IPY files, the sprinkler acreage is greater
-c         than the groundwater acreage and sometimes the gw or sprinkler acreage (or both)
-c         are greater than the total acreage from the CDS file
-c       so if this is an old style IPY record, then use the old style
-c         rules for handling the discrepancies in the acreage values:
-c         1. urf structures are 100% gw. (handle this later)
-c         2. shrink the gw and sprinkler acreages to be equal to or less than total acreage (handle this later).
-c         3. increase the gw acreage (t4) to match the sprinkler acreage (t5) (do this now)
-Cjhb=&  ----------------------------------------------------------------
-c       first thing - convert any negative acreages to 0
-c        if(t4.lt.0.0) then
-c          t4=0.0
-c         catch this warning and record in new log file format...
-c          if(ipresim .ne. 1) call lw_update(45,bas_id(i))
-c          select case (scu_debug)
-c          case (0)
-c          case (1)
-c            write(999,2012)itmp1,twdid
-c          case default
-c          end select
-c        endif
-c        if(t5.lt.0.0) then
-c          t5=0.0
-cc         catch this warning and record in new log file format...
-c          if(ipresim .ne. 1) call lw_update(44,bas_id(i))
-c          select case (scu_debug)
-c          case (0)
-c          case (1)
-c            write(999,2011)itmp1,twdid
-c          case default
-c          end select
-c        endif
-cCjhb=&  ----------------------------------------------------------------
-c        if(t5 .gt. t4)then
-cc         catch this warning and record in new log file format...
-c          if(ipresim .ne. 1) call lw_update(46,bas_id(i))
-c          select case (scu_debug)
-c          case (0)
-c            t4=t5
-c          case (1)
-c            write(999,2013)itmp1,twdid
-c            write(999,2014)itmp1,twdid,t4,t5
-c            t4=t5
-c            write(999,2015)itmp1,twdid,t4,t5
-c          case default
-c            t4=t5
-c          end select
-c        endif
-cCjhb=&  ----------------------------------------------------------------
-ccc       assign the acreages to the four categories - note that rules 1 and 2 from above still have NOT been done yet
-cCjhb=&  ----------------------------------------------------------------
-c        t7=t5
-c        t6=t4-t5
-c        t4=0.
-c        t5=0.
-c      else
-c        write(*,*)'Invalid IPY file record:'
-c        write(*,*)fline
-c        write(*,*)'See documentation for IPY file format details.'
-c        write(999,*)'Invalid IPY file record:'
-c        write(999,*)fline
-c        write(999,*)'See documentation for IPY file format details.'
-c        stop
-c      endif
-Cjhb=&==================================================================
-Cjhb=&  see if it's in the modeled time period
-Cjhb=&==================================================================
-c      if(itmp1.lt.nyr1) goto 30 !read the next line in the IPY file
-c      if(itmp1.gt.nyr2) goto 32 !done reading the IPY file
-Cjhb=&==================================================================
-Cjhb=&  it is! so loop through the structures until the ID matches
-Cjhb=&==================================================================
+!jhb=&  ----------------------------------------------------------------
+!      elseif(len_trim(fline).GE.64) then !old format
+!jhb=&  set a flag to assign the missing acreage to the sw flood category t4 (later in the code)
+!        setswac=.TRUE.
+!        bIPYNew=.FALSE.
+!        read(fline,1131)itmp1,tspid,t1,t2,t3,t4,t5,t8,i9
+! 1131   format(i4,1x,a12,3f6.0,2f8.0,f12.0,i3)
+! 1131   format(i4,1x,a12,3f6.0,2f8.0,f12.0,i4)
+!jhb=&  ----------------------------------------------------------------
+!       sometimes in the old IPY files, the sprinkler acreage is greater
+!         than the groundwater acreage and sometimes the gw or sprinkler acreage (or both)
+!         are greater than the total acreage from the CDS file
+!       so if this is an old style IPY record, then use the old style
+!         rules for handling the discrepancies in the acreage values:
+!         1. urf structures are 100% gw. (handle this later)
+!         2. shrink the gw and sprinkler acreages to be equal to or less than total acreage (handle this later).
+!         3. increase the gw acreage (t4) to match the sprinkler acreage (t5) (do this now)
+!jhb=&  ----------------------------------------------------------------
+!       first thing - convert any negative acreages to 0
+!        if(t4.lt.0.0) then
+!          t4=0.0
+!         catch this warning and record in new log file format...
+!          if(ipresim .ne. 1) call lw_update(45,bas_id(i))
+!          select case (scu_debug)
+!          case (0)
+!          case (1)
+!            write(999,2012)itmp1,twdid
+!          case default
+!          end select
+!        endif
+!        if(t5.lt.0.0) then
+!          t5=0.0
+!c         catch this warning and record in new log file format...
+!          if(ipresim .ne. 1) call lw_update(44,bas_id(i))
+!          select case (scu_debug)
+!          case (0)
+!          case (1)
+!            write(999,2011)itmp1,twdid
+!          case default
+!          end select
+!        endif
+!Cjhb=&  ----------------------------------------------------------------
+!        if(t5 .gt. t4)then
+!c         catch this warning and record in new log file format...
+!          if(ipresim .ne. 1) call lw_update(46,bas_id(i))
+!          select case (scu_debug)
+!          case (0)
+!            t4=t5
+!          case (1)
+!            write(999,2013)itmp1,twdid
+!            write(999,2014)itmp1,twdid,t4,t5
+!            t4=t5
+!            write(999,2015)itmp1,twdid,t4,t5
+!          case default
+!            t4=t5
+!          end select
+!        endif
+!Cjhb=&  ----------------------------------------------------------------
+!cc       assign the acreages to the four categories - note that rules 1 and 2 from above still have NOT been done yet
+!Cjhb=&  ----------------------------------------------------------------
+!        t7=t5
+!        t6=t4-t5
+!        t4=0.
+!        t5=0.
+!      else
+!        write(*,*)'Invalid IPY file record:'
+!        write(*,*)fline
+!        write(*,*)'See documentation for IPY file format details.'
+!        write(999,*)'Invalid IPY file record:'
+!        write(999,*)fline
+!        write(999,*)'See documentation for IPY file format details.'
+!        stop
+!      endif
+!jhb=&==================================================================
+!jhb=&  see if it's in the modeled time period
+!jhb=&==================================================================
+!      if(itmp1.lt.nyr1) goto 30 !read the next line in the IPY file
+!      if(itmp1.gt.nyr2) goto 32 !done reading the IPY file
+!jhb=&==================================================================
+!jhb=&  it is! so loop through the structures until the ID matches
+!jhb=&==================================================================
         do 25 i=1,nbasin
           twdid=bas_id(i)
           iyr=itmp1-nyr1+1
           itmp2=iyr
           if(twdid(1:12) .eq. tspid) then
-c            itmp2=itmp1-nyr1+1
-Cjhb=&==================================================================
-Cjhb=&      reset some acreage values in the "old way" if it was the old format IPY record
-Cjhb=&==================================================================
-c            if(setswac)then
-Cjhb=&        ----------------------------------------------------------
-c             this is an old IPY record with only a gw acreage and a sprinkler acreage in the IPY file
-Cjhb=&        ----------------------------------------------------------
-c             first apply rule 2 from above
-Cjhb=&        ----------------------------------------------------------
-c              if(t6+t7.gt.t_area(i,iyr))then
-c               more gw acreage than total acreage - not good.  see how close it is...
-c                FOLLOWUP=.FALSE.
-c                if((abs((t6+t7-t_area(i,iyr))/t_area(i,iyr)).gt.0.02)
-c     &             .AND.(abs(t6+t7-t_area(i,iyr)).GT.1.0))then
-Cjhb=&            ------------------------------------------------------
-c                 if the diff is bigger than 2% and larger than 1.0 AF
-c                 then it is big enough to write a warning about...
-Cjhb=&            ------------------------------------------------------
-c                 catch this warning and record in new log file format...
-c                  if(ipresim .ne. 1) call lw_update(40,bas_id(i))
-c                  select case (scu_debug)
-c                  case (0)
-c                  case (1)
-c                   write(999,2007)itmp1,twdid
-c                   write(999,2005)itmp1,twdid,t_area(i,iyr),t4,t5,t6,t7
-c                  case default
-c                  end select
-c                  FOLLOWUP=.TRUE.
-c                endif
-Cjhb=&          ----------------------------------------------------------
-c               note that if t_area(i,iyr)=0, then t6 and t7 will =0
-Cjhb=&          ----------------------------------------------------------
-c                if(t7.gt.t_area(i,iyr))then
-c                  t6=0.0
-c                  t7=t_area(i,iyr)
-c                else
-c                  t6=t_area(i,iyr)-t7
-c                endif
-c                if(FOLLOWUP)then
-c                  select case (scu_debug)
-c                  case (0)
-c                  case (1)
-c                   write(999,2006)itmp1,twdid,t_area(i,iyr),t4,t5,t6,t7
-c                  case default
-c                  end select
-c                endif
-c              endif
-Cjhb=&        ----------------------------------------------------------
-c             then set the SW FLOOD acreage to be the difference between the total acreage and the (corrected) gw acreage
-Cjhb=&        ----------------------------------------------------------
-c              t4=t_area(i,iyr)-(t6+t7)
-c            endif
-Cjhb=&==================================================================
-c           mark that we found data for structure, i, for year, itmp2
-Cjhb=&      ------------------------------------------------------------
+!            itmp2=itmp1-nyr1+1
+!jhb=&==================================================================
+!jhb=&      reset some acreage values in the "old way" if it was the old format IPY record
+!jhb=&==================================================================
+!            if(setswac)then
+!jhb=&        ----------------------------------------------------------
+!             this is an old IPY record with only a gw acreage and a sprinkler acreage in the IPY file
+!jhb=&        ----------------------------------------------------------
+!             first apply rule 2 from above
+!jhb=&        ----------------------------------------------------------
+!              if(t6+t7.gt.t_area(i,iyr))then
+!               more gw acreage than total acreage - not good.  see how close it is...
+!                FOLLOWUP=.FALSE.
+!                if((abs((t6+t7-t_area(i,iyr))/t_area(i,iyr)).gt.0.02)
+!     &             .AND.(abs(t6+t7-t_area(i,iyr)).GT.1.0))then
+!jhb=&            ------------------------------------------------------
+!                 if the diff is bigger than 2% and larger than 1.0 AF
+!                 then it is big enough to write a warning about...
+!jhb=&            ------------------------------------------------------
+!                 catch this warning and record in new log file format...
+!                  if(ipresim .ne. 1) call lw_update(40,bas_id(i))
+!                  select case (scu_debug)
+!                  case (0)
+!                  case (1)
+!                   write(999,2007)itmp1,twdid
+!                   write(999,2005)itmp1,twdid,t_area(i,iyr),t4,t5,t6,t7
+!                  case default
+!                  end select
+!                  FOLLOWUP=.TRUE.
+!                endif
+!jhb=&          ----------------------------------------------------------
+!               note that if t_area(i,iyr)=0, then t6 and t7 will =0
+!jhb=&          ----------------------------------------------------------
+!                if(t7.gt.t_area(i,iyr))then
+!                  t6=0.0
+!                  t7=t_area(i,iyr)
+!                else
+!                  t6=t_area(i,iyr)-t7
+!                endif
+!                if(FOLLOWUP)then
+!                  select case (scu_debug)
+!                  case (0)
+!                  case (1)
+!                   write(999,2006)itmp1,twdid,t_area(i,iyr),t4,t5,t6,t7
+!                  case default
+!                  end select
+!                endif
+!              endif
+!jhb=&        ----------------------------------------------------------
+!             then set the SW FLOOD acreage to be the difference between the total acreage and the (corrected) gw acreage
+!jhb=&        ----------------------------------------------------------
+!              t4=t_area(i,iyr)-(t6+t7)
+!            endif
+!jhb=&==================================================================
+!           mark that we found data for structure, i, for year, itmp2
+!jhb=&      ------------------------------------------------------------
             iflag(i,itmp2)=1
-Cjhb=&==================================================================
+!jhb=&==================================================================
             if((abs(t1).lt.0.001).or.
      &         (abs(t2).lt.0.001).or.
      &         (abs(t3).lt.0.001)) then
@@ -754,19 +758,19 @@ Cjhb=&==================================================================
      :e ', twdid,' check irrigation practice (*.ipy) file'
               stop
             endif
-Cjhb=&      ceff(i,iyr) = delivery efficiency from sw diversion to farm headgate
+!jhb=&      ceff(i,iyr) = delivery efficiency from sw diversion to farm headgate
             if(t1.le.1.0)then
               ceff(i,iyr)=t1 !old fraction format
             else
               ceff(i,iyr)=t1/100.0 !new percentage format
             endif
-Cjhb=&      fleff(i,iyr) = flood irrigation efficiency
+!jhb=&      fleff(i,iyr) = flood irrigation efficiency
             if(t2.le.1.0)then
               fleff(i,iyr)=t2 !old fraction format
             else
               fleff(i,iyr)=t2/100.0 !new percentage format
             endif
-Cjhb=&      speff(i,iyr) = sprinkler irrigation efficiency
+!jhb=&      speff(i,iyr) = sprinkler irrigation efficiency
             if(t3.le.1.0)then
               speff(i,iyr)=t3 !old fraction format
             else
@@ -775,15 +779,15 @@ Cjhb=&      speff(i,iyr) = sprinkler irrigation efficiency
           if(ceff(i,iyr) .eq. 1.0) then
             if(ipresim .ne. 1) call lw_update(52,bas_id(i))
           endif  
-Cjhb=&==================================================================
-Cjhb=&      gmode(i,iyr) = groundwater use mode
-Cjhb=&                  1=surface and GW are used to maximize supply.
-Cjhb=&                  2=surface water is used 1st on all
-Cjhb=&                  acreage, and then GW.
-Cjhb=&                  3=GW is used first on sprinkler
-Cjhb=&                  acreage and surface water shares for
-Cjhb=&                  the same acreage are available for recharge.
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      gmode(i,iyr) = groundwater use mode
+!jhb=&                  1=surface and GW are used to maximize supply.
+!jhb=&                  2=surface water is used 1st on all
+!jhb=&                  acreage, and then GW.
+!jhb=&                  3=GW is used first on sprinkler
+!jhb=&                  acreage and surface water shares for
+!jhb=&                  the same acreage are available for recharge.
+!jhb=&==================================================================
             select case (isuply)
               case (4) !groundwater supply available, all gmodes are available, use the value in the file
                 select case (i9)
@@ -804,21 +808,21 @@ Cjhb=&==================================================================
                 gmode(i,iyr)=2
             end select
               if(abs(t4+t5+t6+t7-t_area(i,iyr)).gt.0.00)then
-c               IPY and CDS acreage values do not match.
+!               IPY and CDS acreage values do not match.
                 if((abs((t4+t5+t6+t7-t_area(i,iyr))/t_area(i,iyr))
      &              .gt.0.02) .AND.
      &             (abs(t4+t5+t6+t7-t_area(i,iyr)).GT.1.0)) then
-Cjhb=&            ------------------------------------------------------
-c                 if the diff is bigger than 2% and larger than 1.0 AF
-c                 then it is big enough to write a warning about...
-Cjhb=&            ------------------------------------------------------
+!jhb=&            ------------------------------------------------------
+!                 if the diff is bigger than 2% and larger than 1.0 AF
+!                 then it is big enough to write a warning about...
+!jhb=&            ------------------------------------------------------
                   if(ipresim .ne. 1) call lw_update(55,bas_id(i))
                  endif
-Cjhb=&          --------------------------------------------------------
-c               note that if t_area(i,iyr)=0 then t4,t5,t6,t7 will=0
-Cjhb=&          --------------------------------------------------------
+!jhb=&          --------------------------------------------------------
+!               note that if t_area(i,iyr)=0 then t4,t5,t6,t7 will=0
+!jhb=&          --------------------------------------------------------
                 if(abs(t4+t5+t6+t7).lt.0.01)then
-c                 put it all in sw flood if nothing is entered
+!                 put it all in sw flood if nothing is entered
                   t4=t_area(i,iyr)
                   t5=0.0
                   t6=0.0
@@ -831,59 +835,59 @@ c                 put it all in sw flood if nothing is entered
                   t7=t7*scalefctr
                 endif
               endif
-c            endif
-Cjhb=&==================================================================
-Cjhb=&      now determine the four irrigated lands categories
-Cjhb=&==================================================================
+!            endif
+!jhb=&==================================================================
+!jhb=&      now determine the four irrigated lands categories
+!jhb=&==================================================================
             swflac(i,iyr)=t4
             swspac(i,iyr)=t5
             swgwflac(i,iyr)=t6
             swgwspac(i,iyr)=t7
-C            if(t5 .gt. t4) t4=t5
-Cjhb=&==================================================================
-Cjhb=&      groundwater percentage = gw acreage / total acreage
-Cjhb=&==================================================================
+!            if(t5 .gt. t4) t4=t5
+!jhb=&==================================================================
+!jhb=&      groundwater percentage = gw acreage / total acreage
+!jhb=&==================================================================
             if(t_area(i,iyr) .ne. 0.0) then
              gper(i,iyr)=(swgwflac(i,iyr)+swgwspac(i,iyr))/t_area(i,iyr)
             else
              gper(i,iyr) = 0.0
             endif
-Cjhb=&==================================================================
-Cjhb=&      sprinkler percentage = sprinkler acreage / total acreage
-Cjhb=&      note this is a NEW use of the sper() variable
-Cjhb=&      but necessary since [sw only] now potentially has sprinkler acreage
-Cjhb=&==================================================================
-c            if(t4 .gt. 0) then
-c               sper(i,iyr)=t5/t4
-c            else
-c               sper(i,iyr) = 0
-c            endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      sprinkler percentage = sprinkler acreage / total acreage
+!jhb=&      note this is a NEW use of the sper() variable
+!jhb=&      but necessary since [sw only] now potentially has sprinkler acreage
+!jhb=&==================================================================
+!            if(t4 .gt. 0) then
+!               sper(i,iyr)=t5/t4
+!            else
+!               sper(i,iyr) = 0
+!            endif
+!jhb=&==================================================================
             if(t_area(i,iyr) .ne. 0.0) then
                sper(i,iyr)=(swspac(i,iyr)+swgwspac(i,iyr))/t_area(i,iyr)
             else
                sper(i,iyr) = 0.0
             endif
-Cjhb=&==================================================================
-Cjhb=&      assign sfeff(i,iyr) = max application efficiency on sw lands
-Cjhb=&      assign gfeff(i,iyr) = max application efficiency on gw lands
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      assign sfeff(i,iyr) = max application efficiency on sw lands
+!jhb=&      assign gfeff(i,iyr) = max application efficiency on gw lands
+!jhb=&==================================================================
             if(gmode(i,iyr) .eq. 1) then
-c             gmode=1 - "maximize water supply" - actually this is a bit of a misnomer
-c             the following operation partly maximizes CU (gw first to
-c             gw spr acreage) but also partly matches a particular mode of
-c             operation on some RG structures (gw last to gw fl acreage)
-c             specifically:
-c             first use gw as much as possible on sw/gw spr acreage
-c             then use sw as needed on sw only acreage (fl and spr) and
-c             then to sw/gw fl acreage.
-c             last, use gw to meet unmet demand on sw/gw fl acreage
-c             max possible sw applic efficiency = assume gw supply fully
-c             satisfies demand on sw/gw spr acreage =
-c             (sw.fl.acres*fl.eff+sw.spr.acres*spr.eff+sw.gw.fl.acres*fl.eff)/(sw.fl.acres+sw.spr.acres+sw.gw.fl.acres)
-c             old code:
-c              sfeff(i,iyr)=fleff(i,iyr)
-c             new code:
+!             gmode=1 - "maximize water supply" - actually this is a bit of a misnomer
+!             the following operation partly maximizes CU (gw first to
+!             gw spr acreage) but also partly matches a particular mode of
+!             operation on some RG structures (gw last to gw fl acreage)
+!             specifically:
+!             first use gw as much as possible on sw/gw spr acreage
+!             then use sw as needed on sw only acreage (fl and spr) and
+!             then to sw/gw fl acreage.
+!             last, use gw to meet unmet demand on sw/gw fl acreage
+!             max possible sw applic efficiency = assume gw supply fully
+!             satisfies demand on sw/gw spr acreage =
+!             (sw.fl.acres*fl.eff+sw.spr.acres*spr.eff+sw.gw.fl.acres*fl.eff)/(sw.fl.acres+sw.spr.acres+sw.gw.fl.acres)
+!             old code:
+!              sfeff(i,iyr)=fleff(i,iyr)
+!             new code:
               if(swflac(i,iyr)+swspac(i,iyr)+swgwflac(i,iyr).eq.0.)then
                 sfeff(i,iyr)=0.0
               else
@@ -893,9 +897,9 @@ c             new code:
      &                       (swflac(i,iyr)+swspac(i,iyr)
      &                        +swgwflac(i,iyr))
               endif
-Cjhb          ==========================================================
-Cjhb          added max system efficiency for lands served by gw, gfeff
-Cjhb          ==========================================================
+!jhb          ==========================================================
+!jhb          added max system efficiency for lands served by gw, gfeff
+!jhb          ==========================================================
               if(swgwflac(i,iyr)+swgwspac(i,iyr).eq.0.)then
                 gfeff(i,iyr)=0.0
               else
@@ -903,17 +907,17 @@ Cjhb          ==========================================================
      &                        swgwspac(i,iyr)*speff(i,iyr)) /
      &                       (swgwflac(i,iyr)+swgwspac(i,iyr))
               endif
-Cjhb        ============================================================
+!jhb        ============================================================
             elseif(gmode(i,iyr) .eq. 2) then
-c             gmode=2 - true mutual ditch operation mode - sw spread equally
-c                        to all 4 irrig acreage categories
-c             max possible sw applic efficiency = 
-c             (sw.fl.acres*fl.eff+sw.spr.acres*spr.eff+sw.gw.fl.acres*fl.eff+sw.gw.spr.acres*spr.eff)/
-c               (sw.fl.acres+sw.spr.acres+sw.gw.fl.acres+sw.gw.spr.acres)
-c             old code:
-c              sfeff(i,iyr)=t3*gper(i,iyr)*sper(i,iyr)+t2*(1-gper(i,iyr)
-c     :                   *sper(i,iyr))
-c             new code:
+!             gmode=2 - true mutual ditch operation mode - sw spread equally
+!                        to all 4 irrig acreage categories
+!             max possible sw applic efficiency = 
+!             (sw.fl.acres*fl.eff+sw.spr.acres*spr.eff+sw.gw.fl.acres*fl.eff+sw.gw.spr.acres*spr.eff)/
+!               (sw.fl.acres+sw.spr.acres+sw.gw.fl.acres+sw.gw.spr.acres)
+!             old code:
+!              sfeff(i,iyr)=t3*gper(i,iyr)*sper(i,iyr)+t2*(1-gper(i,iyr)
+!     :                   *sper(i,iyr))
+!             new code:
               if(swflac(i,iyr)+swspac(i,iyr)
      &           +swgwflac(i,iyr)+swgwspac(i,iyr).eq.0.)then
                 sfeff(i,iyr)=0.0
@@ -925,9 +929,9 @@ c             new code:
      &                       (swflac(i,iyr)+swspac(i,iyr)+
      &                        swgwflac(i,iyr)+swgwspac(i,iyr))
               endif
-Cjhb          ==========================================================
-Cjhb          added max system efficiency for lands served by gw, gfeff
-Cjhb          ==========================================================
+!jhb          ==========================================================
+!jhb          added max system efficiency for lands served by gw, gfeff
+!jhb          ==========================================================
               if(swgwflac(i,iyr)+swgwspac(i,iyr).eq.0.)then
                 gfeff(i,iyr)=0.0
               else
@@ -935,19 +939,19 @@ Cjhb          ==========================================================
      &                        swgwspac(i,iyr)*speff(i,iyr)) /
      &                       (swgwflac(i,iyr)+swgwspac(i,iyr))
               endif
-Cjhb        ============================================================
+!jhb        ============================================================
             elseif(gmode(i,iyr) .eq. 3) then
-c             gmode=3 - an alternative mutual ditch mode - another RG operation
-c               prorate sw to ALL 4 irrig acreage categories,
-c               but use gw first to try and meet the full demand on the
-c               sw/gw spr acreage.  then if not needed, use it for recharge
-c             max possible sw applic efficiency = assume gw supply fully
-c             satisfies demand on sw/gw spr acreage =
-c             (sw.fl.acres*fl.eff+sw.spr.acres*spr.eff+sw.gw.fl.acres*fl.eff)/(sw.fl.acres+sw.spr.acres+sw.gw.fl.acres)
-c             old code:
-c              sfeff(i,iyr)=t3*gper(i,iyr)*sper(i,iyr)+t2*(1-gper(i,iyr)
-c     :                   *sper(i,iyr))
-c             new code:
+!             gmode=3 - an alternative mutual ditch mode - another RG operation
+!               prorate sw to ALL 4 irrig acreage categories,
+!               but use gw first to try and meet the full demand on the
+!               sw/gw spr acreage.  then if not needed, use it for recharge
+!             max possible sw applic efficiency = assume gw supply fully
+!             satisfies demand on sw/gw spr acreage =
+!             (sw.fl.acres*fl.eff+sw.spr.acres*spr.eff+sw.gw.fl.acres*fl.eff)/(sw.fl.acres+sw.spr.acres+sw.gw.fl.acres)
+!             old code:
+!              sfeff(i,iyr)=t3*gper(i,iyr)*sper(i,iyr)+t2*(1-gper(i,iyr)
+!     :                   *sper(i,iyr))
+!             new code:
               if(swflac(i,iyr)+swspac(i,iyr)+swgwflac(i,iyr).eq.0.)then
                 sfeff(i,iyr)=0.0
               else
@@ -957,9 +961,9 @@ c             new code:
      &                       (swflac(i,iyr)+swspac(i,iyr)
      &                        +swgwflac(i,iyr))
               endif
-Cjhb          ==========================================================
-Cjhb          added max system efficiency for lands served by gw, gfeff
-Cjhb          ==========================================================
+!jhb          ==========================================================
+!jhb          added max system efficiency for lands served by gw, gfeff
+!jhb          ==========================================================
               if(swgwflac(i,iyr)+swgwspac(i,iyr).eq.0.)then
                 gfeff(i,iyr)=0.0
               else
@@ -968,11 +972,11 @@ Cjhb          ==========================================================
      &                       (swgwflac(i,iyr)+swgwspac(i,iyr))
               endif
             endif
-Cjhb=&==================================================================
-Cjhb=&      assign the max pumping rate (AF/month) to all months
-Cjhb=&      11/2007 the value is based on 30.4 days per month (accd to the way the hydrobase dmi works)
-Cjhb=&      11/2007 so convert to a daily rate and then create a new monthly based on days per month
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      assign the max pumping rate (AF/month) to all months
+!jhb=&      11/2007 the value is based on 30.4 days per month (accd to the way the hydrobase dmi works)
+!jhb=&      11/2007 so convert to a daily rate and then create a new monthly based on days per month
+!jhb=&==================================================================
             do j=1,12
               mprate(i,iyr,j)=(t8/30.4)*month(j)
             enddo
@@ -986,31 +990,31 @@ Cjhb=&==================================================================
                case default
             end select   
 
-Cjhb=&==================================================================
-Cjhb=&      read the next line
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      read the next line
+!jhb=&==================================================================
            goto 30
-Cjhb=&==================================================================
+!jhb=&==================================================================
           endif
 25      continue
-Cjhb=&==================================================================
-Cjhb=&  read the next line
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&  read the next line
+!jhb=&==================================================================
        goto 30
-Cjhb=&==================================================================
-Cjhb=&only get here if no ipy file is found when ISUPLY>0
-Cjhb=&(goto statements jump around it)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&only get here if no ipy file is found when ISUPLY>0
+!jhb=&(goto statements jump around it)
+!jhb=&==================================================================
 42    write(0,*) 'Stop - An irrigation practice file (*.ipy) must be pro
      :vided when ISUPLY is greater than 0'
       write(999,*) 'Stop - An irrigation practice file (*.ipy) must be p
      :rovided when ISUPLY is greater than 0'
       stop
-Cjhb=&==================================================================
-Cjhb=&check to be sure ALL structures and years were read in the IPY file
-Cjhb=&iflag() should = 1 for every combination of str and year if so
-Cjhb=&stop if not
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&check to be sure ALL structures and years were read in the IPY file
+!jhb=&iflag() should = 1 for every combination of str and year if so
+!jhb=&stop if not
+!jhb=&==================================================================
 32    do i=1,nbasin
           do j=1,nyrs
             if(iflag(i,j) .eq. 0) then
@@ -1025,24 +1029,24 @@ Cjhb=&==================================================================
             endif
           enddo
        enddo
-Cjhb=&==================================================================
-Cjhb=&close the IPY file
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&close the IPY file
+!jhb=&==================================================================
       close (150)
-Cjhb=&==================================================================
-Cjhb=&original comment - but not related to the code here:
-c if all of the structure have % groundwater, do not consider
-c if any of the structure have groundwater, do not consider water rights
-c or return flow timing or patterns
-Cjhb=&==================================================================
-Cjhb=&if the PVH file exists, read it, else jump to the drafile reading code
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&original comment - but not related to the code here:
+! if all of the structure have % groundwater, do not consider
+! if any of the structure have groundwater, do not consider water rights
+! or return flow timing or patterns
+!jhb=&==================================================================
+!jhb=&if the PVH file exists, read it, else jump to the drafile reading code
+!jhb=&==================================================================
       if(pvhfile.eq.'') goto 43
       open (unit=180,file=pvhfile,status='old',err=43)
       call skipn(180) !skip comment records
-Cjhb=&==================================================================
-c check to see if gw data exists for all years
-Cjhb=&==================================================================
+!jhb=&==================================================================
+! check to see if gw data exists for all years
+!jhb=&==================================================================
       read(180,29) jyr1, jyr2, idum3 !read first record
       if(idum3 .eq. 'WYR') THEN 
         jyr1=jyr1+1
@@ -1056,11 +1060,11 @@ Cjhb=&==================================================================
      :  'Monthly pumping capacity data not available for all years'
         stop
       endif
-Cjhb=&==================================================================
-Cjhb=& now read the PVH file pumping records and
-Cjhb=& reset the max pumping rate array
-Cjhb=& (note it adjusts for water year)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=& now read the PVH file pumping records and
+!jhb=& reset the max pumping rate array
+!jhb=& (note it adjusts for water year)
+!jhb=&==================================================================
 33    read (180,21, end=40) itmp,pvhid,(p1(k),k=1,12)
 21    format(i4,1x,a12,12f8.0)
       if(idum3 .eq. 'WYR' .and. itmp .lt. (nyr1+1)) goto 33
@@ -1089,18 +1093,18 @@ Cjhb=&==================================================================
       goto 33
 40    close(180)
 43    continue
-Cjhb=&==================================================================
-c ew 03/12/04 - open and read drain/tailwater supply file
-c               (here to 60)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+! ew 03/12/04 - open and read drain/tailwater supply file
+!               (here to 60)
+!jhb=&==================================================================
       if(idrain .ge. 1) then
         if(drafile.eq.'') goto 44
         write(999,*) 'Reading in drain/tailwater file ', drafile
         open (unit=190,file=drafile,status='old',err=44)
         call skipn(190)
-Cjhb=&==================================================================
-c check to see if drain/tailwater supply data exists for all years
-Cjhb=&==================================================================
+!jhb=&==================================================================
+! check to see if drain/tailwater supply data exists for all years
+!jhb=&==================================================================
         read(190,29) jyr1, jyr2, idum3
         if(idum3 .eq. 'WYR') THEN 
           jyr1=jyr1+1
@@ -1113,11 +1117,11 @@ Cjhb=&==================================================================
      &'Monthly drain/tailwater supply data not available for all years.'
           stop
         endif
-Cjhb=&==================================================================
-Cjhb=& now read the DRA file records and
-Cjhb=& set the tail array
-Cjhb=& (note it adjusts for water year)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=& now read the DRA file records and
+!jhb=& set the tail array
+!jhb=& (note it adjusts for water year)
+!jhb=&==================================================================
 63      read (190,21, end=44) itmp,pvhid,(p1(k),k=1,12)
         if(idum3 .eq. 'WYR' .and. itmp .lt. (nyr1+1)) goto 63
         if(itmp .lt. nyr1) goto 63
@@ -1136,9 +1140,9 @@ Cjhb=&==================================================================
                 p1(k)=max(p1(k),0.0)
               end select
               if(idum3 .eq. 'WYR') then
-Cjhb=&==================================================================
-crrb 2004/05/05; Allow multiple entries for the same ID & year             
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!rrb 2004/05/05; Allow multiple entries for the same ID & year             
+!jhb=&==================================================================
                 if(k .gt. 3) then
                   tail(i,iyr,k-3)=tail(i,iyr,k-3)+ p1(k)
                 else
@@ -1152,132 +1156,132 @@ Cjhb=&==================================================================
             goto 63
           endif
 65      continue
-Cjhb=&==================================================================
-c rrb 2004/05/05; Warn if station is not found
-Cjhb=&==================================================================
+!jhb=&==================================================================
+! rrb 2004/05/05; Warn if station is not found
+!jhb=&==================================================================
         if(ifound.eq.0) then
             if(ipresim .ne. 1) call lw_update(56,pvhid)
         endif  
         goto 63
       endif
-Cjhb=&==================================================================
-c  open up output files (.dwb detailed water budget by structure)
-c                       (.swb scenario water budget)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!  open up output files (.dwb detailed water budget by structure)
+!                       (.swb scenario water budget)
+!jhb=&==================================================================
 44    thefile1 = dfile
       thefile1(fn_len:fn_len+4) = '.dwb'
-c     close the drain file      
+!     close the drain file      
       close(190)
 
-Cjhb=&==================================================================
-Cjhb  open binary file 1
+!jhb=&==================================================================
+!jhb  open binary file 1
       IF (LBD1OUT.and.(ipresim.ne.1)) THEN
-Cjhb     call the routine to initialize the bd1 binary file output
-Cjhb     call CreateBD1FileHeader(dfile)
+!jhb     call the routine to initialize the bd1 binary file output
+!jhb     call CreateBD1FileHeader(dfile)
 
-Cjhb    add file name extension
+!jhb    add file name extension
         BD1FN=dfile
         NCH=len_trim(BD1FN)
         BD1FN(NCH+1:NCH+5) = BD1EXT
-Cjhb    open file in binary mode for output
+!jhb    open file in binary mode for output
         OPEN (UNIT=IBD1UN,FILE=BD1FN,STATUS='REPLACE',IOSTAT=IERR,
-c     &        ACCESS='TRANSPARENT',FORM='BINARY')
-c     &         ACCESS='SEQUENTIAL',FORM='BINARY')
+!     &        ACCESS='TRANSPARENT',FORM='BINARY')
+!     &         ACCESS='SEQUENTIAL',FORM='BINARY')
      &         ACCESS='STREAM')
       ENDIF
-Cjhb=&==================================================================
-Cjhb  open binary file 2
+!jhb=&==================================================================
+!jhb  open binary file 2
       IF (LBD2OUT) THEN
-Cjhb     call the routine to initialize the bd2 binary file output
-Cjhb     call CreateBD2FileHeader(dfile)
+!jhb     call the routine to initialize the bd2 binary file output
+!jhb     call CreateBD2FileHeader(dfile)
       ENDIF
-Cjhb=&==================================================================
-Cjhb  open binary file 3
+!jhb=&==================================================================
+!jhb  open binary file 3
       IF (LBD3OUT) THEN
-Cjhb     call the routine to initialize the bd3 binary file output
-Cjhb     call CreateBD3FileHeader(dfile)
+!jhb     call the routine to initialize the bd3 binary file output
+!jhb     call CreateBD3FileHeader(dfile)
       ENDIF
-Cjhb=&==================================================================
-Cjhb  open binary file 4
+!jhb=&==================================================================
+!jhb  open binary file 4
       IF (LBD4OUT) THEN
-Cjhb     call the routine to initialize the bd4 binary file output
-Cjhb     call CreateBD4FileHeader(dfile)
+!jhb     call the routine to initialize the bd4 binary file output
+!jhb     call CreateBD4FileHeader(dfile)
       ENDIF
-Cjhb=&==================================================================
-Cjhb  open binary file 5
+!jhb=&==================================================================
+!jhb  open binary file 5
       IF (LBD5OUT) THEN
-Cjhb     call the routine to initialize the bd5 binary file output
-Cjhb     call CreateBD5FileHeader(dfile)
+!jhb     call the routine to initialize the bd5 binary file output
+!jhb     call CreateBD5FileHeader(dfile)
       ENDIF
-Cjhb=&==================================================================
+!jhb=&==================================================================
 
 
       IF (LBD1OUT.and.(ipresim.ne.1)) THEN
-Cjhb=&==================================================================
-Cjhb  Description of this BD1 binary file:
-Cjhb  This binary file contains structure data - both monthly time series and non-time series
-Cjhb  Header records are at the top of the file.
-Cjhb  Then one record for every structure containing multiple fields of non time series data.
-Cjhb  Then one record for each structure/time step combination containing 
-Cjhb  multiple fields on each record containing the data
-Cjhb  that (potentially) change from structure/timestep pair to structure/timestep pair.
-Cjhb=&==================================================================
-Cjhb  Binary File Overview
-Cjhb  The initial records describe the organization of the monthly time series structure data.
-Cjhb  These binary files are created with the FORTRAN FORM='BINARY' specification,
-Cjhb    which means the data are written to the file in binary form in one long stream.
-Cjhb    This accomplishes two objectives:
-Cjhb    1. Allows the existing VB6 StateCUI code to flexibly read the binary file
-Cjhb       one value at at time with GET() statements without having to "hardwire"
-Cjhb       a fixed record structure that would cause the GUI (VB6) code to "break"
-Cjhb       if the FORTRAN output changed.
-Cjhb       So new values can be added to the binary output files in the FORTRAN code
-Cjhb       and the VB6 GUI will automatically accomodate them without any changes.
-Cjhb       In addition, this allows the BD1 file to be different for each scenario
-Cjhb       option (ISUPLY, IFLOOD, etc) without creating a nightmare for the GUI (VB6) code
-Cjhb       attempting to read the file.
-Cjhb    2. Prevents having to set a fixed record size large enough for the long header
-Cjhb       records which creates unused space on the many data records that follow,
-Cjhb       making the file much larger than necessary containing empty space.
-Cjhb  The first BD1 (monthly time series structure data) record has the format of 5 integers:
-Cjhb      NBASIN-Num Structures (I), IBD1TS-Num Timesteps (I),
-Cjhb      IBD1NSF-Num Structure Fields, IBD1NF-Num TimeStep Fields,
-Cjhb      IBD1TSA-Num Annual Time Steps (I) 1=>annual, 12=>monthly, 52=>weekly, 365=>daily
-Cjhb      The resulting number of structure data rows in the file is NBASIN
-Cjhb      The resulting number of time series data rows in the file, NR, can
-Cjhb        therefore be calculated as: NR-NRows (I) = NBASIN * IBD1TS
-Cjhb        where IBD1TS = IBD1TSA * NYRS
-Cjhb      The begin/end years can be determined from the
-Cjhb        values in the header record #1 and the first time series data row.
-Cjhb      The list of structures follows header record number 1.
-Cjhb      This design allows the same binary file organization to be used for:
-Cjhb        monthly times series for structures,
-Cjhb        monthly times series for stations,
-Cjhb        daily time series for structures,
-Cjhb        daily time series for stations,
-Cjhb        other misc time series;
-Cjhb        it also allows time series to have variable start and end dates
-Cjhb        (i.e. do not have to begin on Jan 1 and end on Dec 31)
-Cjhb  After the first record are IBD1NSF records (one record per field) with data describing
-Cjhb      the fields on the structure data records.  The format for these header records is:
-Cjhb      Field Type (Character*1:'I','F','C'), Field Length in Bytes (Integer*4),
-Cjhb      Field Name (Character*24), Field In Report (Integer*4:0=false, non-zero=true),
-Cjhb      Field Report Header (Character*60)
-Cjhb  After these records are IBD1NF records (one record per field) with data describing
-Cjhb      the fields on the time series data records.  The format for these header records is:
-Cjhb      Field Type (Character*1:'I','F','C'), Field Length in Bytes (Integer*4),
-Cjhb      Field Name (Character*24), Field In Report (Integer*4:0=false, non-zero=true),
-Cjhb      Field Report Header (Character*60)
-Cjhb  Then are the NBASIN records containing the structure data
-Cjhb      with the fields described above.
-Cjhb  Then are the NBASIN * IBD1TS records containing the monthly time series structure data
-Cjhb      with the fields described above, with the entire time series for structure 1,
-Cjhb      then the entire time series for structure 2, etc.
-Cjhb  The number of fields varies depending on the model run scenario options
-Cjhb
-Cjhb=&==================================================================
-Cjhb     write BD1 header records
-Cjhb=================***************====================================
+!jhb=&==================================================================
+!jhb  Description of this BD1 binary file:
+!jhb  This binary file contains structure data - both monthly time series and non-time series
+!jhb  Header records are at the top of the file.
+!jhb  Then one record for every structure containing multiple fields of non time series data.
+!jhb  Then one record for each structure/time step combination containing 
+!jhb  multiple fields on each record containing the data
+!jhb  that (potentially) change from structure/timestep pair to structure/timestep pair.
+!jhb=&==================================================================
+!jhb  Binary File Overview
+!jhb  The initial records describe the organization of the monthly time series structure data.
+!jhb  These binary files are created with the FORTRAN FORM='BINARY' specification,
+!jhb    which means the data are written to the file in binary form in one long stream.
+!jhb    This accomplishes two objectives:
+!jhb    1. Allows the existing VB6 StateCUI code to flexibly read the binary file
+!jhb       one value at at time with GET() statements without having to "hardwire"
+!jhb       a fixed record structure that would cause the GUI (VB6) code to "break"
+!jhb       if the FORTRAN output changed.
+!jhb       So new values can be added to the binary output files in the FORTRAN code
+!jhb       and the VB6 GUI will automatically accomodate them without any changes.
+!jhb       In addition, this allows the BD1 file to be different for each scenario
+!jhb       option (ISUPLY, IFLOOD, etc) without creating a nightmare for the GUI (VB6) code
+!jhb       attempting to read the file.
+!jhb    2. Prevents having to set a fixed record size large enough for the long header
+!jhb       records which creates unused space on the many data records that follow,
+!jhb       making the file much larger than necessary containing empty space.
+!jhb  The first BD1 (monthly time series structure data) record has the format of 5 integers:
+!jhb      NBASIN-Num Structures (I), IBD1TS-Num Timesteps (I),
+!jhb      IBD1NSF-Num Structure Fields, IBD1NF-Num TimeStep Fields,
+!jhb      IBD1TSA-Num Annual Time Steps (I) 1=>annual, 12=>monthly, 52=>weekly, 365=>daily
+!jhb      The resulting number of structure data rows in the file is NBASIN
+!jhb      The resulting number of time series data rows in the file, NR, can
+!jhb        therefore be calculated as: NR-NRows (I) = NBASIN * IBD1TS
+!jhb        where IBD1TS = IBD1TSA * NYRS
+!jhb      The begin/end years can be determined from the
+!jhb        values in the header record #1 and the first time series data row.
+!jhb      The list of structures follows header record number 1.
+!jhb      This design allows the same binary file organization to be used for:
+!jhb        monthly times series for structures,
+!jhb        monthly times series for stations,
+!jhb        daily time series for structures,
+!jhb        daily time series for stations,
+!jhb        other misc time series;
+!jhb        it also allows time series to have variable start and end dates
+!jhb        (i.e. do not have to begin on Jan 1 and end on Dec 31)
+!jhb  After the first record are IBD1NSF records (one record per field) with data describing
+!jhb      the fields on the structure data records.  The format for these header records is:
+!jhb      Field Type (Character*1:'I','F','C'), Field Length in Bytes (Integer*4),
+!jhb      Field Name (Character*24), Field In Report (Integer*4:0=false, non-zero=true),
+!jhb      Field Report Header (Character*60)
+!jhb  After these records are IBD1NF records (one record per field) with data describing
+!jhb      the fields on the time series data records.  The format for these header records is:
+!jhb      Field Type (Character*1:'I','F','C'), Field Length in Bytes (Integer*4),
+!jhb      Field Name (Character*24), Field In Report (Integer*4:0=false, non-zero=true),
+!jhb      Field Report Header (Character*60)
+!jhb  Then are the NBASIN records containing the structure data
+!jhb      with the fields described above.
+!jhb  Then are the NBASIN * IBD1TS records containing the monthly time series structure data
+!jhb      with the fields described above, with the entire time series for structure 1,
+!jhb      then the entire time series for structure 2, etc.
+!jhb  The number of fields varies depending on the model run scenario options
+!jhb
+!jhb=&==================================================================
+!jhb     write BD1 header records
+!jhb=================***************====================================
          IF(ISUPLY .EQ. 1) THEN
            IBD1TSA=12 !# time steps per year, assumes this is monthly
            IBD1TS=IBD1TSA*NYRS !total # time steps
@@ -1290,193 +1294,193 @@ Cjhb=================***************====================================
            WRITE(UNIT=IBD1UN)NBASIN,
      &                       IBD1TS,IBD1NSF,IBD1NF,IBD1TSA
            endif
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=1
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=1
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    'Structure Index                                             '
-Cjhb=&=====2============================================================
-Cjhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
+!jhb=&=====2============================================================
+!jhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure ID            ',1,
      &    'Structure ID                                                '
-Cjhb=&=====3============================================================
-Cjhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
+!jhb=&=====3============================================================
+!jhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure Name          ',1,
      &    'Structure Name                                              '
-Cjhb=&==================================================================
-Cjhb       Total record size = 4+12+12 = 28 bytes
-Cjhb=&==================================================================
-Cjhb
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NF (29) values on the time series records for ISUPLY=1
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Total record size = 4+12+12 = 28 bytes
+!jhb=&==================================================================
+!jhb
+!jhb=&==================================================================
+!jhb       Here are the IBD1NF (29) values on the time series records for ISUPLY=1
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    '          '
-Cjhb=&=====2============================================================
-Cjhb       Integer Year, NYR1+M-1
+!jhb=&=====2============================================================
+!jhb       Integer Year, NYR1+M-1
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Year                    ',0,
      &    '          '
-Cjhb=&=====3============================================================
-Cjhb       Integer Month Index, L
+!jhb=&=====3============================================================
+!jhb       Integer Month Index, L
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Month Index             ',0,
      &    '          '
-Cjhb=&=====4============================================================
-Cjhb       Char*3 abbr month string, AMN(L) ***REPORT***
+!jhb=&=====4============================================================
+!jhb       Char*3 abbr month string, AMN(L) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',3,
      &    'Month Name              ',1,
      &    '          '
-Cjhb=&=====5============================================================
-Cjhb       Real*4 Total Crop Acreage - t_area(i,m)
+!jhb=&=====5============================================================
+!jhb       Real*4 Total Crop Acreage - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
      &    'ACRE      '
-Cjhb=&=====6============================================================
-Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
+!jhb=&=====6============================================================
+!jhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
      &    'ACRE      '
-Cjhb=&=====7============================================================
-Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
+!jhb=&=====7============================================================
+!jhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
      &    'Analysis Method         ',1,
      &    '          '
-Cjhb=&=====8============================================================
-Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
+!jhb=&=====8============================================================
+!jhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
      &    'ACFT      '
-Cjhb=&=====9============================================================
-Cjhb       Real*4  Effective Precip, effppt(i,m,l)
+!jhb=&=====9============================================================
+!jhb       Real*4  Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
      &    'ACFT      '
-Cjhb=&=====10============================================================
-Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
+!jhb=&=====10============================================================
+!jhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
      &    'ACFT      '
-Cjhb=&=====11===========================================================
-Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
+!jhb=&=====11===========================================================
+!jhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
      &    'ACFT      '
-Cjhb=&=====12===========================================================
-Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
+!jhb=&=====12===========================================================
+!jhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
      &    'ACFT      '
-Cjhb=&=====13===========================================================
-Cjhb       Real*4 River Diversion Acct. - Historic Diversion, ddhmonot(m,l)
+!jhb=&=====13===========================================================
+!jhb       Real*4 River Diversion Acct. - Historic Diversion, ddhmonot(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion         ',1,
      &    'ACFT      '
-Cjhb=&=====14===========================================================
-Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
+!jhb=&=====14===========================================================
+!jhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
      &    'PERCENT   '
-Cjhb=&=====15===========================================================
-Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
+!jhb=&=====15===========================================================
+!jhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
      &    'ACFT      '
-Cjhb=&=====16===========================================================
-Cjhb       Real*4 River Diversion Acct. - Farm Headgate Diversion, fdiv(m,l)
+!jhb=&=====16===========================================================
+!jhb       Real*4 River Diversion Acct. - Farm Headgate Diversion, fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
      &    'ACFT      '
-Cjhb=&=====17===========================================================
-Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
+!jhb=&=====17===========================================================
+!jhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
      &    'ACFT      '
-C removed Cjhb=&=====16===========================================================
-C removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
-C removed            WRITE(UNIT=IBD1UN)'R',4,
-C removed      &    'Sprinkler FHG (Not Appl)',0,
-C removed      &    'ACFT      '
-Cjhb=&=====18===========================================================
-Cjhb       Real*4 River Diversion Acct. - SW to CU                , crop_cut(m,l)
+! removed Cjhb=&=====16===========================================================
+! removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
+! removed            WRITE(UNIT=IBD1UN)'R',4,
+! removed      &    'Sprinkler FHG (Not Appl)',0,
+! removed      &    'ACFT      '
+!jhb=&=====18===========================================================
+!jhb       Real*4 River Diversion Acct. - SW to CU                , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU                ',1,
      &    'ACFT      '
-Cjhb=&=====19===========================================================
-Cjhb       Real*4 River Diversion Acct. - SW to Soil              , soil_cu(m,l)
+!jhb=&=====19===========================================================
+!jhb       Real*4 River Diversion Acct. - SW to Soil              , soil_cu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil              ',1,
      &    'ACFT      '
-Cjhb=&=====21===========================================================
-Cjhb       Real*4 River Diversion Acct. - SW to CU & Soil         , divcu(m,l)
+!jhb=&=====21===========================================================
+!jhb       Real*4 River Diversion Acct. - SW to CU & Soil         , divcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU & Soil         ',1,
      &    'ACFT      '
-Cjhb=&=====21===========================================================
-Cjhb       Real*4 River Diversion Acct. - SW_Non_Consumed         , ulagt(m,l)-closs(m,l)
+!jhb=&=====21===========================================================
+!jhb       Real*4 River Diversion Acct. - SW_Non_Consumed         , ulagt(m,l)-closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed         ',1,
      &    'ACFT      '
-Cjhb=&=====22===========================================================
-Cjhb       Real*4 River Diversion Acct. - Max Application Effic   , sfeff(i,m)
+!jhb=&=====22===========================================================
+!jhb       Real*4 River Diversion Acct. - Max Application Effic   , sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
      &    'PERCENT   '
-Cjhb=&=====23===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc SW Applic Effic    , effcu(m,l)
+!jhb=&=====23===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc SW Applic Effic    , effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
      &    'PERCENT   '
-Cjhb=&=====24===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
+!jhb=&=====24===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
      &    'PERCENT   '
-Cjhb=&=====25===========================================================
-Cjhb       Real*4 Soil Moisture Contents, soiltott(m,l)
+!jhb=&=====25===========================================================
+!jhb       Real*4 Soil Moisture Contents, soiltott(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content         ',1,
      &    'ACFT      '
-Cjhb=&=====26===========================================================
-Cjhb       Real*4 Crop CU from SW         , crop_cut(m,l)
+!jhb=&=====26===========================================================
+!jhb       Real*4 Crop CU from SW         , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW         ',1,
      &    'ACFT      '
-Cjhb=&=====27===========================================================
-Cjhb       Real*4 Crop CU from Soil       , cropcusoil(m,l)
+!jhb=&=====27===========================================================
+!jhb       Real*4 Crop CU from Soil       , cropcusoil(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
      &    'ACFT      '
-Cjhb=&=====28===========================================================
-Cjhb       Real*4 Total Crop CU           , estcrpt(i,m,l)
+!jhb=&=====28===========================================================
+!jhb       Real*4 Total Crop CU           , estcrpt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
      &    'ACFT      '
-Cjhb=&=====29===========================================================
-Cjhb       Real*4 CU Shortage             , SHORTAGE
-Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
+!jhb=&=====29===========================================================
+!jhb       Real*4 CU Shortage             , SHORTAGE
+!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
      &    'ACFT      '
-Cjhb=&==================================================================
-Cjhb       Total record size = 3*4+3+4+4+10+22*4 = 121 bytes
-Cjhb=&==================================================================
-Cjhb
-Cjhb=&==================================================================
-Cjhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=1
-Cjhb       Note: assumes these arrays are already populated, so output them now...
-Cjhb====================================================================
+!jhb=&==================================================================
+!jhb       Total record size = 3*4+3+4+4+10+22*4 = 121 bytes
+!jhb=&==================================================================
+!jhb
+!jhb=&==================================================================
+!jhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=1
+!jhb       Note: assumes these arrays are already populated, so output them now...
+!jhb====================================================================
             DO I=1,NBASIN
               CHAR12_1=BAS_ID(I)(1:12)
               CHAR12_2=BAS_ID(I)(13:24)
               WRITE(UNIT=IBD1UN)I,CHAR12_1,CHAR12_2
-Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
+!jhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             END DO
            if(sboutput) then
             DO I=0,SBCOUNT
@@ -1488,9 +1492,9 @@ Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             CHAR12_2=BNAME
             WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
            endif
-Cjhb=&==================================================================
-Cjhb       ISUPLY=2 has a different set of output fields for the time series data
-Cjhb====================================================================
+!jhb=&==================================================================
+!jhb       ISUPLY=2 has a different set of output fields for the time series data
+!jhb====================================================================
          ELSEIF(ISUPLY .EQ. 2) THEN
            IBD1TSA=12 !# time steps per year, assumes this is monthly
            IBD1TS=IBD1TSA*NYRS !total # time steps
@@ -1503,287 +1507,287 @@ Cjhb====================================================================
            WRITE(UNIT=IBD1UN)NBASIN,
      &                       IBD1TS,IBD1NSF,IBD1NF,IBD1TSA
            endif
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=2
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=2
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    'Structure Index                                             '
-Cjhb=&=====2============================================================
-Cjhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
+!jhb=&=====2============================================================
+!jhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure ID            ',1,
      &    'Structure ID                                                '
-Cjhb=&=====3============================================================
-Cjhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
+!jhb=&=====3============================================================
+!jhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure Name          ',1,
      &    'Structure Name                                              '
-Cjhb=&==================================================================
-Cjhb       Total record size = 4+12+12 = 28 bytes
-Cjhb=&==================================================================
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NF (48) values on the time series records for ISUPLY=2
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Total record size = 4+12+12 = 28 bytes
+!jhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Here are the IBD1NF (48) values on the time series records for ISUPLY=2
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    '          '
-Cjhb=&=====2============================================================
-Cjhb       Integer Year, NYR1+M-1
+!jhb=&=====2============================================================
+!jhb       Integer Year, NYR1+M-1
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Year                    ',0,
      &    '          '
-Cjhb=&=====3============================================================
-Cjhb       Integer Month Index, L
+!jhb=&=====3============================================================
+!jhb       Integer Month Index, L
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Month Index             ',0,
      &    '          '
-Cjhb=&=====4============================================================
-Cjhb       Char*3 abbr month string, AMN(L) ***REPORT***
+!jhb=&=====4============================================================
+!jhb       Char*3 abbr month string, AMN(L) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',3,
      &    'Month Name              ',1,
      &    '          '
-Cjhb=&=====5============================================================
-Cjhb       Real*4 Total Irrigated Acreage  - t_area(i,m)
+!jhb=&=====5============================================================
+!jhb       Real*4 Total Irrigated Acreage  - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
      &    'ACRE      '
-Cjhb=&=====6============================================================
-Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
+!jhb=&=====6============================================================
+!jhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
      &    'ACRE      '
-Cjhb=&=====7============================================================
-Cjhb       Char*10 Analysis Method         - "Calculated" vs. "Prorated" - METHOD
+!jhb=&=====7============================================================
+!jhb       Char*10 Analysis Method         - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
      &    'Analysis Method         ',1,
      &    '          '
-Cjhb=&=====8============================================================
-Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
+!jhb=&=====8============================================================
+!jhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
      &    'ACFT      '
-Cjhb=&=====9============================================================
-Cjhb       Real*4 Effective Precip, effppt(i,m,l)
+!jhb=&=====9============================================================
+!jhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
      &    'ACFT      '
-Cjhb=&=====10===========================================================
-Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
+!jhb=&=====10===========================================================
+!jhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
      &    'ACFT      '
-Cjhb=&=====11===========================================================
-Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
+!jhb=&=====11===========================================================
+!jhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
      &    'ACFT      '
-Cjhb=&=====12===========================================================
-Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
+!jhb=&=====12===========================================================
+!jhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
      &    'ACFT      '
-Cjhb=&=====13===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l)
+!jhb=&=====13===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Senior  ',1,
      &    'ACFT      '
-Cjhb=&=====14===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l)
+!jhb=&=====14===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Junior  ',1,
      &    'ACFT      '
-Cjhb=&=====15===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l)
+!jhb=&=====15===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Other   ',1,
      &    'ACFT      '
-Cjhb=&=====16===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
+!jhb=&=====16===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion_Total   ',1,
      &    'ACFT      '
-Cjhb=&=====17===========================================================
-Cjhb       Real*4 Conveyance Efficiency   , ceff(i,m)
+!jhb=&=====17===========================================================
+!jhb       Real*4 Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
      &    'PERCENT   '
-Cjhb=&=====18===========================================================
-Cjhb       Real*4 Conveyance Loss         , closs(m,l)
+!jhb=&=====18===========================================================
+!jhb       Real*4 Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
      &    'ACFT      '
-Cjhb=&=====19===========================================================
-Cjhb       Real*4 Farm Headgate Delivery  , fdiv(m,l)
+!jhb=&=====19===========================================================
+!jhb       Real*4 Farm Headgate Delivery  , fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
      &    'ACFT      '
-Cjhb=&=====20===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Senior, crop_cus(m,l),***REPORT***
+!jhb=&=====20===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Senior, crop_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Senior         ',1,
      &    'ACFT      '
-Cjhb=&=====21===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Junior, crop_cuj(m,l),***REPORT***
+!jhb=&=====21===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Junior, crop_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Junior         ',1,
      &    'ACFT      '
-Cjhb=&=====22===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Other, crop_cuo(m,l),***REPORT***
+!jhb=&=====22===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Other, crop_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Other          ',1,
      &    'ACFT      '
-Cjhb=&=====23===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Total, crop_cut(m,l),***REPORT***
+!jhb=&=====23===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Total, crop_cut(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU_Total          ',1,
      &    'ACFT      '
-Cjhb=&=====24===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Senior, soil_cus(m,l),***REPORT***
+!jhb=&=====24===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Senior, soil_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Senior       ',1,
      &    'ACFT      '
-Cjhb=&=====25===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Junior, soil_cuj(m,l),***REPORT***
+!jhb=&=====25===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Junior, soil_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Junior       ',1,
      &    'ACFT      '
-Cjhb=&=====26===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Other, soil_cuo(m,l),***REPORT***
+!jhb=&=====26===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Other, soil_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Other        ',1,
      &    'ACFT      '
-Cjhb=&=====27===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Total, soil_cu(m,l),***REPORT***
+!jhb=&=====27===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Total, soil_cu(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil_Total        ',1,
      &    'ACFT      '
-Cjhb=&=====28===========================================================
-Cjhb       Real*4 River Diversion Acct. - Total Div to CU & Soil  , divcu(m,l)
+!jhb=&=====28===========================================================
+!jhb       Real*4 River Diversion Acct. - Total Div to CU & Soil  , divcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU & Soil_Total   ',1,
      &    'ACFT      '
-Cjhb=&=====29===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Senior, ulags(m,l),***REPORT***
+!jhb=&=====29===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Senior, ulags(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Senior  ',1,
      &    'ACFT      '
-Cjhb=&=====30===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Junior, ulagj(m,l),***REPORT***
+!jhb=&=====30===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Junior, ulagj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Junior  ',1,
      &    'ACFT      '
-Cjhb=&=====31===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Other, ulago(m,l),***REPORT***
+!jhb=&=====31===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Other, ulago(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Other   ',1,
      &    'ACFT      '
-Cjhb=&=====32===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Total, ulagt(m,l),***REPORT***
+!jhb=&=====32===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Total, ulagt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed_Total   ',1,
      &    'ACFT      '
-Cjhb=&=====33===========================================================
-Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
+!jhb=&=====33===========================================================
+!jhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
      &    'ACFT      '
-C removed Cjhb=&=====31===========================================================
-C removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
-C removed            WRITE(UNIT=IBD1UN)'R',4,
-C removed      &    'Sprinkler FHG (Not Appl)',0,
-C removed      &    'ACFT      '
-Cjhb=&=====34===========================================================
-Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
+! removed Cjhb=&=====31===========================================================
+! removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
+! removed            WRITE(UNIT=IBD1UN)'R',4,
+! removed      &    'Sprinkler FHG (Not Appl)',0,
+! removed      &    'ACFT      '
+!jhb=&=====34===========================================================
+!jhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
      &    'PERCENT   '
-Cjhb=&=====35===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
+!jhb=&=====35===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
      &    'PERCENT   '
-Cjhb=&=====36===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
+!jhb=&=====36===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
      &    'PERCENT   '
-Cjhb=&=====37===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
+!jhb=&=====37===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Senior  ',1,
      &    'ACFT      '
-Cjhb=&=====38===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Junior, soiltottj(m,l), ***REPORT***
+!jhb=&=====38===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Junior, soiltottj(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Junior  ',1,
      &    'ACFT      '
-Cjhb=&=====39===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Other, soiltotto(m,l), ***REPORT***
+!jhb=&=====39===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Other, soiltotto(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Other   ',1,
      &    'ACFT      '
-Cjhb=&=====40===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
+!jhb=&=====40===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content_Total   ',1,
      &    'ACFT      '
-Cjhb=&=====41===========================================================
-Cjhb       Real*4 Tot Crop CU from Div    , crop_cut(m,l)
+!jhb=&=====41===========================================================
+!jhb       Real*4 Tot Crop CU from Div    , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW         ',1,
      &    'ACFT      '
-Cjhb=&=====42===========================================================
-Cjhb       Real*4 Tot Crop CU from Soil   , cropcusoil(m,l)
+!jhb=&=====42===========================================================
+!jhb       Real*4 Tot Crop CU from Soil   , cropcusoil(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
      &    'ACFT      '
-Cjhb=&=====43===========================================================
-Cjhb       Real*4 Estimated Crop CU - By Water Rights - Senior, estcrps(m,l),***REPORT***
+!jhb=&=====43===========================================================
+!jhb       Real*4 Estimated Crop CU - By Water Rights - Senior, estcrps(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU_Senior    ',1,
      &    'ACFT      '
-Cjhb=&=====44===========================================================
-Cjhb       Real*4 Estimated Crop CU - By Water Rights - Junior, estcrpj(m,l),***REPORT***
+!jhb=&=====44===========================================================
+!jhb       Real*4 Estimated Crop CU - By Water Rights - Junior, estcrpj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU_Junior    ',1,
      &    'ACFT      '
-Cjhb=&=====45===========================================================
-Cjhb       Real*4 Estimated Crop CU - By Water Rights - Other, estcrpo(m,l),***REPORT***
+!jhb=&=====45===========================================================
+!jhb       Real*4 Estimated Crop CU - By Water Rights - Other, estcrpo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU_Other     ',1,
      &    'ACFT      '
-Cjhb=&=====46===========================================================
-Cjhb       Real*4 Estimated Crop CU - By Water Rights - Total, estcrpt(m,l),***REPORT***
+!jhb=&=====46===========================================================
+!jhb       Real*4 Estimated Crop CU - By Water Rights - Total, estcrpt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
      &    'ACFT      '
-Cjhb=&=====47===========================================================
-Cjhb       Real*4 Replacement Requirement, estcrpj(m,l),***REPORT***
+!jhb=&=====47===========================================================
+!jhb       Real*4 Replacement Requirement, estcrpj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Replacement Requirement ',1,
      &    'ACFT      '
-Cjhb=&=====48===========================================================
-Cjhb       Real*4 Calculated CU shortage, SHORTAGE
-Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
+!jhb=&=====48===========================================================
+!jhb       Real*4 Calculated CU shortage, SHORTAGE
+!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
      &    'ACFT      '
-Cjhb=&==================================================================
-Cjhb       Total record size = 3*4+3+4+4+10+41*4 = 197 bytes
-Cjhb=&==================================================================
-Cjhb
-Cjhb=&==================================================================
-Cjhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=2
-Cjhb       Note: assumes these arrays are already populated, so output them now...
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Total record size = 3*4+3+4+4+10+41*4 = 197 bytes
+!jhb=&==================================================================
+!jhb
+!jhb=&==================================================================
+!jhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=2
+!jhb       Note: assumes these arrays are already populated, so output them now...
+!jhb=&==================================================================
             DO I=1,NBASIN
               CHAR12_1=BAS_ID(I)(1:12)
               CHAR12_2=BAS_ID(I)(13:24)
               WRITE(UNIT=IBD1UN)I,CHAR12_1,CHAR12_2
-Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
+!jhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             END DO
            if(sboutput) then
             DO I=0,SBCOUNT
@@ -1795,9 +1799,9 @@ Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             CHAR12_2=BNAME
             WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
            endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
          ELSEIF(ISUPLY .EQ. 3) THEN
-Cjhb=&==================================================================
+!jhb=&==================================================================
            IBD1TSA=12 !# time steps per year
            IBD1TS=IBD1TSA*NYRS !total # time steps
            IBD1NF=61 !number output values per timestep per structure
@@ -1809,352 +1813,352 @@ Cjhb=&==================================================================
            WRITE(UNIT=IBD1UN)NBASIN,
      &                       IBD1TS,IBD1NSF,IBD1NF,IBD1TSA
            endif
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=3
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=3
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    'Structure Index                                             '
-Cjhb=&=====2============================================================
-Cjhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
+!jhb=&=====2============================================================
+!jhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure ID            ',1,
      &    'Structure ID                                                '
-Cjhb=&=====3============================================================
-Cjhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
+!jhb=&=====3============================================================
+!jhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure Name          ',1,
      &    'Structure Name                                              '
-Cjhb=&==================================================================
-Cjhb       Total record size = 4+12+12 = 28 bytes
-Cjhb=&==================================================================
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NF (60) values on the time series records for ISUPLY=3
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Total record size = 4+12+12 = 28 bytes
+!jhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Here are the IBD1NF (60) values on the time series records for ISUPLY=3
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    '          '
-Cjhb=&=====2============================================================
-Cjhb       Integer Year, NYR1+M-1
+!jhb=&=====2============================================================
+!jhb       Integer Year, NYR1+M-1
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Year                    ',0,
      &    '          '
-Cjhb=&=====3============================================================
-Cjhb       Integer Month Index, L
+!jhb=&=====3============================================================
+!jhb       Integer Month Index, L
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Month Index             ',0,
      &    '          '
-Cjhb=&=====4============================================================
-Cjhb       Char*3 abbr month string, AMN(L) ***REPORT***
+!jhb=&=====4============================================================
+!jhb       Char*3 abbr month string, AMN(L) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',3,
      &    'Month Name              ',1,
      &    '          '
-Cjhb=&=====5============================================================
-Cjhb       Real*4 Total Crop Acreage - t_area(i,m)
+!jhb=&=====5============================================================
+!jhb       Real*4 Total Crop Acreage - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
      &    'ACRE      '
-Cjhb=&=====6============================================================
-Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
+!jhb=&=====6============================================================
+!jhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
      &    'ACRE      '
-Cjhb=&=====7============================================================
-Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
+!jhb=&=====7============================================================
+!jhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
      &    'Analysis Method         ',1,
      &    '          '
-Cjhb=&=====8============================================================
-Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
+!jhb=&=====8============================================================
+!jhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
      &    'ACFT      '
-Cjhb=&=====9============================================================
-Cjhb       Real*4 Effective Precip, effppt(i,m,l)
+!jhb=&=====9============================================================
+!jhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
      &    'ACFT      '
-Cjhb=&=====10===========================================================
-Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
+!jhb=&=====10===========================================================
+!jhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
      &    'ACFT      '
-Cjhb=&=====11===========================================================
-Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
+!jhb=&=====11===========================================================
+!jhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
      &    'ACFT      '
-Cjhb=&=====12===========================================================
-Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
+!jhb=&=====12===========================================================
+!jhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
      &    'ACFT      '
-Cjhb=&=====13===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT***
+!jhb=&=====13===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Senior',1,
      &    'ACFT      '
-Cjhb=&=====14===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT***
+!jhb=&=====14===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Junior',1,
      &    'ACFT      '
-Cjhb=&=====15===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT***
+!jhb=&=====15===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Other ',1,
      &    'ACFT      '
-Cjhb=&=====16===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
+!jhb=&=====16===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion - Total ',1,
      &    'ACFT      '
-Cjhb=&=====17===========================================================
-Cjhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
+!jhb=&=====17===========================================================
+!jhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
      &    'PERCENT   '
-Cjhb=&=====18===========================================================
-Cjhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
+!jhb=&=====18===========================================================
+!jhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
      &    'ACFT      '
-Cjhb=&=====19===========================================================
-Cjhb       Real*4 River Diversion Acct. - Farm Headgate Delivery  , fdiv(m,l)
+!jhb=&=====19===========================================================
+!jhb       Real*4 River Diversion Acct. - Farm Headgate Delivery  , fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
      &    'ACFT      '
-Cjhb=&=====20===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Senior, crop_cus(m,l),***REPORT***
+!jhb=&=====20===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Senior, crop_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Senior',1,
      &    'ACFT      '
-Cjhb=&=====21===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Junior, crop_cuj(m,l),***REPORT***
+!jhb=&=====21===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Junior, crop_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Junior',1,
      &    'ACFT      '
-Cjhb=&=====22===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Other, crop_cuo(m,l),***REPORT***
+!jhb=&=====22===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Other, crop_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Other ',1,
      &    'ACFT      '
-Cjhb=&=====23===========================================================
-Cjhb       Real*4 River Diversion Acct. - Diversion to CU - Total, crop_cut(m,l),***REPORT***
+!jhb=&=====23===========================================================
+!jhb       Real*4 River Diversion Acct. - Diversion to CU - Total, crop_cut(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Diversion to CU - Total ',1,
      &    'ACFT      '
-Cjhb=&=====24===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Senior, soil_cus(m,l),***REPORT***
+!jhb=&=====24===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Senior, soil_cus(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Senior',1,
      &    'ACFT      '
-Cjhb=&=====25===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Junior, soil_cuj(m,l),***REPORT***
+!jhb=&=====25===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Junior, soil_cuj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Junior',1,
      &    'ACFT      '
-Cjhb=&=====26===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Other, soil_cuo(m,l),***REPORT***
+!jhb=&=====26===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Other, soil_cuo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Other ',1,
      &    'ACFT      '
-Cjhb=&=====27===========================================================
-Cjhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Total, soil_cu(m,l),***REPORT***
+!jhb=&=====27===========================================================
+!jhb       Real*4 River Diversion Acct. - Add to Soil Moisture - Total, soil_cu(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div to Soil Moist-Total ',1,
      &    'ACFT      '
-Cjhb=&=====28===========================================================
-Cjhb       Real*4 River Diversion Acct. - Total Div to CU & Soil  , divcu(m,l)
+!jhb=&=====28===========================================================
+!jhb       Real*4 River Diversion Acct. - Total Div to CU & Soil  , divcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Div to CU & Soil  ',1,
      &    'ACFT      '
-Cjhb=&=====29===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Senior, ulags(m,l),***REPORT***
+!jhb=&=====29===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Senior, ulags(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Senior ',1,
      &    'ACFT      '
-Cjhb=&=====30===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Junior, ulagj(m,l),***REPORT***
+!jhb=&=====30===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Junior, ulagj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Junior ',1,
      &    'ACFT      '
-Cjhb=&=====31===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Other, ulago(m,l),***REPORT***
+!jhb=&=====31===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Other, ulago(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Other  ',1,
      &    'ACFT      '
-Cjhb=&=====32===========================================================
-Cjhb       Real*4 River Diversion Acct. - Non-Consumed - Total, ulagt(m,l),***REPORT***
+!jhb=&=====32===========================================================
+!jhb       Real*4 River Diversion Acct. - Non-Consumed - Total, ulagt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Div Non-Consumed-Total  ',1,
      &    'ACFT      '
-C removed Cjhb=&=====31===========================================================
-C removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
-C removed            WRITE(UNIT=IBD1UN)'R',4,
-C removed      &    'Sprinkler FHG (Not Appl)',0,
-C removed      &    'ACFT      '
-Cjhb=&=====33===========================================================
-Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
+! removed Cjhb=&=====31===========================================================
+! removed Cjhb       Real*4 River Diversion Acct. - Sprinkler FHG (Not Applied), arech(m,l)
+! removed            WRITE(UNIT=IBD1UN)'R',4,
+! removed      &    'Sprinkler FHG (Not Appl)',0,
+! removed      &    'ACFT      '
+!jhb=&=====33===========================================================
+!jhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
      &    'ACFT      '
-Cjhb=&=====34===========================================================
-Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
+!jhb=&=====34===========================================================
+!jhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
      &    'PERCENT   '
-Cjhb=&=====35===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
+!jhb=&=====35===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
      &    'PERCENT   '
-Cjhb=&=====36===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
+!jhb=&=====36===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
      &    'PERCENT   '
-Cjhb=&=====37===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
+!jhb=&=====37===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Senior, soiltotts(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Senior ',1,
      &    'ACFT      '
-Cjhb=&=====38===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Junior, soiltottj(m,l), ***REPORT***
+!jhb=&=====38===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Junior, soiltottj(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Junior ',1,
      &    'ACFT      '
-Cjhb=&=====39===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Other, soiltotto(m,l), ***REPORT***
+!jhb=&=====39===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Other, soiltotto(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Other  ',1,
      &    'ACFT      '
-Cjhb=&=====40===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
+!jhb=&=====40===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'EOM Soil Moist - Total  ',1,
      &    'ACFT      '
-Cjhb=&=====41===========================================================
-Cjhb       Real*4 Tot Crop CU from Div    , crop_cut(m,l)
+!jhb=&=====41===========================================================
+!jhb       Real*4 Tot Crop CU from Div    , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Tot Crop CU from Div    ',1,
      &    'ACFT      '
-Cjhb=&=====42===========================================================
-Cjhb       Real*4 Total Crop from Soil    , cropcusoil(m,l)
+!jhb=&=====42===========================================================
+!jhb       Real*4 Total Crop from Soil    , cropcusoil(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop from Soil    ',1,
      &    'ACFT      '
-Cjhb=&=====43===========================================================
-Cjhb       Real*4 Total Crop CU - Senior  , estcrps(m,l),***REPORT***
+!jhb=&=====43===========================================================
+!jhb       Real*4 Total Crop CU - Senior  , estcrps(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU - Senior  ',1,
      &    'ACFT      '
-Cjhb=&=====44===========================================================
-Cjhb       Real*4 Total Crop CU - Junior  , estcrpj(m,l),***REPORT***
+!jhb=&=====44===========================================================
+!jhb       Real*4 Total Crop CU - Junior  , estcrpj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU - Junior  ',1,
      &    'ACFT      '
-Cjhb=&=====45===========================================================
-Cjhb       Real*4 Total Crop CU - Other   , estcrpo(m,l),***REPORT***
+!jhb=&=====45===========================================================
+!jhb       Real*4 Total Crop CU - Other   , estcrpo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU - Other   ',1,
      &    'ACFT      '
-Cjhb=&=====46===========================================================
-Cjhb       Real*4 Total Crop CU           , estcrpt(m,l),***REPORT***
+!jhb=&=====46===========================================================
+!jhb       Real*4 Total Crop CU           , estcrpt(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
      &    'ACFT      '
-Cjhb=&=====47===========================================================
-Cjhb       Real*4 Months Return Flows - From This Months Div - Senior, lagrets(m,l),***REPORT***
+!jhb=&=====47===========================================================
+!jhb       Real*4 Months Return Flows - From This Months Div - Senior, lagrets(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Sen',1,
      &    'ACFT      '
-Cjhb=&=====48===========================================================
-Cjhb       Real*4 Months Return Flows - From This Months Div - Junior, lagretj(m,l),***REPORT***
+!jhb=&=====48===========================================================
+!jhb       Real*4 Months Return Flows - From This Months Div - Junior, lagretj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Jun',1,
      &    'ACFT      '
-Cjhb=&=====49===========================================================
-Cjhb       Real*4 Months Return Flows - From This Months Div - Other, lagreto(m,l),***REPORT***
+!jhb=&=====49===========================================================
+!jhb       Real*4 Months Return Flows - From This Months Div - Other, lagreto(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Oth',1,
      &    'ACFT      '
-Cjhb=&=====50===========================================================
-Cjhb       Real*4 Months Return Flows - From This Months Div - Total, lagrett(m,l),***REPORT***
+!jhb=&=====50===========================================================
+!jhb       Real*4 Months Return Flows - From This Months Div - Total, lagrett(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From This Mo Div-Tot',1,
      &    'ACFT      '
-Cjhb=&=====51===========================================================
-Cjhb       Real*4 Months Return Flows - From Prev Months Div - Senior, laglates(m,l),***REPORT***
+!jhb=&=====51===========================================================
+!jhb       Real*4 Months Return Flows - From Prev Months Div - Senior, laglates(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Sen',1,
      &    'ACFT      '
-Cjhb=&=====52===========================================================
-Cjhb       Real*4 Months Return Flows - From Prev Months Div - Junior, laglatej(m,l),***REPORT***
+!jhb=&=====52===========================================================
+!jhb       Real*4 Months Return Flows - From Prev Months Div - Junior, laglatej(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Jun',1,
      &    'ACFT      '
-Cjhb=&=====53===========================================================
-Cjhb       Real*4 Months Return Flows - From Prev Months Div - Other, laglateo(m,l),***REPORT***
+!jhb=&=====53===========================================================
+!jhb       Real*4 Months Return Flows - From Prev Months Div - Other, laglateo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Oth',1,
      &    'ACFT      '
-Cjhb=&=====54===========================================================
-Cjhb       Real*4 Months Return Flows - From Prev Months Div - Total, laglatet(m,l),***REPORT***
+!jhb=&=====54===========================================================
+!jhb       Real*4 Months Return Flows - From Prev Months Div - Total, laglatet(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Ret From Prev Mo Div-Tot',1,
      &    'ACFT      '
-Cjhb=&=====55===========================================================
-Cjhb       Real*4 Months Return Flows - Total, totret(m,l),***REPORT***
+!jhb=&=====55===========================================================
+!jhb       Real*4 Months Return Flows - Total, totret(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Return Flow - Total     ',1,
      &    'ACFT      '
-Cjhb=&=====56===========================================================
-Cjhb       Real*4 River Depl(+)/Accr(-) - By Priority - Senior, deps(m,l),***REPORT***
+!jhb=&=====56===========================================================
+!jhb       Real*4 River Depl(+)/Accr(-) - By Priority - Senior, deps(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Sen ',1,
      &    'ACFT      '
-Cjhb=&=====57===========================================================
-Cjhb       Real*4 River Depl(+)/Accr(-) - By Priority - Junior, depj(m,l),***REPORT***
+!jhb=&=====57===========================================================
+!jhb       Real*4 River Depl(+)/Accr(-) - By Priority - Junior, depj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Jun ',1,
      &    'ACFT      '
-Cjhb=&=====58===========================================================
-Cjhb       Real*4 River Depl(+)/Accr(-) - By Priority - Other, depo(m,l),***REPORT***
+!jhb=&=====58===========================================================
+!jhb       Real*4 River Depl(+)/Accr(-) - By Priority - Other, depo(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Oth ',1,
      &    'ACFT      '
-Cjhb=&=====59===========================================================
-Cjhb       Real*4 River Depl(+)/Accr(-) - Total, dept(m,l),***REPORT***
+!jhb=&=====59===========================================================
+!jhb       Real*4 River Depl(+)/Accr(-) - Total, dept(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Riv Deplete/Accrete-Tot ',1,
      &    'ACFT      '
-Cjhb=&=====60===========================================================
-Cjhb       Real*4 Replacement Requirement, depj(m,l),***REPORT***
+!jhb=&=====60===========================================================
+!jhb       Real*4 Replacement Requirement, depj(m,l),***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Replacement Requirement ',1,
      &    'ACFT      '
-Cjhb=&=====61===========================================================
-Cjhb       Real*4 Calculated CU shortage, SHORTAGE
-Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
+!jhb=&=====61===========================================================
+!jhb       Real*4 Calculated CU shortage, SHORTAGE
+!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
      &    'ACFT      '
-Cjhb=&==================================================================
-Cjhb       Total record size = 3*4+3+4+4+10+54*4 = 249 bytes
-Cjhb=&==================================================================
-Cjhb
-Cjhb=&==================================================================
-Cjhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=3
-Cjhb       Note: assumes these arrays are already populated, so output them now...
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Total record size = 3*4+3+4+4+10+54*4 = 249 bytes
+!jhb=&==================================================================
+!jhb
+!jhb=&==================================================================
+!jhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=3
+!jhb       Note: assumes these arrays are already populated, so output them now...
+!jhb=&==================================================================
             DO I=1,NBASIN
               CHAR12_1=BAS_ID(I)(1:12)
               CHAR12_2=BAS_ID(I)(13:24)
               WRITE(UNIT=IBD1UN)I,CHAR12_1,CHAR12_2
-Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
+!jhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             END DO
            if(sboutput) then
             DO I=0,SBCOUNT
@@ -2166,10 +2170,10 @@ Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             CHAR12_2=BNAME
             WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
            endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
          ELSEIF(ISUPLY .EQ. 4) THEN
            IF(IFLOOD .EQ. 0) THEN
-Cjhb=&==================================================================
+!jhb=&==================================================================
            IBD1TSA=12 !# time steps per year
            IBD1TS=IBD1TSA*NYRS !total # time steps
            IBD1NF=34 !number output values per timestep per structure
@@ -2181,212 +2185,212 @@ Cjhb=&==================================================================
            WRITE(UNIT=IBD1UN)NBASIN,
      &                       IBD1TS,IBD1NSF,IBD1NF,IBD1TSA
            endif
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=4 and IFLOOD=0
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=4 and IFLOOD=0
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    'Structure Index                                             '
-Cjhb=&=====2============================================================
-Cjhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
+!jhb=&=====2============================================================
+!jhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure ID            ',1,
      &    'Structure ID                                                '
-Cjhb=&=====3============================================================
-Cjhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
+!jhb=&=====3============================================================
+!jhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure Name          ',1,
      &    'Structure Name                                              '
-Cjhb=&==================================================================
-Cjhb       Total record size = 4+12+12 = 28 bytes
-Cjhb=&==================================================================
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NF (34) values on the time series records for ISUPLY=4 and IFLOOD=0
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Total record size = 4+12+12 = 28 bytes
+!jhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Here are the IBD1NF (34) values on the time series records for ISUPLY=4 and IFLOOD=0
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    '          '
-Cjhb=&=====2============================================================
-Cjhb       Integer Year, NYR1+M-1
+!jhb=&=====2============================================================
+!jhb       Integer Year, NYR1+M-1
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Year                    ',0,
      &    '          '
-Cjhb=&=====3============================================================
-Cjhb       Integer Month Index, L
+!jhb=&=====3============================================================
+!jhb       Integer Month Index, L
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Month Index             ',0,
      &    '          '
-Cjhb=&=====4============================================================
-Cjhb       Char*3 abbr month string, AMN(L) ***REPORT***
+!jhb=&=====4============================================================
+!jhb       Char*3 abbr month string, AMN(L) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',3,
      &    'Month Name              ',1,
      &    '          '
-Cjhb=&=====5============================================================
-Cjhb       Real*4 'Total Irrigated Acreage ' - t_area(i,m)
+!jhb=&=====5============================================================
+!jhb       Real*4 'Total Irrigated Acreage ' - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
      &    'ACRE      '
-Cjhb=&=====6============================================================
-Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
+!jhb=&=====6============================================================
+!jhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
      &    'ACRE      '
-Cjhb=&=====7============================================================
-Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
+!jhb=&=====7============================================================
+!jhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
      &    'Analysis Method         ',1,
      &    '          '
-Cjhb=&=====8============================================================
-Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
+!jhb=&=====8============================================================
+!jhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
      &    'ACFT      '
-Cjhb=&=====9============================================================
-Cjhb       Real*4 Effective Precip, effppt(i,m,l)
+!jhb=&=====9============================================================
+!jhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
      &    'ACFT      '
-Cjhb=&=====10===========================================================
-Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
+!jhb=&=====10===========================================================
+!jhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
      &    'ACFT      '
-Cjhb=&=====11===========================================================
-Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
+!jhb=&=====11===========================================================
+!jhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
      &    'ACFT      '
-Cjhb=&=====12===========================================================
-Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
+!jhb=&=====12===========================================================
+!jhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
      &    'ACFT      '
-Cjhb=&=====13===========================================================
-Cjhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
+!jhb=&=====13===========================================================
+!jhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion         ',1,
      &    'ACFT      '
-Cjhb=&=====14===========================================================
-Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
+!jhb=&=====14===========================================================
+!jhb       Real*4 River Diversion Acct. - conveyance Efficiency, ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
      &    'PERCENT   '
-Cjhb=&=====15===========================================================
-Cjhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
+!jhb=&=====15===========================================================
+!jhb       Real*4 River Diversion Acct. - conveyance Efficiency, closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
      &    'ACFT      '
-Cjhb=&=====16===========================================================
-Cjhb       Real*4 River Diversion Acct. - Farm Headgate Diversion, fdiv(m,l)
+!jhb=&=====16===========================================================
+!jhb       Real*4 River Diversion Acct. - Farm Headgate Diversion, fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
      &    'ACFT      '
-Cjhb=&=====17===========================================================
-Cjhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
+!jhb=&=====17===========================================================
+!jhb       Real*4 Tail water, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
      &    'ACFT      '
-Cjhb=&=====18===========================================================
-Cjhb       Real*4 River Diversion Acct. - 'Farm Deliver to Recharge', arech(m,l)
+!jhb=&=====18===========================================================
+!jhb       Real*4 River Diversion Acct. - 'Farm Deliver to Recharge', arech(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Recharge          ',0,
      &    'ACFT      '
-Cjhb=&=====19===========================================================
-Cjhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
+!jhb=&=====19===========================================================
+!jhb       Real*4 River Diversion Acct. - Max Applic Effic, sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
      &    'PERCENT   '
-Cjhb=&=====20===========================================================
-Cjhb       Real*4 River Diversion Acct. - Destination: CU, crop_cut(m,l)
+!jhb=&=====20===========================================================
+!jhb       Real*4 River Diversion Acct. - Destination: CU, crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU                ',1,
      &    'ACFT      '
-Cjhb=&=====21===========================================================
-Cjhb       Real*4 River Diversion Acct. - Destination: Soil Zone, soil_cu(m,l)
+!jhb=&=====21===========================================================
+!jhb       Real*4 River Diversion Acct. - Destination: Soil Zone, soil_cu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil              ',1,
      &    'ACFT      '
-Cjhb=&=====22===========================================================
-Cjhb       Real*4 River Diversion Acct. - Destination: Non-Consumed, ulagt(m,l)
+!jhb=&=====22===========================================================
+!jhb       Real*4 River Diversion Acct. - Destination: Non-Consumed, ulagt(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed         ',1,
      &    'ACFT      '
-Cjhb=&=====23===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
+!jhb=&=====23===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
      &    'PERCENT   '
-Cjhb=&=====24===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
+!jhb=&=====24===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
      &    'PERCENT   '
-Cjhb=&=====25===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
+!jhb=&=====25===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Diversion            ',0,
      &    'ACFT      '
-Cjhb=&=====26===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
+!jhb=&=====26===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc GW Application Eff ',0,
      &    'PERCENT   '
-Cjhb=&=====27===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
+!jhb=&=====27===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW CU                   ',0,
      &    'ACFT      '
-Cjhb=&=====28===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'GW - Non-Consumed       ', gwro(m,l)
+!jhb=&=====28===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'GW - Non-Consumed       ', gwro(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW_Non-Consumed         ',0,
      &    'ACFT      '
-Cjhb=&=====29===========================================================
-Cjhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
+!jhb=&=====29===========================================================
+!jhb       Real*4 EOM Soil Moisture Contents - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content         ',1,
      &    'ACFT      '
-Cjhb=&=====30===========================================================
-Cjhb       Real*4 Estimated Crop CU - From SW/GW Diversion, cutot, ***REPORT***
+!jhb=&=====30===========================================================
+!jhb       Real*4 Estimated Crop CU - From SW/GW Diversion, cutot, ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW and GW  ',1,
      &    'ACFT      '
-Cjhb=&=====31===========================================================
-Cjhb       Real*4 Estimated Crop CU - From Soil Moisture, cropcusoil(m,l), ***REPORT***
+!jhb=&=====31===========================================================
+!jhb       Real*4 Estimated Crop CU - From Soil Moisture, cropcusoil(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
      &    'ACFT      '
-Cjhb=&=====32===========================================================
-Cjhb       Real*4 Estimated Crop CU - Total, custot(i,m,l), ***REPORT***
+!jhb=&=====32===========================================================
+!jhb       Real*4 Estimated Crop CU - Total, custot(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
      &    'ACFT      '
-Cjhb=&=====33===========================================================
-Cjhb       Real*4 Total Month Non-Consumed, tdp(m,l), ***REPORT***
+!jhb=&=====33===========================================================
+!jhb       Real*4 Total Month Non-Consumed, tdp(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW & GW Non_Consumed    ',1,
      &    'ACFT      '
-Cjhb=&=====34===========================================================
-Cjhb       Real*4 Calculated CU shortage, SHORTAGE
-Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
+!jhb=&=====34===========================================================
+!jhb       Real*4 Calculated CU shortage, SHORTAGE
+!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
      &    'ACFT      '
-Cjhb=&==================================================================
-Cjhb       Total record size = 3*4+3+4+4+10+27*4 = 137 bytes
-Cjhb=&==================================================================
-Cjhb
-Cjhb=&==================================================================
-Cjhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=4 and IFLOOD=0
-Cjhb       Note: assumes these arrays are already populated, so output them now...
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Total record size = 3*4+3+4+4+10+27*4 = 137 bytes
+!jhb=&==================================================================
+!jhb
+!jhb=&==================================================================
+!jhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=4 and IFLOOD=0
+!jhb       Note: assumes these arrays are already populated, so output them now...
+!jhb=&==================================================================
             DO I=1,NBASIN
               CHAR12_1=BAS_ID(I)(1:12)
               CHAR12_2=BAS_ID(I)(13:24)
               WRITE(UNIT=IBD1UN)I,CHAR12_1,CHAR12_2
-Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
+!jhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             END DO
            if(sboutput) then
             DO I=0,SBCOUNT
@@ -2398,9 +2402,9 @@ Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             CHAR12_2=BNAME
             WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
            endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
            ELSE !IFLOOD .NE. 0
-Cjhb=&==================================================================
+!jhb=&==================================================================
            IBD1TSA=12 !# time steps per year
            IBD1TS=IBD1TSA*NYRS !total # time steps
            IBD1NF=36+IFLOOD2 !number output values per timestep per structure
@@ -2412,237 +2416,237 @@ Cjhb=&==================================================================
            WRITE(UNIT=IBD1UN)NBASIN,
      &                       IBD1TS,IBD1NSF,IBD1NF,IBD1TSA
            endif
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=4 and IFLOOD<>0
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Here are the IBD1NSF (3) values on the STRUCTURE records for ISUPLY=4 and IFLOOD<>0
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    'Structure Index                                             '
-Cjhb=&=====2============================================================
-Cjhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
+!jhb=&=====2============================================================
+!jhb       Char*12 Structure ID string, BAS_ID(L)(1:12) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure ID            ',1,
      &    'Structure ID                                                '
-Cjhb=&=====3============================================================
-Cjhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
+!jhb=&=====3============================================================
+!jhb       Char*12 Structure ID name, BAS_ID(L)(13:24) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',12,
      &    'Structure Name          ',1,
      &    'Structure Name                                              '
-Cjhb=&==================================================================
-Cjhb       Total record size = 4+12+12 = 28 bytes
-Cjhb=&==================================================================
-Cjhb=&==================================================================
-Cjhb       Here are the IBD1NF (33+IFLOOD2+1) values on the time series records for ISUPLY=4 and IFLOOD<>0
-Cjhb=======1============================================================
-Cjhb       Integer Structure Index, I
+!jhb=&==================================================================
+!jhb       Total record size = 4+12+12 = 28 bytes
+!jhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Here are the IBD1NF (33+IFLOOD2+1) values on the time series records for ISUPLY=4 and IFLOOD<>0
+!jhb=======1============================================================
+!jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Structure Index         ',0,
      &    '          '
-Cjhb=&=====2============================================================
-Cjhb       Integer Year, NYR1+M-1
+!jhb=&=====2============================================================
+!jhb       Integer Year, NYR1+M-1
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Year                    ',0,
      &    '          '
-Cjhb=&=====3============================================================
-Cjhb       Integer Month Index, L
+!jhb=&=====3============================================================
+!jhb       Integer Month Index, L
            WRITE(UNIT=IBD1UN)'I',4,
      &    'Month Index             ',0,
      &    '          '
-Cjhb=&=====4============================================================
-Cjhb       Char*3 abbr month string, AMN(L) ***REPORT***
+!jhb=&=====4============================================================
+!jhb       Char*3 abbr month string, AMN(L) ***REPORT***
            WRITE(UNIT=IBD1UN)'C',3,
      &    'Month Name              ',1,
      &    '          '
-Cjhb=&=====5============================================================
-Cjhb       Real*4 'Total Irrigated Acreage ' - t_area(i,m)
+!jhb=&=====5============================================================
+!jhb       Real*4 'Total Irrigated Acreage ' - t_area(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Irrigated Acreage ',1,
      &    'ACRE      '
-Cjhb=&=====6============================================================
-Cjhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
+!jhb=&=====6============================================================
+!jhb       Real*4 Modeled Crop Acreage - m_area(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Modeled Irrig Acreage   ',0,
      &    'ACRE      '
-Cjhb=&=====7============================================================
-Cjhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
+!jhb=&=====7============================================================
+!jhb       Char*10 Analysis method - "Calculated" vs. "Prorated" - METHOD
            WRITE(UNIT=IBD1UN)'C',10,
      &    'Analysis Method         ',1,
      &    '          '
-Cjhb=&=====8============================================================
-Cjhb       Real*4 Potential Crop ET  , ettot(i,m,l)
+!jhb=&=====8============================================================
+!jhb       Real*4 Potential Crop ET  , ettot(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Potential Crop ET       ',1,
      &    'ACFT      '
-Cjhb=&=====9============================================================
-Cjhb       Real*4 Effective Precip, effppt(i,m,l)
+!jhb=&=====9============================================================
+!jhb       Real*4 Effective Precip, effppt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Effective Precip        ',1,
      &    'ACFT      '
-Cjhb=&=====10===========================================================
-Cjhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
+!jhb=&=====10===========================================================
+!jhb       Real*4 Irrigation Water Requirement IWR, reqt(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Irrigation Water Reqt   ',1,
      &    'ACFT      '
-Cjhb=&=====11===========================================================
-Cjhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
+!jhb=&=====11===========================================================
+!jhb       Real*4 EOM Winter Precip Carryover, wbu(i,m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Wint Prec Soil Content  ',1,
      &    'ACFT      '
-Cjhb=&=====12===========================================================
-Cjhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
+!jhb=&=====12===========================================================
+!jhb       Real*4 IWR After Winter Precip, reqreqts(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'IWR After Winter Precip ',1,
      &    'ACFT      '
-Cjhb=&=====13===========================================================
-Cjhb       Real*4 River Diversion Acct - River Diversion         , ddhmonot(m,l), ***REPORT***
+!jhb=&=====13===========================================================
+!jhb       Real*4 River Diversion Acct - River Diversion         , ddhmonot(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'River Diversion         ',1,
      &    'ACFT      '
-Cjhb=&=====14===========================================================
-Cjhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
+!jhb=&=====14===========================================================
+!jhb       Real*4 River Diversion Acct. - Conveyance Efficiency   , ceff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Efficiency   ',0,
      &    'PERCENT   '
-Cjhb=&=====15===========================================================
-Cjhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
+!jhb=&=====15===========================================================
+!jhb       Real*4 River Diversion Acct. - Conveyance Loss         , closs(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Conveyance Loss         ',0,
      &    'ACFT      '
-Cjhb=&=====16===========================================================
-Cjhb       Real*4 River Diversion Acct. - 'Farm Headgate Delivery  ', fdiv(m,l)
+!jhb=&=====16===========================================================
+!jhb       Real*4 River Diversion Acct. - 'Farm Headgate Delivery  ', fdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Farm Headgate Delivery  ',0,
      &    'ACFT      '
-Cjhb=&=====17===========================================================
-Cjhb       Real*4 Supply_Tail Water_Drains, tail(i,m,l), ***REPORT***
+!jhb=&=====17===========================================================
+!jhb       Real*4 Supply_Tail Water_Drains, tail(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Supply_Tail Water_Drains',1,
      &    'ACFT      '
-Cjhb=&=====18===========================================================
-Cjhb       Real*4 River Diversion Acct. - 'Farm Deliver to Recharge', arech(m,l)
+!jhb=&=====18===========================================================
+!jhb       Real*4 River Diversion Acct. - 'Farm Deliver to Recharge', arech(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Recharge          ',0,
      &    'ACFT      '
-Cjhb=&=====19===========================================================
-Cjhb       Real*4 River Diversion Acct. - 'Max Application Effic   ', sfeff(i,m)
+!jhb=&=====19===========================================================
+!jhb       Real*4 River Diversion Acct. - 'Max Application Effic   ', sfeff(i,m)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Max Application Effic   ',0,
      &    'PERCENT   '
-Cjhb=&=====20===========================================================
-Cjhb       Real*4 River Diversion Acct. - SW to CU         , crop_cut(m,l)
+!jhb=&=====20===========================================================
+!jhb       Real*4 River Diversion Acct. - SW to CU         , crop_cut(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to CU                ',1,
      &    'ACFT      '
-Cjhb=&=====21===========================================================
-Cjhb       Real*4 River Diversion Acct. - SW to Soil              , soil_cu(m,l)
+!jhb=&=====21===========================================================
+!jhb       Real*4 River Diversion Acct. - SW to Soil              , soil_cu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW to Soil              ',1,
      &    'ACFT      '
-Cjhb=&=====22===========================================================
-Cjhb       Real*4 River Diversion Acct. - 'SW_Non_Consumed         ', ulagt(m,l)
+!jhb=&=====22===========================================================
+!jhb       Real*4 River Diversion Acct. - 'SW_Non_Consumed         ', ulagt(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW_Non_Consumed         ',1,
      &    'ACFT      '
-Cjhb=&=====23===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
+!jhb=&=====23===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc Surface Water Applic Effic (%), effcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW Applic Effic    ',0,
      &    'PERCENT   '
-Cjhb=&=====24===========================================================
-Cjhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
+!jhb=&=====24===========================================================
+!jhb       Real*4 River Diversion Acct. - Calc SW System Effic    , seffcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc SW System Effic    ',1,
      &    'PERCENT   '
-Cjhb=&=====25===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
+!jhb=&=====25===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'GW Diversion            ', gdiv(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Diversion            ',0,
      &    'ACFT      '
-Cjhb=&=====26===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
+!jhb=&=====26===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'Calc GW Application Eff ', effgw(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Calc GW Application Eff ',0,
      &    'PERCENT   '
-Cjhb=&=====27===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
+!jhb=&=====27===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW CU                   ',0,
      &    'ACFT      '
-Cjhb=&=====28===========================================================
-Cjhb       Real*4 GW Diversion Acct. - 'GW - Non-Consumed       ', gwro(m,l)
+!jhb=&=====28===========================================================
+!jhb       Real*4 GW Diversion Acct. - 'GW - Non-Consumed       ', gwro(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW_Non-Consumed         ',0,
      &    'ACFT      '
-Cjhb=&=====29===========================================================
-Cjhb       Real*4 EOM SW Soil Content - Total, soiltott(m,l), ***REPORT***
+!jhb=&=====29===========================================================
+!jhb       Real*4 EOM SW Soil Content - Total, soiltott(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW Soil Content         ',1,
      &    'ACFT      '
-Cjhb=&=====30===========================================================
-Cjhb       Real*4 Estimated Crop CU - From SW/GW Diversion, cutot, ***REPORT***
+!jhb=&=====30===========================================================
+!jhb       Real*4 Estimated Crop CU - From SW/GW Diversion, cutot, ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from SW and GW  ',1,
      &    'ACFT      '
-Cjhb=&=====31===========================================================
-Cjhb       Real*4 Estimated Crop CU - From Soil Moisture, cropcusoil(m,l), ***REPORT***
+!jhb=&=====31===========================================================
+!jhb       Real*4 Estimated Crop CU - From Soil Moisture, cropcusoil(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Crop CU from Soil       ',1,
      &    'ACFT      '
-Cjhb=&=====32===========================================================
-Cjhb       Real*4 Estimated Crop CU - Total, custot(i,m,l), ***REPORT***
+!jhb=&=====32===========================================================
+!jhb       Real*4 Estimated Crop CU - Total, custot(i,m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'Total Crop CU           ',1,
      &    'ACFT      '
-Cjhb=&=====33===========================================================
-Cjhb       Real*4 Total Month Non-Consumed, tdp(m,l), ***REPORT***
+!jhb=&=====33===========================================================
+!jhb       Real*4 Total Month Non-Consumed, tdp(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'SW & GW Non_Consumed    ',1,
      &    'ACFT      '
-Cjhb=&=====34===========================================================
-Cjhb       Real*4 Calculated CU shortage, SHORTAGE
-Cjhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
+!jhb=&=====34===========================================================
+!jhb       Real*4 Calculated CU shortage, SHORTAGE
+!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
      &    'ACFT      '
-Cjhb=&=====35===========================================================
-Cjhb       Real*4 GW div to Sprinkler, gsdiv(m,l), ***REPORT***
+!jhb=&=====35===========================================================
+!jhb       Real*4 GW div to Sprinkler, gsdiv(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Applied by Sprinklers',1,
      &    'ACFT      '
-Cjhb=&=====36===========================================================
-Cjhb       Real*4 GW div to Flood, gfdiv(m,l), ***REPORT***
+!jhb=&=====36===========================================================
+!jhb       Real*4 GW div to Flood, gfdiv(m,l), ***REPORT***
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Applied by Flood Irr ',1,
      &    'ACFT      '
-Cjhb=&=====37-??========================================================
+!jhb=&=====37-??========================================================
            DO I=1,IFLOOD
            CHTMP1=subname(i) // ' IWR               '
            CHTMP1=CHTMP1 // REPEAT(' ',24-LEN(CHTMP1))
-Cjhb       Real*4 Grass Pasture IWR, grass(i,m,l,ifx)
+!jhb       Real*4 Grass Pasture IWR, grass(i,m,l,ifx)
            WRITE(UNIT=IBD1UN)'R',4,
      &     CHTMP1,0,
      &    'ACFT      '
            CHTMP1=subname(i) // ' Acreage            '
            CHTMP1=CHTMP1//REPEAT(' ',24-LEN(CHTMP1))
-Cjhb       Real*4 Grass Pasture IWR, grass(i,m,l,ifx)
+!jhb       Real*4 Grass Pasture IWR, grass(i,m,l,ifx)
            WRITE(UNIT=IBD1UN)'R',4,
      &     CHTMP1,0,
      &    'ACFT      '
            END DO
-Cjhb=&==================================================================
-Cjhb       Total record size = 3*4+3+4+4+10+29*4+IFLOOD2*4 = ?? bytes
-Cjhb=&==================================================================
-Cjhb
-Cjhb=&==================================================================
-Cjhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=4 and IFLOOD<>0
-Cjhb       Note: assumes these arrays are already populated, so output them now...
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb       Total record size = 3*4+3+4+4+10+29*4+IFLOOD2*4 = ?? bytes
+!jhb=&==================================================================
+!jhb
+!jhb=&==================================================================
+!jhb       Now write the NSTR (NBASIN) structure data records for ISUPLY=4 and IFLOOD<>0
+!jhb       Note: assumes these arrays are already populated, so output them now...
+!jhb=&==================================================================
             DO I=1,NBASIN
               CHAR12_1=BAS_ID(I)(1:12)
               CHAR12_2=BAS_ID(I)(13:24)
               WRITE(UNIT=IBD1UN)I,CHAR12_1,CHAR12_2
-Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
+!jhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             END DO
            if(sboutput) then
             DO I=0,SBCOUNT
@@ -2654,31 +2658,31 @@ Cjhb          WRITE(*,*)I,CHAR12_1,CHAR12_2
             CHAR12_2=BNAME
             WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
            endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
            ENDIF !IFLOOD .EQ. 0
          ELSE !ISUPLY .NE. 1,2,3,4
             WRITE(*,*)'SHOULD NEVER GET HERE!!!!!!!!!'
          ENDIF !ISUPLY .EQ. 1,2,3,4
       ENDIF ! (LBD1OUT)
-Cjhb=&==================================================================
-c grb 4-20-00 Assign temp1 and temp2 as file names for use in temporary creation of DWB files
-c     Open and close temp2 to avoid error if no aggregates are in data set - next 3 lines
-Cjhb=&==================================================================
+!jhb=&==================================================================
+! grb 4-20-00 Assign temp1 and temp2 as file names for use in temporary creation of DWB files
+!     Open and close temp2 to avoid error if no aggregates are in data set - next 3 lines
+!jhb=&==================================================================
       OPEN (UNIT=256,FILE="temp2",STATUS='Unknown',IOSTAT=IERR)
       Close (256)
       OPEN (UNIT=256,FILE="temp1",STATUS='Unknown',IOSTAT=IERR)
       thefile2 = dfile
       thefile2(fn_len:fn_len+4)= '.swb'
       OPEN (UNIT=800,FILE=thefile2,STATUS='Unknown')
-Cjhb=&==================================================================
-Cjhb  open the 4 land category output file if necessary
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  open the 4 land category output file if necessary
+!jhb=&==================================================================
       if((trim(s4catid).ne."").and.(ipresim.ne.1))then
         thefile2 = dfile
         thefile2(fn_len:fn_len+4)= '.4wb'
         OPEN (UNIT=413,FILE=thefile2,STATUS='Unknown')
 
-c jhb add header lines to 4WB output file
+! jhb add header lines to 4WB output file
         write(413,1108)vers, rdate
 1108    FORMAT('StateCU Version ', f5.2,2x,a16)
         write(413,1109)dfile
@@ -2692,15 +2696,15 @@ c jhb add header lines to 4WB output file
         write(413,'(A120)')TITLE(3)
         write(413,*)
         write(413,*)"Four Land Category Report for Structure ",s4catid
-c     1111X2223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000"
-c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-c         |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |      SW River Diversion       |       SW River Delivery       |  Tail |                                  SW Farm Headgate Delivery                    |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  |Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |
-c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-c         |   |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | Total |SW Only|SW Only|SW & GW|SW & GW|  re-  | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | junior| other | other | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total |SW & GW|SW & GW| Total |  Max  |SW & GW|SW & GW| Total |SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |
-c         |   |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr| charge|       | sw div| sw div| sw div|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       | by sr | by sr | by jr |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |  Flood|Sprnklr|       |  Rate |  Flood|Sprnklr|       |  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |
-c     Year|Mon|(Acres)|(Acres)|(Acres)|(Acres)|(Acres)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|
-c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-Cjhb=&==================================================================
+!     1111X2223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000"
+!     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
+!         |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |      SW River Diversion       |       SW River Delivery       |  Tail |                                  SW Farm Headgate Delivery                    |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  |Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |
+!     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
+!         |   |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | Total |SW Only|SW Only|SW & GW|SW & GW|  re-  | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | junior| other | other | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total |SW & GW|SW & GW| Total |  Max  |SW & GW|SW & GW| Total |SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |
+!         |   |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr| charge|       | sw div| sw div| sw div|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       | by sr | by sr | by jr |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |  Flood|Sprnklr|       |  Rate |  Flood|Sprnklr|       |  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |
+!     Year|Mon|(Acres)|(Acres)|(Acres)|(Acres)|(Acres)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|
+!     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
+!jhb=&==================================================================
         write(413,'(a801)')
      &"----|---|---------------------------------------|----------------
      &-----------------------|---------------------------------------|--
@@ -2800,9 +2804,9 @@ Cjhb=&==================================================================
      &-----------------------------------|------------------------------
      &---------|"
       endif
-Cjhb=&==================================================================
-c     open efficiency output files for StateMod
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!     open efficiency output files for StateMod
+!jhb=&==================================================================
       if(ddcsw .eq. 1) then
         thefile3 = dfile
         thefile3(fn_len:fn_len+4)= '.def'
@@ -2815,9 +2819,9 @@ Cjhb=&==================================================================
            write(6,661) '*.wef:      Well'
         endif
       endif
-Cjhb=&==================================================================
-c Initialize data for project summaries
-Cjhb=&==================================================================
+!jhb=&==================================================================
+! Initialize data for project summaries
+!jhb=&==================================================================
       nyrs1=nyrs+1
       nyrs2=nyrs+2
       DO K=1,15
@@ -2827,9 +2831,9 @@ Cjhb=&==================================================================
         numat(m)=0.
         acret(m)=0.
         tsfeff(m)=0.
-C       ==================================================================
-c       reset the area arrays - in case this routine is called twice (soil moisture presimulation)
-C       ==================================================================
+!       ==================================================================
+!       reset the area arrays - in case this routine is called twice (soil moisture presimulation)
+!       ==================================================================
         do j=1,12
           btarea(m,j)=0.
           bmarea(m,j)=0.
@@ -2845,7 +2849,7 @@ C       ==================================================================
             sbmarea(j,m,k)=0.
           enddo
         enddo
-C       ==================================================================
+!       ==================================================================
         do j=1,14
           treq(m,j)=0
           treqt(m,j)=0
@@ -2903,14 +2907,14 @@ C       ==================================================================
           tcloss(m,j)=0
           do jj=1,100
             idcnt(jj,m,j) = 0
-c grb 4-28-00 initialize swmet variable
+! grb 4-28-00 initialize swmet variable
             swmet(jj,m,j)=0.0
           enddo
         enddo
       enddo
-Cjhb=&==================================================================
-Cjhb  allows multiple flood irrigated crops...
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  allows multiple flood irrigated crops...
+!jhb=&==================================================================
       if(iflood .ge. 1) then
         open(104,FILE="gtemp")
         do 444 i=1,nbasin
@@ -2926,58 +2930,58 @@ Cjhb=&==================================================================
             enddo
 444     continue
       endif
-c     if this is a soil moisture presimulation, will need to keep this file (gtemp) around for a second pass
+!     if this is a soil moisture presimulation, will need to keep this file (gtemp) around for a second pass
       if(ipresim.eq.1)then
         close(104,status='KEEP')
       else
         close(104,status='DELETE')
       endif
-c
-c
-Cjhb=&==================================================================
-Cjhb  initialize a flag to track whether this is the first or second time through this code
-Cjhb  (first time through determines values to use as average values for missing data)
-Cjhb  itime is count of an internal loop
-Cjhb=&==================================================================
-Cjhb  note: the ipresim variable is for soil moisture initialization - determines whether
-Cjhb  this is first or second call of wsupsum - wsupsum is called twice from statecu.for if ism=2 in the ccu
-Cjhb  this is one way to initialize the sm: run entire wsupsum water supply accounting routine,
-Cjhb  take ending sm and use it as initial sm, then run entire wsupsum water supply accounting routine again
-Cjhb=&==================================================================
+!
+!
+!jhb=&==================================================================
+!jhb  initialize a flag to track whether this is the first or second time through this code
+!jhb  (first time through determines values to use as average values for missing data)
+!jhb  itime is count of an internal loop
+!jhb=&==================================================================
+!jhb  note: the ipresim variable is for soil moisture initialization - determines whether
+!jhb  this is first or second call of wsupsum - wsupsum is called twice from statecu.for if ism=2 in the ccu
+!jhb  this is one way to initialize the sm: run entire wsupsum water supply accounting routine,
+!jhb  take ending sm and use it as initial sm, then run entire wsupsum water supply accounting routine again
+!jhb=&==================================================================
       itime=1 !first time through this code (this is for missing data fill, NOT for ipresim!!!)
-Cjhb=&==================================================================
-Cjhb  jhb/emw Feb 17, 2011
-Cjhb  might have jumped back here after setting itime=2
-Cjhb  now handle the isuply 2,3 cases - water rights - call slimit again
-Cjhb  to re-prorate sr, jr, other
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  jhb/emw Feb 17, 2011
+!jhb  might have jumped back here after setting itime=2
+!jhb  now handle the isuply 2,3 cases - water rights - call slimit again
+!jhb  to re-prorate sr, jr, other
+!jhb=&==================================================================
 45    if (itime.eq.2.and.(isuply.eq.2.or.isuply.eq.3)) then
         eyetime=2
         call slimit
         eyetime=0
       endif
-c     begin nbasin loop (structure loop)
-Cjhb=&==================================================================
+!     begin nbasin loop (structure loop)
+!jhb=&==================================================================
       do 578 i=1,nbasin
-Cjhb=&==================================================================
+!jhb=&==================================================================
         id=99
-c       grb 5-20-00 define aggregate and missing data structures up front in 1st pass for explicit structures
+!       grb 5-20-00 define aggregate and missing data structures up front in 1st pass for explicit structures
         twdid=bas_id(i)
-c       add error and reset of id if no numerical value in first two characters (i.e. old gunnison runs)
+!       add error and reset of id if no numerical value in first two characters (i.e. old gunnison runs)
         read(twdid(1:2),'(i2)',err=4490) ID
  4490   if (id.eq.0) id=99
-c       ----------------------------------------------------------------  
-c       grb 09-10-00 skip reset of flag if presim already performed 
-c       ----------------------------------------------------------------
-c        if (ipresim.eq.2) goto 452
-c       ----------------------------------------------------------------  
-c       first time through wsupsum - initialize missing data flag arrays to 0
-c         missflg1(i) - any missing data for structure i, ANY year
-c         missflag(i,m1) - any missing data for structure i in year m1
-c         added by jhb:
-c         missiwr(i,m1) - missing iwr data for structure i in year m1
-c         missdiv(i,m1) - missing div data for structure i in year m1 (monthly - divsup() from DDH file)
-c       ----------------------------------------------------------------  
+!       ----------------------------------------------------------------  
+!       grb 09-10-00 skip reset of flag if presim already performed 
+!       ----------------------------------------------------------------
+!        if (ipresim.eq.2) goto 452
+!       ----------------------------------------------------------------  
+!       first time through wsupsum - initialize missing data flag arrays to 0
+!         missflg1(i) - any missing data for structure i, ANY year
+!         missflag(i,m1) - any missing data for structure i in year m1
+!         added by jhb:
+!         missiwr(i,m1) - missing iwr data for structure i in year m1
+!         missdiv(i,m1) - missing div data for structure i in year m1 (monthly - divsup() from DDH file)
+!       ----------------------------------------------------------------  
         if (itime.eq.1) then
           missflg1(i)=0 
           do m1=1,nyrs
@@ -2985,62 +2989,62 @@ c       ----------------------------------------------------------------
             missiwr(i,m1)=0
             missdiv(i,m1)=0
           enddo
-Cjhb=&==================================================================
-C     removed iagg and use imiss to prorate aggr data
-C      (i.e. set aggr diversion to -999 externally to get it prorated)
-Cjhb=&==================================================================
-C            if(twdid(4:5) .eq. 'AD' .or. twdid(3:4) .eq. 'AD') then
-C               if(iagg .eq. 1) then
-C                 do 450 m1=1,nyrs
-C 450             missflag(i,m1)=1
-C                 missflg1(i)=1
-C               else
-C                 do 448 m1=1,nyrs
-C                 do 448,j1=1,12
-C                  if(divsup(i,m1,j1).lt. -998 .or.
-C     &             reqt(i,m1,j1) .lt. -998) then
-C                     missflag(i,m1)=1
-C                    missflg1(i)=1
-C                  endif
-C 448            continue
-C               endif
-C            else
-Cjhb=&==================================================================
-c         --------------------------------------------------------------
-c         check for missing data - structure and structure/year flags are
-c         set to 1 (true) if EITHER irrigation water requirement (IWR) or
-c         diversion data is -999 (missing data value) in any month of the year
-c         --------------------------------------------------------------
+!jhb=&==================================================================
+!     removed iagg and use imiss to prorate aggr data
+!      (i.e. set aggr diversion to -999 externally to get it prorated)
+!jhb=&==================================================================
+!            if(twdid(4:5) .eq. 'AD' .or. twdid(3:4) .eq. 'AD') then
+!               if(iagg .eq. 1) then
+!                 do 450 m1=1,nyrs
+! 450             missflag(i,m1)=1
+!                 missflg1(i)=1
+!               else
+!                 do 448 m1=1,nyrs
+!                 do 448,j1=1,12
+!                  if(divsup(i,m1,j1).lt. -998 .or.
+!     &             reqt(i,m1,j1) .lt. -998) then
+!                     missflag(i,m1)=1
+!                    missflg1(i)=1
+!                  endif
+! 448            continue
+!               endif
+!            else
+!jhb=&==================================================================
+!         --------------------------------------------------------------
+!         check for missing data - structure and structure/year flags are
+!         set to 1 (true) if EITHER irrigation water requirement (IWR) or
+!         diversion data is -999 (missing data value) in any month of the year
+!         --------------------------------------------------------------
           do m1=1,nyrs
             do j1=1,12
               if(reqt(i,m1,j1) .lt. -998.) then
-c               there is no IWR              
+!               there is no IWR              
                 missflag(i,m1)=1
                 missflg1(i)=1
                 missiwr(i,m1)=1
               endif
               if(divsup(i,m1,j1).lt. -998.) then
-c               there are missing diversions
+!               there are missing diversions
                 missflag(i,m1)=1
                 missflg1(i)=1
                 missdiv(i,m1)=1
               endif
             enddo
           enddo
-C          endif
-c         --------------------------------------------------------------
-c         reset all monthly diversion data for structure i and year m1
-c         to -999 (missing data value) if the missing data flag is true for that year
-c         --------------------------------------------------------------
+!          endif
+!         --------------------------------------------------------------
+!         reset all monthly diversion data for structure i and year m1
+!         to -999 (missing data value) if the missing data flag is true for that year
+!         --------------------------------------------------------------
           do m1=1,nyrs
             if(missflag(i,m1) .eq. 1) then
               do j1=1,12
                 divsup(i,m1,j1) = -999.
               enddo
             endif
-c           --------------------------------------------------------
-c           calculate the total and modeled areas for the structures, basin and sub basins
-c           --------------------------------------------------------
+!           --------------------------------------------------------
+!           calculate the total and modeled areas for the structures, basin and sub basins
+!           --------------------------------------------------------
             do j1=1,12
               sbtarea(sbsb(i),m1,j1)=sbtarea(sbsb(i),m1,j1)+t_area(i,m1)
               btarea(m1,j1)=btarea(m1,j1)+t_area(i,m1)
@@ -3058,26 +3062,26 @@ c           --------------------------------------------------------
                 bmarea(m1,j1)=bmarea(m1,j1)+t_area(i,m1)
               enddo
             endif
-c           --------------------------------------------------------
+!           --------------------------------------------------------
           enddo
         endif
-c       ----------------------------------------------------------------  
+!       ----------------------------------------------------------------  
 452     continue
-Cjhb=&==================================================================
-Cjhb=&  note this has changed from original comments:
-Cjhb=&  skip the rest of the structure loop (year loop, month loop, etc) on first pass
-Cjhb=&      if structure i is flagged for missing data, missflg(i)=1
-Cjhb=&  skip the rest of the structure loop (year loop, month loop, etc) on second pass if structure has data (i.e.
-Cjhb=&      structure i is not flagged for missing data, missflg(i)=0)
-Cjhb=&==================================================================
-c       grb 05-20-00 skip processing if first pass and
-c          1) iagg= 1, will fill entire period of record
-c          2) imiss2=1 and need to fill that year
-c       skip processing on 2nd pass if no missing data
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&  note this has changed from original comments:
+!jhb=&  skip the rest of the structure loop (year loop, month loop, etc) on first pass
+!jhb=&      if structure i is flagged for missing data, missflg(i)=1
+!jhb=&  skip the rest of the structure loop (year loop, month loop, etc) on second pass if structure has data (i.e.
+!jhb=&      structure i is not flagged for missing data, missflg(i)=0)
+!jhb=&==================================================================
+!       grb 05-20-00 skip processing if first pass and
+!          1) iagg= 1, will fill entire period of record
+!          2) imiss2=1 and need to fill that year
+!       skip processing on 2nd pass if no missing data
+!jhb=&==================================================================
         if(itime .eq. 1 .and. missflg1(i) .eq. 1) goto 578
         if(itime .eq. 2 .and. missflg1(i) .eq. 0) goto 578
-Cjhb=&==================================================================
+!jhb=&==================================================================
         iyct=0
         iyct2=0
         do 200 j=1,nyrs1
@@ -3137,7 +3141,7 @@ Cjhb=&==================================================================
             closs(j,k)=0
             ddhmonot(j,k)=0
             reqreqts(j,k)=0
-c           grb 5-20-00 initialize variable soil_cujout
+!           grb 5-20-00 initialize variable soil_cujout
             soil_cujout(j,k)=0
             soil_cuoout(j,k)=0
 100       continue
@@ -3171,11 +3175,11 @@ c           grb 5-20-00 initialize variable soil_cujout
         holdfo=0
         senaspt=senasp(i)
         junaspt=junasp(i)
-Cjhb=&==================================================================
-c       grb 5-20-00 move some sections of following code to determine missing structures up front
-c       determine if this structure has any annual positive diversions(sumit=1)
-c       set first month diversion to -999 if any missing data for that year
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!       grb 5-20-00 move some sections of following code to determine missing structures up front
+!       determine if this structure has any annual positive diversions(sumit=1)
+!       set first month diversion to -999 if any missing data for that year
+!jhb=&==================================================================
         do 150 m=1, nyrs
           do 20 j=1,nparce(i,m)+1
             if(j .eq. nparce(i,m)+1) then
@@ -3188,31 +3192,31 @@ Cjhb=&==================================================================
             endif
 20        continue
 150     continue
-Cjhb=&==================================================================
-c       begin year loop
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!       begin year loop
+!jhb=&==================================================================
         depfact=1.0
         do 400 m=1,nyrs
-Cjhb=&==================================================================
-c         ew 11/00 = if "maximize supply" option, do not account for
-c         soil moisture reservoir under sprinkler lands
-Cjhb=&==================================================================
-Cjhb=&    11/06 Modified soil moisture capacity code.
-Cjhb=&          Now that there is a new irrig land category (sw only sprinkler) to consider.
-Cjhb=&          The objective is to exclude the swgw spr acreage from the soil moisture capacity
-Cjhb=&          in a certain case: isuply=4 (gw) and gmode=1 ("max supply")
-Cjhb=&          Set spcapz to non-swgw-spr percentage of total soil moisture, scapatot(i,m)
-Cjhb=&==================================================================
-c         if(isuply .eq. 4 .and. gmode(i,m) .eq. 1) then
+!jhb=&==================================================================
+!         ew 11/00 = if "maximize supply" option, do not account for
+!         soil moisture reservoir under sprinkler lands
+!jhb=&==================================================================
+!jhb=&    11/06 Modified soil moisture capacity code.
+!jhb=&          Now that there is a new irrig land category (sw only sprinkler) to consider.
+!jhb=&          The objective is to exclude the swgw spr acreage from the soil moisture capacity
+!jhb=&          in a certain case: isuply=4 (gw) and gmode=1 ("max supply")
+!jhb=&          Set spcapz to non-swgw-spr percentage of total soil moisture, scapatot(i,m)
+!jhb=&==================================================================
+!         if(isuply .eq. 4 .and. gmode(i,m) .eq. 1) then
           select case (isuply)
             case (4)
               select case (gmode(i,m))
                 case (1)
-c                 if(gper(i,m).eq. 0 .or. sper(i,m) .eq. 0) then
-c                   spcapz=scapatot(i,m)
-c                 else
-c                   spcapz = scapatot(i,m)*gper(i,m)*sper(i,m)
-c                 endif
+!                 if(gper(i,m).eq. 0 .or. sper(i,m) .eq. 0) then
+!                   spcapz=scapatot(i,m)
+!                 else
+!                   spcapz = scapatot(i,m)*gper(i,m)*sper(i,m)
+!                 endif
                   if(swgwspac(i,m).gt.0.0)then
                     spcapz=scapatot(i,m)*(t_area(i,m)-swgwspac(i,m))
      &                     /t_area(i,m)
@@ -3222,39 +3226,39 @@ c                 endif
                 case default
                   spcapz=scapatot(i,m)
               end select
-c           else
+!           else
             case default
               spcapz=scapatot(i,m)
           end select
-c         endif
-Cjhb=&==================================================================
-Cjhb=&    initialize the current structure's soil moisture contents in year 1
-Cjhb=&      soiltots = senior soil moisture pool
-Cjhb=&      soiltotj = junior soil moisture pool
-Cjhb=&      soiltoto = other soil moisture pool
-Cjhb=&==================================================================
-c         if(m .eq. 1) then !year 1
+!         endif
+!jhb=&==================================================================
+!jhb=&    initialize the current structure's soil moisture contents in year 1
+!jhb=&      soiltots = senior soil moisture pool
+!jhb=&      soiltotj = junior soil moisture pool
+!jhb=&      soiltoto = other soil moisture pool
+!jhb=&==================================================================
+!         if(m .eq. 1) then !year 1
           select case (m)
             case (1) !year 1
-c             initialize soil moisture contents for this parcel
-c             grb 05-04-00 add logic to skip initiatlization if in presim mode
+!             initialize soil moisture contents for this parcel
+!             grb 05-04-00 add logic to skip initiatlization if in presim mode
               select case (ipresim)
                 case (1) !(ipresim)
-c                 if (ipresim.eq.1) then 
-C                 jhb| start soil moisture at 0 in year 1 of the first time
-C                 jhb| through when running twice (ism=2, ipresim=1)
+!                 if (ipresim.eq.1) then 
+!                 jhb| start soil moisture at 0 in year 1 of the first time
+!                 jhb| through when running twice (ism=2, ipresim=1)
                   soiltots=0
                   soiltotj=0
                   soiltoto=0
-c                 endif
-Cjhb=&==================================================================
-c               grb 05-04-00 add logic to initiatlize soil moisture from pre sim if in simulation mode with presim
+!                 endif
+!jhb=&==================================================================
+!               grb 05-04-00 add logic to initiatlize soil moisture from pre sim if in simulation mode with presim
                 case (2) !(ipresim)
-c                 if (ipresim.eq.2) then
-C                 jhb| set soil moisture in year 1 of the second time through to 
-C                 jhb| the ending soil contents of the first time through when
-C                 jhb| running twice (ism=2, ipresim=2)
-c                 grb 05-31-00 reduce initialization if ending contents exceed beginning capacity
+!                 if (ipresim.eq.2) then
+!                 jhb| set soil moisture in year 1 of the second time through to 
+!                 jhb| the ending soil contents of the first time through when
+!                 jhb| running twice (ism=2, ipresim=2)
+!                 grb 05-31-00 reduce initialization if ending contents exceed beginning capacity
                   if ((endsoils(i)+endsoilj(i)+endsoilo(i)).gt.spcapz)
      &            then
                     soilfac=spcapz/(endsoils(i)+endsoilj(i)+endsoilo(i))
@@ -3264,13 +3268,13 @@ c                 grb 05-31-00 reduce initialization if ending contents exceed b
                   soiltots=endsoils(i)*soilfac
                   soiltotj=endsoilj(i)*soilfac
                   soiltoto=endsoilo(i)*soilfac
-c                endif
-Cjhb=&==================================================================
+!                endif
+!jhb=&==================================================================
                 case (0) !(ipresim)
-c                 if (ipresim.eq.0) then
-c                 grb 4-30-00 make following lines execute for all supply options
-C                 jhb| set soil moisture to user entered percentage of soil capacity
-C                 jhb| when ism=1, ipresim=0
+!                 if (ipresim.eq.0) then
+!                 grb 4-30-00 make following lines execute for all supply options
+!                 jhb| set soil moisture to user entered percentage of soil capacity
+!                 jhb| when ism=1, ipresim=0
                   if(isuply .eq.1.or. isuply .eq. 4) then
                     pjunmo=0
                     pothmo=0
@@ -3278,23 +3282,23 @@ C                 jhb| when ism=1, ipresim=0
                   soiltots = spcapz*psenmo
                   soiltotj = spcapz*pjunmo
                   soiltoto = spcapz*pothmo
-c                 endif
+!                 endif
                 case default !(ipresim)
                   write(*,*)'invalid ipresim value, ',ipresim
                   stop
               end select ! (ipresim)
-Cjhb=&==================================================================
+!jhb=&==================================================================
               soiltot = soiltotj + soiltots +soiltoto
-c             remember initial soil capacities 
+!             remember initial soil capacities 
               senmo=soiltots
               junmo=soiltotj
               othmo=soiltoto
               totmo=soiltot
-Cjhb=&==================================================================
+!jhb=&==================================================================
             case default !(m) - years 2 to nyrs; Reduce current contents by reduction in acreage
-c             else   !years 2 to nyrs; Reduce current contents by reduction in acreage
-c             ew 5/24  changed ratio from t_area to scapatot because soil moisture
-c                    capacity not only function of area, but also max root depth
+!             else   !years 2 to nyrs; Reduce current contents by reduction in acreage
+!             ew 5/24  changed ratio from t_area to scapatot because soil moisture
+!                    capacity not only function of area, but also max root depth
               if(scapatot(i,m) .lt. scapatot(i,m-1)) then
                 iduct=scapatot(i,m)/scapatot(i,m-1)*100
                 write(comment(m),53) iduct
@@ -3307,29 +3311,29 @@ c                    capacity not only function of area, but also max root depth
                 soiltot= soiltotj + soiltots + soiltoto
               endif
           end select
-c         endif
-Cjhb=&==================================================================
-c         begin month loop
-Cjhb=&==================================================================
+!         endif
+!jhb=&==================================================================
+!         begin month loop
+!jhb=&==================================================================
           do 300 l=1,12
             if(missflag(i,m) .eq. 1) then
-Cjhb=&==================================================================
-Cjhb=&        this structure (i) and year (m) is flagged to have missing data
-Cjhb=&========original comments=========================================
-C             removed iagg and use imiss to prorate aggr data
-C             (i.e. set aggr diversion to -999 externally to get it prorated)
-C             if(twdid(4:5) .eq. 'AD' .or. twdid(3:4) .eq. 'AD') then
-C               if(iagg .eq. 1) goto 301
-C             endif
-Cjhb=&==================================================================
-Cjhb=&        if user specified to fill in missing data (imiss2=1) then jump to 301
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&        this structure (i) and year (m) is flagged to have missing data
+!jhb=&========original comments=========================================
+!             removed iagg and use imiss to prorate aggr data
+!             (i.e. set aggr diversion to -999 externally to get it prorated)
+!             if(twdid(4:5) .eq. 'AD' .or. twdid(3:4) .eq. 'AD') then
+!               if(iagg .eq. 1) goto 301
+!             endif
+!jhb=&==================================================================
+!jhb=&        if user specified to fill in missing data (imiss2=1) then jump to 301
+!jhb=&==================================================================
               if(imiss2 .eq. 1) goto 301
-Cjhb=&==================================================================
-Cjhb=&        else set all monthly values to -999, set soil moisture values
-Cjhb=&          as if there was no CU, and then jump to the end of the month
-Cjhb=&          loop (go to the next month)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&        else set all monthly values to -999, set soil moisture values
+!jhb=&          as if there was no CU, and then jump to the end of the month
+!jhb=&          loop (go to the next month)
+!jhb=&==================================================================
               iyear(m)=1
               effcu(m,l) = -999
               seffcu(m,l) = -999
@@ -3415,86 +3419,86 @@ Cjhb=&==================================================================
               depj(m,l)=-999
               depo(m,l)=-999
               dept(m,l)=-999
-c               grb 5--5-00 initialize soil_cujout
+!               grb 5--5-00 initialize soil_cujout
               soil_cujout(m,l)=-999
               soil_cuoout(m,l)=-999
               goto 300
             endif
-Cjhb=&==================================================================
-Cjhb=&      to get here -
-Cjhb=&        either there IS NO missing data for structure i in year m (missflag(i,m) = 0)
-Cjhb=&          (and note that therefore this must be the first time through, itime=1,
-Cjhb=&           since the year loop is skipped when there is no missing data on the second time through)
-Cjhb=&        or there IS missing data for structure i in year m (missflag(i,m) = 1),
-Cjhb=&          and the user specified to FILL in missing data (imiss2=1)
-Cjhb=&          (and note that therefore this must be the second time through, itime=2,
-Cjhb=&           since the year loop is skipped when there is missing data on the first time through)
-Cjhb=&==================================================================
-C           jhb | keep a count of the number of times through the month loop (for monthly averaging purposes later)
+!jhb=&==================================================================
+!jhb=&      to get here -
+!jhb=&        either there IS NO missing data for structure i in year m (missflag(i,m) = 0)
+!jhb=&          (and note that therefore this must be the first time through, itime=1,
+!jhb=&           since the year loop is skipped when there is no missing data on the second time through)
+!jhb=&        or there IS missing data for structure i in year m (missflag(i,m) = 1),
+!jhb=&          and the user specified to FILL in missing data (imiss2=1)
+!jhb=&          (and note that therefore this must be the second time through, itime=2,
+!jhb=&           since the year loop is skipped when there is missing data on the first time through)
+!jhb=&==================================================================
+!           jhb | keep a count of the number of times through the month loop (for monthly averaging purposes later)
 301         imonth(l)=imonth(l)+1
-C           jhb | initialize the variables containing soil moisture contributions to crop cu
+!           jhb | initialize the variables containing soil moisture contributions to crop cu
             holdcrops=0
             holdcropj=0
             holdcropo=0
             holdcrop=0
-Cjhb=&==================================================================
-Cjhb=&      initialize the winter carryover soil moisture contents for structure i, year m, month l
-Cjhb=&        here is where the winter precip values are accumulated
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      initialize the winter carryover soil moisture contents for structure i, year m, month l
+!jhb=&        here is where the winter precip values are accumulated
+!jhb=&==================================================================
             if(l .eq. 1) then
-c               month 1 - check to see if year 1
+!               month 1 - check to see if year 1
                 if(m .eq. 1) then
-c                   year 1, month 1 - start with initial wint prec value
+!                   year 1, month 1 - start with initial wint prec value
                     wbu(i,m,l)=WINTPREC(i,m,l)
                 else
-c                   year m>1, month l=1 - accumulate, add last month's wbu to this month's wintprec
+!                   year m>1, month l=1 - accumulate, add last month's wbu to this month's wintprec
                     wbu(i,m,l)=wbu(i,m-1,12)+WINTPREC(i,m,l)
                 endif
             else
-c               year m, month l>1 - accumulate, add last month's wbu to this month's wintprec
+!               year m, month l>1 - accumulate, add last month's wbu to this month's wintprec
                 wbu(i,m,l)=wbu(i,m,l-1)+WINTPREC(i,m,l)
             endif
-Cjhb=&==================================================================
-Cjhb=&      if wbu > soil space avail after initial soil contents,
-Cjhb=&      then set wbu=avail space in soil
-Cjhb=&      I think this needs to be corrected to account for isuply=4
-Cjhb=&      and gmode=1 since the soil moisture capacity is shrunk in that case...
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      if wbu > soil space avail after initial soil contents,
+!jhb=&      then set wbu=avail space in soil
+!jhb=&      I think this needs to be corrected to account for isuply=4
+!jhb=&      and gmode=1 since the soil moisture capacity is shrunk in that case...
+!jhb=&==================================================================
             wbu(i,m,l)=max(min(wbu(i,m,l),scapatot(i,m)-soiltot),0.)
-Cjhb=&==================================================================
+!jhb=&==================================================================
             if(reqt(i,m,l) .gt. -998) then
-Cjhb=&==================================================================
-Cjhb=&        if the crop cu requirement is not missing (-999)
-Cjhb=&==================================================================
-c              reqreq(m,l)=max((reqt(i,m,l)-wbu(i,m,l)),0.)
-c              add this for central only
-c              if(m .le. 24) depfact=1.0
-c              if(m .gt. 24 .and. l .eq. 1) depfact=depfact-(.15/45)
-c              reqt(i,m,l)=depfact*reqt(i,m,l)
-c              reqt(i,m,l)=depfact*reqt(i,m,l)
-c              reqreq(m,l)=max(reqt(i,m,l),0.)
-Cjhb=&==================================================================
-c             apply winter carryover soil moisture to the crop IWR
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&        if the crop cu requirement is not missing (-999)
+!jhb=&==================================================================
+!              reqreq(m,l)=max((reqt(i,m,l)-wbu(i,m,l)),0.)
+!              add this for central only
+!              if(m .le. 24) depfact=1.0
+!              if(m .gt. 24 .and. l .eq. 1) depfact=depfact-(.15/45)
+!              reqt(i,m,l)=depfact*reqt(i,m,l)
+!              reqt(i,m,l)=depfact*reqt(i,m,l)
+!              reqreq(m,l)=max(reqt(i,m,l),0.)
+!jhb=&==================================================================
+!             apply winter carryover soil moisture to the crop IWR
+!jhb=&==================================================================
               wbu_used = max(min(reqt(i,m,l),wbu(i,m,l)),0.)
               wbused(i,m,l)=wbu_used
               reqreq(m,l) = reqt(i,m,l) - wbu_used
-Cjhb=&==================================================================
-c             adjust the winter carryover soil moisture storage to acct for water used by crop
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!             adjust the winter carryover soil moisture storage to acct for water used by crop
+!jhb=&==================================================================
               wbu(i,m,l) = wbu(i,m,l) - wbu_used
-c              swreq(m,l)=reqreq(m,l)*(1-gper(i,m))
-c              gsreq(m,l)=reqreq(m,l)*gper(i,m)*sper(i,m)
-c              gfreq(m,l)=reqreq(m,l)*gper(i,m)*(1-sper(i,m))
-Cjhb=&==================================================================
-C             DISTRIBUTE CROP IWR TO THE FOUR LAND CATEGORIES
-C             sfreq - surface water only, flood irrigated lands
-C             ssreq - surface water only, sprinkler irrigated lands
-C             swreq - surface water only, all lands
-C             gfreq - surface water and groundwater, flood irrigated lands
-C             gsreq - surface water and groundwater, sprinkler irrigated lands
-C             gwreq - surface water and groundwater, all lands
-Cjhb=&==================================================================
+!              swreq(m,l)=reqreq(m,l)*(1-gper(i,m))
+!              gsreq(m,l)=reqreq(m,l)*gper(i,m)*sper(i,m)
+!              gfreq(m,l)=reqreq(m,l)*gper(i,m)*(1-sper(i,m))
+!jhb=&==================================================================
+!             DISTRIBUTE CROP IWR TO THE FOUR LAND CATEGORIES
+!             sfreq - surface water only, flood irrigated lands
+!             ssreq - surface water only, sprinkler irrigated lands
+!             swreq - surface water only, all lands
+!             gfreq - surface water and groundwater, flood irrigated lands
+!             gsreq - surface water and groundwater, sprinkler irrigated lands
+!             gwreq - surface water and groundwater, all lands
+!jhb=&==================================================================
               if(t_area(i,m).gt.0.0)then
                 sfreq(m,l)=reqreq(m,l)*swflac(i,m)/t_area(i,m)
                 ssreq(m,l)=reqreq(m,l)*swspac(i,m)/t_area(i,m)
@@ -3526,31 +3530,31 @@ Cjhb=&==================================================================
             gwreqdef(m,l)=gwreq(m,l)*def_irr_frac(i,m)
             gsreqdef(m,l)=gsreq(m,l)*def_irr_frac(i,m)
             gfreqdef(m,l)=gfreq(m,l)*def_irr_frac(i,m)
-Cjhb=&==================================================================
-Cjhb=&      set spcapz to portion of soil moisture not occupied by winter carryover...
-Cjhb=&      I think this needs to be corrected to account for isuply=4
-Cjhb=&      and gmode=1 since the soil moisture capacity is shrunk in that case...
-Cjhb=&==================================================================
-Cjhb=&      comment this out - we do not want to use up soil moist space with wbu
-Cjhb=&==================================================================
-c           spcapz=scapatot(i,m)-wbu(i,m,l)
-Cjhb=&==================================================================
-c grb  05-20-00 add execution of following code if missing diversion data for a year or for aggregated structure
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      set spcapz to portion of soil moisture not occupied by winter carryover...
+!jhb=&      I think this needs to be corrected to account for isuply=4
+!jhb=&      and gmode=1 since the soil moisture capacity is shrunk in that case...
+!jhb=&==================================================================
+!jhb=&      comment this out - we do not want to use up soil moist space with wbu
+!jhb=&==================================================================
+!           spcapz=scapatot(i,m)-wbu(i,m,l)
+!jhb=&==================================================================
+! grb  05-20-00 add execution of following code if missing diversion data for a year or for aggregated structure
+!jhb=&==================================================================
             if(itime .eq. 2 .and. missflag(i,m) .eq. 1) then !second pass and filling missing data...
               select case (gmode(i,m))
               case (3)
-c              if(gmode(i,m) .eq. 3) then
-c                this is gmode 3 where sw for gw sp lands goes to recharge
-c                modify to handle all four categories
+!              if(gmode(i,m) .eq. 3) then
+!                this is gmode 3 where sw for gw sp lands goes to recharge
+!                modify to handle all four categories
                 sfcu=sfreq(m,l)*swmet(id,m,l)
                 sscu=ssreq(m,l)*swmet(id,m,l)
                 swcu=sfcu+sscu
                 gfcu=gfreq(m,l)*swmet(id,m,l)
                 gscu=gsreq(m,l)*swmet(id,m,l)
                 gcu=gfcu+gscu
-c                 fdiv(m,l)=swcu/fleff(i,m)+gfcu/fleff(i,m)+
-c     :                   gscu
+!                 fdiv(m,l)=swcu/fleff(i,m)+gfcu/fleff(i,m)+
+!     :                   gscu
                 fdiv(m,l)=sfcu/fleff(i,m)+gfcu/fleff(i,m)+
      :                     sscu/speff(i,m)+gscu
                 arech(m,l)=gscu
@@ -3558,67 +3562,67 @@ c     :                   gscu
                 arech(nyrs1,l)=arech(nyrs1,l)+arech(m,l)
                 gsshare=0
               case (1)
-c                else
-c                this is gmode 1 - maximize supply mode
-c                (don't put sw on gw spr lands, put supply on spr lands first)
+!                else
+!                this is gmode 1 - maximize supply mode
+!                (don't put sw on gw spr lands, put supply on spr lands first)
                 sfcu=sfreq(m,l)*swmet(id,m,l)
                 sscu=ssreq(m,l)*swmet(id,m,l)
                 swcu=sfcu+sscu
                 gfcu=gfreq(m,l)*swmet(id,m,l)
                 gscu=gsreq(m,l)*swmet(id,m,l)
-c               don't put gw spr IWR in fdiv
+!               don't put gw spr IWR in fdiv
                 gscu=0
                 gcu=gfcu+gscu
-c                 fdiv(m,l)=swcu/fleff(i,m)+gfcu/fleff(i,m)+
-c     :                   gscu/speff(i,m)
+!                 fdiv(m,l)=swcu/fleff(i,m)+gfcu/fleff(i,m)+
+!     :                   gscu/speff(i,m)
                 fdiv(m,l)=sfcu/fleff(i,m)+gfcu/fleff(i,m)+
      :                     sscu/speff(i,m)+gscu/speff(i,m)
               case default ! 2 or any other value of gmode
-c              elseif(gmode(i,m) .eq. 2) then
-c                this is gmode 2 - mutual ditch mode
+!              elseif(gmode(i,m) .eq. 2) then
+!                this is gmode 2 - mutual ditch mode
                 sfcu=sfreq(m,l)*swmet(id,m,l)
                 sscu=ssreq(m,l)*swmet(id,m,l)
                 swcu=sfcu+sscu
                 gfcu=gfreq(m,l)*swmet(id,m,l)
                 gscu=gsreq(m,l)*swmet(id,m,l)
                 gcu=gfcu+gscu
-c                 fdiv(m,l)=swcu/fleff(i,m)+gfcu/fleff(i,m)+
-c     :                   gscu/speff(i,m)
+!                 fdiv(m,l)=swcu/fleff(i,m)+gfcu/fleff(i,m)+
+!     :                   gscu/speff(i,m)
                 fdiv(m,l)=sfcu/fleff(i,m)+gfcu/fleff(i,m)+
      :                     sscu/speff(i,m)+gscu/speff(i,m)
               end select
-c              endif
+!              endif
               divsup(i,m,l) = fdiv(m,l)/ceff(i,m)
-cjhb &         ---------------------------------------------------------
-cjhb &         remove these lines since we are going to rederive the gfcu and gscu (and hopefully get the same numbers)
-cjhb &         and therefore remove the surf div cu from the req on gw lands later
-cjhb &         ---------------------------------------------------------
-c              gsreq(m,l) = gsreq(m,l) - gscu
-c              gfreq(m,l) = gfreq(m,l) - gfcu
+!jhb &         ---------------------------------------------------------
+!jhb &         remove these lines since we are going to rederive the gfcu and gscu (and hopefully get the same numbers)
+!jhb &         and therefore remove the surf div cu from the req on gw lands later
+!jhb &         ---------------------------------------------------------
+!              gsreq(m,l) = gsreq(m,l) - gscu
+!              gfreq(m,l) = gfreq(m,l) - gfcu
             endif
-Cjhb=&==================================================================
-Cjhb=&      end of missing data filling
-Cjhb=&==================================================================
-c
-c  ew 3/12/04  here is where we want to read suppy from drains/tailwater
-c  add drain/tailwater supply to fdiv for accounting (but do not consider losses) 
-Cjhb=&==================================================================
-C           SURFACE WATER farm deliveries = diversions - canal losses + tailwater
-C           note that tail() can be negative
-C           ew/jhb 09/2008 - tail() can be negative but constrain it
-C                            to the value of fdiv()=divsup()*ceff()
-C                            make a note to the log file if abs(tail)>fdiv
-C                            and then change the value of tail()=-fdiv
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb=&      end of missing data filling
+!jhb=&==================================================================
+!
+!  ew 3/12/04  here is where we want to read suppy from drains/tailwater
+!  add drain/tailwater supply to fdiv for accounting (but do not consider losses) 
+!jhb=&==================================================================
+!           SURFACE WATER farm deliveries = diversions - canal losses + tailwater
+!           note that tail() can be negative
+!           ew/jhb 09/2008 - tail() can be negative but constrain it
+!                            to the value of fdiv()=divsup()*ceff()
+!                            make a note to the log file if abs(tail)>fdiv
+!                            and then change the value of tail()=-fdiv
+!jhb=&==================================================================
             fdiv(m,l)=divsup(i,m,l)*ceff(i,m)+tail(i,m,l)
             if(fdiv(m,l).lt.0.0)then
-c             why do it this way?
-c             because it not only adjusts when tail() is too negative
-c             it also fixes the problem if a negative divsup slips through
-c             should not happen, but better to catch it and create a warning than crash...
+!             why do it this way?
+!             because it not only adjusts when tail() is too negative
+!             it also fixes the problem if a negative divsup slips through
+!             should not happen, but better to catch it and create a warning than crash...
               tail(i,m,l)=tail(i,m,l)-fdiv(m,l)
               fdiv(m,l)=0.0
-c             catch this warning and record in new log file format...
+!             catch this warning and record in new log file format...
               if(fdiv(m,l) .lt. -2.0) then
                 if(ipresim .ne. 1) call lw_update(47,bas_id(i))
               endif  
@@ -3635,25 +3639,25 @@ c             catch this warning and record in new log file format...
             endif
             fdiv(m,13)=fdiv(m,13)+fdiv(m,l)
             fdiv(nyrs1,l)=fdiv(nyrs1,l)+fdiv(m,l)
-Cjhb=&==================================================================
-C           canal losses = diversions - farm deliveries + tailwater
-Cjhb=&==================================================================
-c           jhb: i am not sure why it was calculated this way previously,
-c           but change it to divsup*(1-canal eff)
-c            closs(m,l)=divsup(i,m,l)-fdiv(m,l)+tail(i,m,l)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           canal losses = diversions - farm deliveries + tailwater
+!jhb=&==================================================================
+!           jhb: i am not sure why it was calculated this way previously,
+!           but change it to divsup*(1-canal eff)
+!            closs(m,l)=divsup(i,m,l)-fdiv(m,l)+tail(i,m,l)
+!jhb=&==================================================================
             closs(m,l)=divsup(i,m,l)*(1.0-ceff(i,m))
             closs(m,13)=closs(m,13)+closs(m,l)
             closs(nyrs1,l)=closs(nyrs1,l)+closs(m,l)
-Cjhb=&==================================================================
-C           Split SURFACE WATER farm deliveries into senior, other and junior deliveries
-Cjhb=&==================================================================
-C           Senior Diversions
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           Split SURFACE WATER farm deliveries into senior, other and junior deliveries
+!jhb=&==================================================================
+!           Senior Diversions
+!jhb=&==================================================================
             IF (missflg1(i).EQ.0) THEN
-Cjhb=&==================================================================
-C             No missing data
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!             No missing data
+!jhb=&==================================================================
               if(idaily.eq.0) holdps=
      1          min(divsup(i,m,l),senasp(i)*1.9835*month(l))
               if (idaily.gt.0) then
@@ -3663,11 +3667,11 @@ Cjhb=&==================================================================
                   holdps=divsup(i,m,l)*persen(i,m,l)
                 endif
               endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
             ELSE
-Cjhb=&==================================================================
-C             Missing data
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!             Missing data
+!jhb=&==================================================================
               if (idaily.le.3) then
                 do 7500 k4=1,ddstrctt
                   if (trim(adjustr(ddstruct(k4))).eq.
@@ -3685,7 +3689,7 @@ Cjhb=&==================================================================
                 IDAYS=31
                 IF (L.EQ.2) IDAYS=28
                 IF (L.EQ.4.OR.L.EQ.6.OR.L.EQ.9.OR.L.EQ.11) IDAYS=30
-c               grb 09-13-00 initialize holdps
+!               grb 09-13-00 initialize holdps
                 holdps=0                        
                 DO 755 I6=1,IDAYS
                   HOLDPS=HOLDPS+MIN(-DIVNDATA(I6)*1.9835,
@@ -3706,68 +3710,68 @@ c               grb 09-13-00 initialize holdps
                 else
                   holdps=divsup(i,m,l)*persen(i,m,l)
                 endif
-c                  HOLDPS=MIN(DIVSUP(I,M,L),SENASP(I)*1.9835*month(L))
+!                  HOLDPS=MIN(DIVSUP(I,M,L),SENASP(I)*1.9835*month(L))
               ENDIF
             ENDIF
-Cjhb=&==================================================================
-C           now we have senior diversions - HOLDPS
-Cjhb=&==================================================================
-C           convert it to senior farm deliveries - HOLDFS, SENIORF(m,l)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           now we have senior diversions - HOLDPS
+!jhb=&==================================================================
+!           convert it to senior farm deliveries - HOLDFS, SENIORF(m,l)
+!jhb=&==================================================================
 756         continue
             holdfs=holdps*ceff(i,m)
-Cjhb=&==================================================================
-C-----------Other Diversions                   
-C           grb 06-29-00 add consideration of variable administration dates                          
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!-----------Other Diversions                   
+!           grb 06-29-00 add consideration of variable administration dates                          
+!jhb=&==================================================================
             IF (MISSFLG1(I).EQ.0) THEN
-Cjhb=&==================================================================
-C             no missing data
-Cjhb=&==================================================================
-C              rewrite the following code because it does not work
-C                sufficiently for the 4 category design, even though the
-C                errors did not affect the 3 category output
-C                (essentially the incorrect holdpo and holdpj canceled each
-C                 other when added together)
-Cjhb=&=========old code=================================================
-c               the following calculates the max possible "other" diversions
-c               based on the total sr and jr rights added up from the ddr file
-c               --------------------------------------------------------
-c               however, note that it IGNORES the diversions classified
-c               as senior calculated above!  so it is double accounting that
-c               water since trights(i) is going to be 0 when idaily=0
-c               bottom line, this code sets holdpo to divsup, when it should be 0
-c               so, if divsup(i,m,l)=100, then holdps=100, holdpo=100 and holdpj=-100
-c               --------------------------------------------------------
-c              if(idaily.eq.0) holdpo=
-c     &           max(divsup(i,m,l)-(trights(i)*month(l)*1.9835),0.0)
-Cjhb=&=========new code=================================================
+!jhb=&==================================================================
+!             no missing data
+!jhb=&==================================================================
+!              rewrite the following code because it does not work
+!                sufficiently for the 4 category design, even though the
+!                errors did not affect the 3 category output
+!                (essentially the incorrect holdpo and holdpj canceled each
+!                 other when added together)
+!jhb=&=========old code=================================================
+!               the following calculates the max possible "other" diversions
+!               based on the total sr and jr rights added up from the ddr file
+!               --------------------------------------------------------
+!               however, note that it IGNORES the diversions classified
+!               as senior calculated above!  so it is double accounting that
+!               water since trights(i) is going to be 0 when idaily=0
+!               bottom line, this code sets holdpo to divsup, when it should be 0
+!               so, if divsup(i,m,l)=100, then holdps=100, holdpo=100 and holdpj=-100
+!               --------------------------------------------------------
+!              if(idaily.eq.0) holdpo=
+!     &           max(divsup(i,m,l)-(trights(i)*month(l)*1.9835),0.0)
+!jhb=&=========new code=================================================
               if(idaily.eq.0) then
-c               --------------------------------------------------------
-c               no priority modeling
-c               --------------------------------------------------------
-c               the following calculates the max possible "other" diversions
-c               based on the total sr and jr rights added up from the ddr file
-c               --------------------------------------------------------
-c               however, note that it IGNORES the diversions classified
-c               as senior calculated above!  so it is double accounting that
-c               water since trights(i) is going to be 0 when idaily=0
-c               bottom line, this code sets holdpo to divsup, when it should be 0
-c               --------------------------------------------------------
+!               --------------------------------------------------------
+!               no priority modeling
+!               --------------------------------------------------------
+!               the following calculates the max possible "other" diversions
+!               based on the total sr and jr rights added up from the ddr file
+!               --------------------------------------------------------
+!               however, note that it IGNORES the diversions classified
+!               as senior calculated above!  so it is double accounting that
+!               water since trights(i) is going to be 0 when idaily=0
+!               bottom line, this code sets holdpo to divsup, when it should be 0
+!               --------------------------------------------------------
                 holdpo=max(divsup(i,m,l)-trights(i)*month(l)*1.9835,
      &                     0.0)
-c               --------------------------------------------------------
-c               therefore add the following correction
-c               this also fixes the anomolous result for holdpj calculated
-c               next that an incorrect value of holdpo causes
-c               --------------------------------------------------------
+!               --------------------------------------------------------
+!               therefore add the following correction
+!               this also fixes the anomolous result for holdpj calculated
+!               next that an incorrect value of holdpo causes
+!               --------------------------------------------------------
                 holdpo=min(holdpo, divsup(i,m,l)-holdps)
-Cjhb=&==================================================================
-c              if (idaily.gt.0) then
+!jhb=&==================================================================
+!              if (idaily.gt.0) then
               else
-c               --------------------------------------------------------
-c               priority modeling
-c               --------------------------------------------------------
+!               --------------------------------------------------------
+!               priority modeling
+!               --------------------------------------------------------
                 if(peroth(i,m,l) .lt. -998) then
                   holdpo=max(0.0,divsup(i,m,l)-((senasp(i)+junasp(i))
      &                   *month(l)*1.9835))
@@ -3776,60 +3780,60 @@ c               --------------------------------------------------------
                 endif
               endif
             ELSE
-Cjhb=&==================================================================
-C             missing data
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!             missing data
+!jhb=&==================================================================
               IDAYS=31
               IF (L.EQ.2) IDAYS=28
               IF (L.EQ.4.OR.L.EQ.6.OR.L.EQ.9.OR.L.EQ.11) IDAYS=30
-c             grb 09-13-00 initialize holdpo                   
+!             grb 09-13-00 initialize holdpo                   
               holdpo=0                       
               DO 753 I6=1,IDAYS
                 HOLDPO=HOLDPO+MAX((DIVSUP(I,M,L)/idays-(TRIGHTS(I)*
      1                  1.9835)),0.0)
 753           CONTINUE 
-c             --------------------------------------------------------
-c             add the following correction for the same reason explained above
-c             --------------------------------------------------------
+!             --------------------------------------------------------
+!             add the following correction for the same reason explained above
+!             --------------------------------------------------------
               holdpo=min(holdpo, divsup(i,m,l)-holdps)
             ENDIF
-Cjhb=&==================================================================
-C           now we have other diversions - HOLDPO
-Cjhb=&==================================================================
-C           convert it to other farm deliveries - HOLDFO, OTHERF(m,l)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           now we have other diversions - HOLDPO
+!jhb=&==================================================================
+!           convert it to other farm deliveries - HOLDFO, OTHERF(m,l)
+!jhb=&==================================================================
             holdfo = holdpo*ceff(i,m)
-Cjhb=&==================================================================
-C-----------------Junior Diversions
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!-----------------Junior Diversions
+!jhb=&==================================================================
             IF (MISSFLG1(I).EQ.0.and.idaily.ne.0) then
-C             no missing data AND using daily admin #
+!             no missing data AND using daily admin #
               holdpj = divsup(i,m,l)*(1.0-persen(i,m,l)-peroth(i,m,l))
             ELSE
-C             missing data OR not using daily admin #
+!             missing data OR not using daily admin #
               HOLDPJ=(DIVSUP(I,M,L)-HOLDPO-HOLDPS)
             ENDIF
             HOLDPJ=(DIVSUP(I,M,L)-HOLDPO-HOLDPS)
-Cjhb=&==================================================================
-C           now we have junior diversions - HOLDPJ
-Cjhb=&==================================================================
-C           convert it to junior farm deliveries - HOLDFJ, JUNIORF(m,l)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           now we have junior diversions - HOLDPJ
+!jhb=&==================================================================
+!           convert it to junior farm deliveries - HOLDFJ, JUNIORF(m,l)
+!jhb=&==================================================================
             holdfj=holdpj*ceff(i,m)
-Cjhb=&==================================================================
-C           Now reflect the effects of the drain file values
-C           Because these can can be negative,
-C             had to wait until last to make the adjustments
-C           The drain file only effects FARM deliveries (holdfs, holdfj, holdfo)
-C            and not river headgate values (holdps, holdpj, holdpo)
-C           Also, if the structure/year has missing data, do not add it in at all.
+!jhb=&==================================================================
+!           Now reflect the effects of the drain file values
+!           Because these can can be negative,
+!             had to wait until last to make the adjustments
+!           The drain file only effects FARM deliveries (holdfs, holdfj, holdfo)
+!            and not river headgate values (holdps, holdpj, holdpo)
+!           Also, if the structure/year has missing data, do not add it in at all.
             if(missflg1(i).eq.0)then !no missing data
               if(tail(i,m,l).ge.0.0)then !drain value is positive
-c               add it to other farm deliveries and be done with it
+!               add it to other farm deliveries and be done with it
                 holdfo = holdfo + tail(i,m,l)
               else !it is negative
-c               reduce other farm deliveries, then junior, then senior
-c               leave tail() negative so the efficiencies will calculate correctly
+!               reduce other farm deliveries, then junior, then senior
+!               leave tail() negative so the efficiencies will calculate correctly
                 total_adj=tail(i,m,l)
                 oth_adj=max(-holdfo,total_adj)
                 holdfo=holdfo+oth_adj
@@ -3841,7 +3845,7 @@ c               leave tail() negative so the efficiencies will calculate correct
                 holdfs=holdfs+sen_adj
               endif
             endif
-C           now we have the final categorized farm delivery values to use
+!           now we have the final categorized farm delivery values to use
             seniorf(m,l)=seniorf(m,l)+holdfs
             seniorf(m,13)=seniorf(m,13)+holdfs
             seniorf(nyrs1,l)=seniorf(nyrs1,l)+holdfs
@@ -3851,47 +3855,47 @@ C           now we have the final categorized farm delivery values to use
             otherf(m,l)=otherf(m,l)+holdfo
             otherf(m,13)=otherf(m,13)+holdfo
             otherf(nyrs1,l)=otherf(nyrs1,l)+holdfo
-C
-Cjhb=&==================================================================
-C           DISTRIBUTE FARM DELIVERIES FROM SURFACE SOURCES TO THE FOUR LAND CATEGORIES
-C             sfshare - surface water only, flood irrigated lands
-C             ssshare - surface water only, sprinkler irrigated lands
-C             swshare - surface water only, all lands
-C             gfshare - surface water and groundwater, flood irrigated lands
-C             gsshare - surface water and groundwater, sprinkler irrigated lands
-C             gwshare - surface water and groundwater, all lands
-C           THEN CALCULATE CU FROM SURFACE SOURCES ON THE FOUR LAND CATEGORIES
-C             sfcu - surface water only, flood irrigated lands
-C             sscu - surface water only, sprinkler irrigated lands
-C             swcu - surface water only, all lands
-C             gfcu - surface water and groundwater, flood irrigated lands
-C             gscu - surface water and groundwater, sprinkler irrigated lands
-C             gcu  - surface water and groundwater, all lands
-Cjhb=&==================================================================
-Cjhb=&      on second pass, if this is structure and year with filled data,
-Cjhb=&      then we STARTED with IWR (sfreq, ssreq, gfreq, gsreq) and the
-Cjhb=&      division average shortage (swmet),
-Cjhb=&      and then back-calculated the CU and then the farm deliveries (fdiv) ,
-Cjhb=&      and then the stream diversions (divsup)
-Cjhb=&      Therefore we do NOT want to recalculate the CU, again!
-Cjhb=&==================================================================
-C            if(itime .eq. 2 .and. missflag(i,m) .eq. 1) goto 46
-Cjhb=&==================================================================
+!
+!jhb=&==================================================================
+!           DISTRIBUTE FARM DELIVERIES FROM SURFACE SOURCES TO THE FOUR LAND CATEGORIES
+!             sfshare - surface water only, flood irrigated lands
+!             ssshare - surface water only, sprinkler irrigated lands
+!             swshare - surface water only, all lands
+!             gfshare - surface water and groundwater, flood irrigated lands
+!             gsshare - surface water and groundwater, sprinkler irrigated lands
+!             gwshare - surface water and groundwater, all lands
+!           THEN CALCULATE CU FROM SURFACE SOURCES ON THE FOUR LAND CATEGORIES
+!             sfcu - surface water only, flood irrigated lands
+!             sscu - surface water only, sprinkler irrigated lands
+!             swcu - surface water only, all lands
+!             gfcu - surface water and groundwater, flood irrigated lands
+!             gscu - surface water and groundwater, sprinkler irrigated lands
+!             gcu  - surface water and groundwater, all lands
+!jhb=&==================================================================
+!jhb=&      on second pass, if this is structure and year with filled data,
+!jhb=&      then we STARTED with IWR (sfreq, ssreq, gfreq, gsreq) and the
+!jhb=&      division average shortage (swmet),
+!jhb=&      and then back-calculated the CU and then the farm deliveries (fdiv) ,
+!jhb=&      and then the stream diversions (divsup)
+!jhb=&      Therefore we do NOT want to recalculate the CU, again!
+!jhb=&==================================================================
+!            if(itime .eq. 2 .and. missflag(i,m) .eq. 1) goto 46
+!jhb=&==================================================================
             select case (isuply)
-c             if (isuply.eq.2.or.isuply.eq.3) then
+!             if (isuply.eq.2.or.isuply.eq.3) then
               case (2,3) !(isuply)
-Cjhb=&==================================================================
-c               isuply mode 2 (water rights) or 3 (water rights and return flows)
-c               (but no groundwater supply)
-c               -----------------------------------------------
-c               in these isuply scenarios (2 and 3), there are water right priorities
-c               so the farm deliveries are stored in the senior, other, and junior variables: holdfs, holdfo, holdfj
-c               add them up to get the total sw source farm deliveries, swshare
-Cjhb=&==================================================================
-c               -----------------------------------------------
-c               prorate the 3 "colors" of farm deliv (sr-holdfs, jr-holdfj,
-c               oth-holdfo) to the four irrig land categories based on acreage
-c               -----------------------------------------------
+!jhb=&==================================================================
+!               isuply mode 2 (water rights) or 3 (water rights and return flows)
+!               (but no groundwater supply)
+!               -----------------------------------------------
+!               in these isuply scenarios (2 and 3), there are water right priorities
+!               so the farm deliveries are stored in the senior, other, and junior variables: holdfs, holdfo, holdfj
+!               add them up to get the total sw source farm deliveries, swshare
+!jhb=&==================================================================
+!               -----------------------------------------------
+!               prorate the 3 "colors" of farm deliv (sr-holdfs, jr-holdfj,
+!               oth-holdfo) to the four irrig land categories based on acreage
+!               -----------------------------------------------
                 if(t_area(i,m).gt.0.0)then
                   sfshares=holdfs*swflac(i,m)/t_area(i,m)
                   sfsharej=holdfj*swflac(i,m)/t_area(i,m)
@@ -3902,7 +3906,7 @@ c               -----------------------------------------------
                   sfshareo=holdfo
                 endif
                 sfshare=sfshares+sfsharej+sfshareo
-c               -----------------------------------------------
+!               -----------------------------------------------
                 if(t_area(i,m).gt.0.0)then
                   ssshares=holdfs*swspac(i,m)/t_area(i,m)
                   sssharej=holdfj*swspac(i,m)/t_area(i,m)
@@ -3913,9 +3917,9 @@ c               -----------------------------------------------
                   ssshareo=0.0
                 endif
                 ssshare=ssshares+sssharej+ssshareo
-c               -----------------------------------------------
+!               -----------------------------------------------
                 swshare=sfshare+ssshare
-c               -----------------------------------------------
+!               -----------------------------------------------
                 if(t_area(i,m).gt.0.0)then
                   gfshares=holdfs*swgwflac(i,m)/t_area(i,m)
                   gfsharej=holdfj*swgwflac(i,m)/t_area(i,m)
@@ -3926,7 +3930,7 @@ c               -----------------------------------------------
                   gfshareo=0.0
                 endif
                 gfshare=gfshares+gfsharej+gfshareo
-c               -----------------------------------------------
+!               -----------------------------------------------
                 if(t_area(i,m).gt.0.0)then
                   gsshares=holdfs*swgwspac(i,m)/t_area(i,m)
                   gssharej=holdfj*swgwspac(i,m)/t_area(i,m)
@@ -3937,44 +3941,44 @@ c               -----------------------------------------------
                   gsshareo=0.0
                 endif
                 gsshare=gsshares+gssharej+gsshareo
-c               -----------------------------------------------
+!               -----------------------------------------------
                 gwshare=gfshare+gsshare
-c               -----------------------------------------------
-c               calculate actual cu for each land category (up
-c               to max of the irrig water requirement for that category)
-c               -----------------------------------------------
-c               swcu=min(swshare*fleff(i,m),swreq(m,l))
+!               -----------------------------------------------
+!               calculate actual cu for each land category (up
+!               to max of the irrig water requirement for that category)
+!               -----------------------------------------------
+!               swcu=min(swshare*fleff(i,m),swreq(m,l))
                 sfcu=min(max(sfshare*fleff(i,m),0.),sfreq(m,l))
                 sscu=min(max(ssshare*speff(i,m),0.),ssreq(m,l))
                 swcu=sfcu+sscu
                 gfcu=min(max(gfshare*fleff(i,m),0.),gfreq(m,l))
                 gscu=min(max(gsshare*speff(i,m),0.),gsreq(m,l))
                 gcu=gfcu+gscu
-c               -----------------------------------------------
-c             endif
-Cjhb=&==================================================================
-c             if (isuply.eq.1.or.isuply.eq.4) then
+!               -----------------------------------------------
+!             endif
+!jhb=&==================================================================
+!             if (isuply.eq.1.or.isuply.eq.4) then
               case (1,4)
-c               isuply mode 1 (supply limited) or 4 (groundwater)
-c               -----------------------------------------------
-c               note that in these isuply scenarios (1 and 4), there are no
-c               water right priorities, so all the farm deliveries from
-c               surface stream diversions are stored in the senior variable, holdfs
-c               however, holdfo still contains any tailwater input data
-Cjhb=&==================================================================
-c               if(gmode(i,m) .eq. 2) then
+!               isuply mode 1 (supply limited) or 4 (groundwater)
+!               -----------------------------------------------
+!               note that in these isuply scenarios (1 and 4), there are no
+!               water right priorities, so all the farm deliveries from
+!               surface stream diversions are stored in the senior variable, holdfs
+!               however, holdfo still contains any tailwater input data
+!jhb=&==================================================================
+!               if(gmode(i,m) .eq. 2) then
                 select case (gmode(i,m))
                   case (2)
-Cjhb=&==================================================================
-c                   gw mode 2 - mutual ditch operation
-Cjhb=&==================================================================
-c                   swshare=holdfs*(1-gper(i,m))
-c                   gsshare=holdfs*gper(i,m)*sper(i,m)
-c                   gfshare=holdfs*gper(i,m)*(1-sper(i,m))
-c                   -----------------------------------------------
-c                   prorate the 3 "colors" of farm deliv (sr-holdfs, jr-holdfj,
-c                   oth-holdfo) to the four irrig land categories based on acreage
-c                   -----------------------------------------------
+!jhb=&==================================================================
+!                   gw mode 2 - mutual ditch operation
+!jhb=&==================================================================
+!                   swshare=holdfs*(1-gper(i,m))
+!                   gsshare=holdfs*gper(i,m)*sper(i,m)
+!                   gfshare=holdfs*gper(i,m)*(1-sper(i,m))
+!                   -----------------------------------------------
+!                   prorate the 3 "colors" of farm deliv (sr-holdfs, jr-holdfj,
+!                   oth-holdfo) to the four irrig land categories based on acreage
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       sfshares=holdfs*swflac(i,m)/t_area(i,m)
                       sfsharej=holdfj*swflac(i,m)/t_area(i,m)
@@ -3985,7 +3989,7 @@ c                   -----------------------------------------------
                       sfshareo=holdfo
                     endif
                     sfshare=sfshares+sfsharej+sfshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       ssshares=holdfs*swspac(i,m)/t_area(i,m)
                       sssharej=holdfj*swspac(i,m)/t_area(i,m)
@@ -3996,9 +4000,9 @@ c                   -----------------------------------------------
                       ssshareo=0.0
                     endif
                     ssshare=ssshares+sssharej+ssshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     swshare=sfshare+ssshare
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       gfshares=holdfs*swgwflac(i,m)/t_area(i,m)
                       gfsharej=holdfj*swgwflac(i,m)/t_area(i,m)
@@ -4009,7 +4013,7 @@ c                   -----------------------------------------------
                       gfshareo=0.0
                     endif
                     gfshare=gfshares+gfsharej+gfshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       gsshares=holdfs*swgwspac(i,m)/t_area(i,m)
                       gssharej=holdfj*swgwspac(i,m)/t_area(i,m)
@@ -4020,31 +4024,31 @@ c                   -----------------------------------------------
                       gsshareo=0.0
                     endif
                     gsshare=gsshares+gssharej+gsshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     gwshare=gfshare+gsshare
-c                   -----------------------------------------------
-c                   swcu=min(swshare*fleff(i,m),swreq(m,l))
-c                   gscu=min(gsshare*speff(i,m),gsreq(m,l))
-c                   gfcu=min(gfshare*fleff(i,m),gfreq(m,l))
-c                   -----------------------------------------------
-c                   now convert the farm deliveries into cu values for each category
-c                   -----------------------------------------------
+!                   -----------------------------------------------
+!                   swcu=min(swshare*fleff(i,m),swreq(m,l))
+!                   gscu=min(gsshare*speff(i,m),gsreq(m,l))
+!                   gfcu=min(gfshare*fleff(i,m),gfreq(m,l))
+!                   -----------------------------------------------
+!                   now convert the farm deliveries into cu values for each category
+!                   -----------------------------------------------
                     sfcu=min(max(sfshare*fleff(i,m),0.),sfreq(m,l))
                     sscu=min(max(ssshare*speff(i,m),0.),ssreq(m,l))
                     swcu=sfcu+sscu
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     gfcu=min(max(gfshare*fleff(i,m),0.),gfreq(m,l))
                     gscu=min(max(gsshare*speff(i,m),0.),gsreq(m,l))
                     gcu=gfcu+gscu
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                   case (3)
-c                 elseif(gmode(i,m) .eq. 3) then
-Cjhb=&==================================================================
-c                   gw mode 3 - mutual ditch w/ sw for gw spr acreage to recharge and not CU
-Cjhb=&==================================================================
-c                   prorate the 3 "colors" of farm deliv (sr-holdfs, jr-holdfj,
-c                   oth-holdfo) to the four irrig land categories based on acreage
-c                   -----------------------------------------------
+!                 elseif(gmode(i,m) .eq. 3) then
+!jhb=&==================================================================
+!                   gw mode 3 - mutual ditch w/ sw for gw spr acreage to recharge and not CU
+!jhb=&==================================================================
+!                   prorate the 3 "colors" of farm deliv (sr-holdfs, jr-holdfj,
+!                   oth-holdfo) to the four irrig land categories based on acreage
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       sfshares=holdfs*swflac(i,m)/t_area(i,m)
                       sfsharej=holdfj*swflac(i,m)/t_area(i,m)
@@ -4055,7 +4059,7 @@ c                   -----------------------------------------------
                       sfshareo=holdfo
                     endif
                     sfshare=sfshares+sfsharej+sfshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       ssshares=holdfs*swspac(i,m)/t_area(i,m)
                       sssharej=holdfj*swspac(i,m)/t_area(i,m)
@@ -4066,9 +4070,9 @@ c                   -----------------------------------------------
                       ssshareo=0.0
                     endif
                     ssshare=ssshares+sssharej+ssshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     swshare=sfshare+ssshare
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       gfshares=holdfs*swgwflac(i,m)/t_area(i,m)
                       gfsharej=holdfj*swgwflac(i,m)/t_area(i,m)
@@ -4079,7 +4083,7 @@ c                   -----------------------------------------------
                       gfshareo=0.0
                     endif
                     gfshare=gfshares+gfsharej+gfshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     if(t_area(i,m).gt.0.0)then
                       gsshares=holdfs*swgwspac(i,m)/t_area(i,m)
                       gssharej=holdfj*swgwspac(i,m)/t_area(i,m)
@@ -4090,61 +4094,61 @@ c                   -----------------------------------------------
                       gsshareo=0.0
                     endif
                     gsshare=gsshares+gssharej+gsshareo
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     gwshare=gfshare+gsshare
-c                   -----------------------------------------------
-c                   sw for gw spr acreage goes to recharge, not cu
-c                   -----------------------------------------------
+!                   -----------------------------------------------
+!                   sw for gw spr acreage goes to recharge, not cu
+!                   -----------------------------------------------
                     arech(m,l)=gsshare
                     arech(m,13)=arech(m,13)+arech(m,l)
                     arech(nyrs1,l)=arech(nyrs1,l)+arech(m,l)
-c                   -----------------------------------------------
-c                   swcu=min(swshare*fleff(i,m),swreq(m,l))
-c                   gscu=min(gsshare*speff(i,m),gsreq(m,l))
-c                   gfcu=min(gfshare*fleff(i,m),gfreq(m,l))
-c                   -----------------------------------------------
+!                   -----------------------------------------------
+!                   swcu=min(swshare*fleff(i,m),swreq(m,l))
+!                   gscu=min(gsshare*speff(i,m),gsreq(m,l))
+!                   gfcu=min(gfshare*fleff(i,m),gfreq(m,l))
+!                   -----------------------------------------------
                     sfcu=min(max(sfshare*fleff(i,m),0.),sfreq(m,l))
                     sscu=min(max(ssshare*speff(i,m),0.),ssreq(m,l))
                     swcu=sfcu+sscu
-c                   -----------------------------------------------
-c                   reset the gw spr deliveries to 0 (went to recharge)
-c                   -----------------------------------------------
+!                   -----------------------------------------------
+!                   reset the gw spr deliveries to 0 (went to recharge)
+!                   -----------------------------------------------
                     gsshare=0.0
                     gsshares=0.0
                     gssharej=0.0
                     gsshareo=0.0
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     gwshare=gfshare+gsshare
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                     gfcu=min(max(gfshare*fleff(i,m),0.),gfreq(m,l))
                     gscu=0.0 !no cu from sw since no deliv from sw
                     gcu=gfcu+gscu
-c                   -----------------------------------------------
+!                   -----------------------------------------------
                   case (1)
-c                 else
-Cjhb=&==================================================================
-c                   gw mode 1 - maximize supply - no sw for gw spr acreage,
-c                   -----------------------------------------------
-c                   note this is different than all the other scenarios;
-c                   the combined farm deliveries are not spread over all
-c                   the structure's acreage.  Instead they are first put on
-c                   sw only sprinkler lands (typically more efficient), then on
-c                   sw only flood lands, then the remaining on sw/gw flood
-c                   lands.  No surface source water is put on sw/gw sprinkler lands.
-Cjhb=&==================================================================
-c                   swshare=holdfs
-c                   swcu=min(swshare*fleff(i,m),swreq(m,l))
-c                   -------------------------
-c                   sw only sprinkler lands first
-c                   -------------------------
+!                 else
+!jhb=&==================================================================
+!                   gw mode 1 - maximize supply - no sw for gw spr acreage,
+!                   -----------------------------------------------
+!                   note this is different than all the other scenarios;
+!                   the combined farm deliveries are not spread over all
+!                   the structure's acreage.  Instead they are first put on
+!                   sw only sprinkler lands (typically more efficient), then on
+!                   sw only flood lands, then the remaining on sw/gw flood
+!                   lands.  No surface source water is put on sw/gw sprinkler lands.
+!jhb=&==================================================================
+!                   swshare=holdfs
+!                   swcu=min(swshare*fleff(i,m),swreq(m,l))
+!                   -------------------------
+!                   sw only sprinkler lands first
+!                   -------------------------
                     ssshare=holdfs+holdfj+holdfo
                     sscu=min(max(ssshare*speff(i,m),0.),ssreq(m,l))
                     ssshare=sscu/speff(i,m)
-c                   -------------------------
-c                   split the sw only spr deliv into sr, jr, oth
-c                   note that this applies all 3 classes to each
-c                   land type in sequence as opposed to sr first, etc.
-c                   -------------------------
+!                   -------------------------
+!                   split the sw only spr deliv into sr, jr, oth
+!                   note that this applies all 3 classes to each
+!                   land type in sequence as opposed to sr first, etc.
+!                   -------------------------
                     if(holdfs+holdfj+holdfo.gt.0.0)then
                       ssshares=ssshare*holdfs/(holdfs+holdfj+holdfo)
                       sssharej=ssshare*holdfj/(holdfs+holdfj+holdfo)
@@ -4154,13 +4158,13 @@ c                   -------------------------
                       sssharej=0.0
                       ssshareo=0.0
                     endif
-c                   -------------------------
-c                   then sw only flood lands
-c                   -------------------------
+!                   -------------------------
+!                   then sw only flood lands
+!                   -------------------------
                     sfshare=holdfs+holdfj+holdfo-ssshare
                     sfcu=min(max(sfshare*fleff(i,m),0.),sfreq(m,l))
                     sfshare=sfcu/fleff(i,m)
-c                   -------------------------
+!                   -------------------------
                     if(holdfs+holdfj+holdfo.gt.0.0)then
                       sfshares=sfshare*holdfs/(holdfs+holdfj+holdfo)
                       sfsharej=sfshare*holdfj/(holdfs+holdfj+holdfo)
@@ -4170,15 +4174,15 @@ c                   -------------------------
                       sfsharej=0.0
                       sfshareo=0.0
                     endif
-c                   -------------------------
+!                   -------------------------
                     swshare=sfshare+ssshare
                     swcu=sscu+sfcu
-c                   -------------------------
-c                   then sw and gw flood lands - gets all that is left
-c                   -------------------------
+!                   -------------------------
+!                   then sw and gw flood lands - gets all that is left
+!                   -------------------------
                     gfshare=holdfs+holdfj+holdfo-ssshare-sfshare
                     gfcu=min(max(gfshare*fleff(i,m),0.),gfreq(m,l))
-c                   -------------------------
+!                   -------------------------
                     if(holdfs+holdfj+holdfo.gt.0.0)then
                       gfshares=gfshare*holdfs/(holdfs+holdfj+holdfo)
                       gfsharej=gfshare*holdfj/(holdfs+holdfj+holdfo)
@@ -4188,12 +4192,12 @@ c                   -------------------------
                       gfsharej=0.0
                       gfshareo=0.0
                     endif
-c                   -------------------------
-c                   sw and gw sprinkler lands get no sw (will get pumping supply later)
-c                   -------------------------
+!                   -------------------------
+!                   sw and gw sprinkler lands get no sw (will get pumping supply later)
+!                   -------------------------
                     gsshare=0.
                     gscu=0.
-c                   -------------------------
+!                   -------------------------
                     if(holdfs+holdfj+holdfo.gt.0.0)then
                       gsshares=gsshare*holdfs/(holdfs+holdfj+holdfo)
                       gssharej=gsshare*holdfj/(holdfs+holdfj+holdfo)
@@ -4203,73 +4207,73 @@ c                   -------------------------
                       gssharej=0.0
                       gsshareo=0.0
                     endif
-c                   -------------------------
+!                   -------------------------
                     gwshare=gfshare+gsshare
                     gcu=gfcu+gscu
-c                   -------------------------
-c                 endif
-c                   -------------------------
+!                   -------------------------
+!                 endif
+!                   -------------------------
                   case default
                     write (*,*)'invalid value of gmode(i,m)',
      &                         i,m,gmode(i,m)
                     stop
                 end select !(gmode(i,m))
-c               -------------------------
+!               -------------------------
               case default
                 write (*,*)'invalid value of isuply, ',isuply
                 stop
             end select !(isuply)
-c           endif
-Cjhb=&==================================================================
-C           Now that the CU from surface sources has been determined...
-C           RESET IWR ON LANDS THAT HAVE GW SUPPLIES TO BE THE UNMET IWR
-Cjhb=&==================================================================
+!           endif
+!jhb=&==================================================================
+!           Now that the CU from surface sources has been determined...
+!           RESET IWR ON LANDS THAT HAVE GW SUPPLIES TO BE THE UNMET IWR
+!jhb=&==================================================================
             gsreq(m,l) = gsreq(m,l) - gscu
             gsreqdef(m,l) = max(gsreqdef(m,l)-gscu,0.0)
             gfreq(m,l) = gfreq(m,l) - gfcu
             gfreqdef(m,l) = max(gfreqdef(m,l)-gfcu,0.0)
             gwreqdef(m,l) = gsreqdef(m,l) + gfreqdef(m,l)
-Cjhb=&==================================================================
-C          DISTRIBUTE THE CALCULATED CU TO THE SR, JR and OTH FARM DELIVERIES
-C          note that so far we are still only dealing with farm deliveries
-C          from surface water diversions
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!          DISTRIBUTE THE CALCULATED CU TO THE SR, JR and OTH FARM DELIVERIES
+!          note that so far we are still only dealing with farm deliveries
+!          from surface water diversions
+!jhb=&==================================================================
 46          continue
             if(DistByPriority)then
-c             ----------------------------------------------------------
-c             distribute the cu by priority - meet IWR first from sr deliv,
-c             then from jr then last from other
-c             this is the default behavior
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
+!             distribute the cu by priority - meet IWR first from sr deliv,
+!             then from jr then last from other
+!             this is the default behavior
+!             ----------------------------------------------------------
               sfcus=min(sfcu,max(sfshares*fleff(i,m),0.))
               sfcuj=min(sfcu-sfcus,max(sfsharej*fleff(i,m),0.))
               sfcuo=min(sfcu-sfcus-sfcuj,max(sfshareo*fleff(i,m),0.)) !sfshareo could be negative - don't let sfcuo be neg though!
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
               sscus=min(sscu,max(ssshares*speff(i,m),0.))
               sscuj=min(sscu-sscus,max(sssharej*speff(i,m),0.))
               sscuo=min(sscu-sscus-sscuj,max(ssshareo*speff(i,m),0.)) !ssshareo could be negative - don't let sscuo be neg though!
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
               gfcus=min(gfcu,max(gfshares*fleff(i,m),0.))
               gfcuj=min(gfcu-gfcus,max(gfsharej*fleff(i,m),0.))
               gfcuo=min(gfcu-gfcus-gfcuj,max(gfshareo*fleff(i,m),0.)) !gfshareo could be negative - don't let gfcuo be neg though!
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
               gscus=min(gscu,max(gsshares*speff(i,m),0.))
               gscuj=min(gscu-gscus,max(gssharej*speff(i,m),0.))
               gscuo=min(gscu-gscus-gscuj,max(gsshareo*speff(i,m),0.)) !gsshareo could be negative - don't let gscuo be neg though!
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
             else
-c             ----------------------------------------------------------
-c             distribute the cu to each priority
-c             prorate equally based on the delivery
-c             ----------------------------------------------------------
-c             this method is NOT used in any scenario,
-c               so make sure it stops the code if it ends up here...
+!             ----------------------------------------------------------
+!             distribute the cu to each priority
+!             prorate equally based on the delivery
+!             ----------------------------------------------------------
+!             this method is NOT used in any scenario,
+!               so make sure it stops the code if it ends up here...
               write(*,*)
      &          'invalid value of DistByPriority ',DistByPriority
               write(999,*)
      &          'invalid value of DistByPriority ',DistByPriority
               stop
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
               if(sfshare.eq.0.0)then
                 sfcus=0.0
                 sfcuj=0.0
@@ -4279,7 +4283,7 @@ c             ----------------------------------------------------------
                 sfcuj=sfcu*sfsharej/sfshare
                 sfcuo=sfcu*sfshareo/sfshare
               endif               
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
               if(ssshare.eq.0.0)then
                 sscus=0.0
                 sscuj=0.0
@@ -4289,7 +4293,7 @@ c             ----------------------------------------------------------
                 sscuj=sscu*sssharej/ssshare
                 sscuo=sscu*ssshareo/ssshare
               endif               
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
               if(gfshare.eq.0.0)then
                 gfcus=0.0
                 gfcuj=0.0
@@ -4299,7 +4303,7 @@ c             ----------------------------------------------------------
                 gfcuj=gfcu*gfsharej/gfshare
                 gfcuo=gfcu*gfshareo/gfshare
               endif               
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
               if(gsshare.eq.0.0)then
                 gscus=0.0
                 gscuj=0.0
@@ -4309,42 +4313,42 @@ c             ----------------------------------------------------------
                 gscuj=gscu*gssharej/gsshare
                 gscuo=gscu*gsshareo/gsshare
               endif               
-c             ----------------------------------------------------------
+!             ----------------------------------------------------------
             endif
-Cjhb=&==================================================================
-C           ADD UP THE CU VALUES TO GET A TOTAL SR, JR AND OTHER CU
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           ADD UP THE CU VALUES TO GET A TOTAL SR, JR AND OTHER CU
+!jhb=&==================================================================
             holds=sfcus+sscus+gfcus+gscus
             holdj=sfcuj+sscuj+gfcuj+gscuj
             holdo=sfcuo+sscuo+gfcuo+gscuo
-c           ------------------------------------------------------------
+!           ------------------------------------------------------------
             crop_cus(m,l)=crop_cus(m,l)+holds
             crop_cus(m,13)=crop_cus(m,13)+holds
             crop_cus(nyrs1,l)=crop_cus(nyrs1,l)+holds
-c           ------------------------------------------------------------
+!           ------------------------------------------------------------
             crop_cuj(m,l)=crop_cuj(m,l)+holdj
             crop_cuj(m,13)=crop_cuj(m,13)+holdj
             crop_cuj(nyrs1,l)=crop_cuj(nyrs1,l)+holdj
-c           ------------------------------------------------------------
+!           ------------------------------------------------------------
             crop_cuo(m,l) = crop_cuo(m,l)+holdo
             crop_cuo(m,13)=crop_cuo(m,13)+holdo
             crop_cuo(nyrs1,l)=crop_cuo(nyrs1,l)+holdo
-Cjhb=&==================================================================
-C           TOTAL CU FROM SURFACE SOURCES
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           TOTAL CU FROM SURFACE SOURCES
+!jhb=&==================================================================
             holdt = holds+holdj+holdo
             crop_cut(m,l) =crop_cut(m,l)+ holdt
             crop_cut(m,13)=crop_cut(m,13)+holdt
             crop_cut(nyrs1,l)=crop_cut(nyrs1,l)+holdt
-Cjhb=&==================================================================
-Cjhb Feb 2011 Ack - this was bad, bad nomenclature!!
-Cjhb Feb 2011   this is actually EXCESS EFFICIENT DELIVERIES, so the
-Cjhb Feb 2011   variables are BADLY named.  Should have been xseff or something similar
-C           Determine unused (inefficient) farm deliveries from surface water sources
-C           sfinefs - 's'w only, 'f'lood irrigated, 's'enior - 'inef'ficient farm deliveries
-C           sfinefsx- sw only, flood irrigated, senior - inef soil deliveries
-C           etc.
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb Feb 2011 Ack - this was bad, bad nomenclature!!
+!jhb Feb 2011   this is actually EXCESS EFFICIENT DELIVERIES, so the
+!jhb Feb 2011   variables are BADLY named.  Should have been xseff or something similar
+!           Determine unused (inefficient) farm deliveries from surface water sources
+!           sfinefs - 's'w only, 'f'lood irrigated, 's'enior - 'inef'ficient farm deliveries
+!           sfinefsx- sw only, flood irrigated, senior - inef soil deliveries
+!           etc.
+!jhb=&==================================================================
             sfinefs=max(0.0,sfshares-sfcus/fleff(i,m))
             sfinefsx=sfinefs*fleff(i,m)
             sfinefj=max(0.0,sfsharej-sfcuj/fleff(i,m))
@@ -4353,7 +4357,7 @@ Cjhb=&==================================================================
             sfinefox=sfinefo*fleff(i,m)
             sfinef =sfinefs +sfinefj +sfinefo
             sfinefx=sfinefsx+sfinefjx+sfinefox
-c           ------------------------------------------------------------
+!           ------------------------------------------------------------
             ssinefs=max(0.0,ssshares-sscus/speff(i,m))
             ssinefsx=ssinefs*speff(i,m)
             ssinefj=max(0.0,sssharej-sscuj/speff(i,m))
@@ -4362,7 +4366,7 @@ c           ------------------------------------------------------------
             ssinefox=ssinefo*speff(i,m)
             ssinef =ssinefs +ssinefj +ssinefo
             ssinefx=ssinefsx+ssinefjx+ssinefox
-c           ------------------------------------------------------------
+!           ------------------------------------------------------------
             gfinefs=max(0.0,gfshares-gfcus/fleff(i,m))
             gfinefsx=gfinefs*fleff(i,m)
             gfinefj=max(0.0,gfsharej-gfcuj/fleff(i,m))
@@ -4371,7 +4375,7 @@ c           ------------------------------------------------------------
             gfinefox=gfinefo*fleff(i,m)
             gfinef =gfinefs +gfinefj +gfinefo
             gfinefx=gfinefsx+gfinefjx+gfinefox
-c           ------------------------------------------------------------
+!           ------------------------------------------------------------
             gsinefs=max(0.0,gsshares-gscus/speff(i,m))
             gsinefsx=gsinefs*speff(i,m)
             gsinefj=max(0.0,gssharej-gscuj/speff(i,m))
@@ -4380,44 +4384,44 @@ c           ------------------------------------------------------------
             gsinefox=gsinefo*speff(i,m)
             gsinef =gsinefs +gsinefj +gsinefo
             gsinefx=gsinefsx+gsinefjx+gsinefox
-c           ------------------------------------------------------------
+!           ------------------------------------------------------------
             inefs=sfinefsx+ssinefsx+gfinefsx+gsinefsx
             inefj=sfinefjx+ssinefjx+gfinefjx+gsinefjx
             inefo=sfinefox+ssinefox+gfinefox+gsinefox
-Cjhb=&==================================================================
-C           CALCULATE SENIOR DIVERSIONS INTO SOIL MOISTURE
-Cjhb=&==================================================================
-C           current soil moisture space available
-C           soil moisture calculations for whole structure
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           CALCULATE SENIOR DIVERSIONS INTO SOIL MOISTURE
+!jhb=&==================================================================
+!           current soil moisture space available
+!           soil moisture calculations for whole structure
+!jhb=&==================================================================
             if(iprtysm.eq.1)then !use priorities in soil moisture accounting
               smspc=max(0.0,spcapz-soiltots) !move out old jr and old other water to make room for new senior water
             else !do not use priorities in soil moisture accounting
               smspc=max(0.0,spcapz-soiltot) !don't move out any water old water; only fill empty space
             endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
             holds1=min(inefs,smspc) !minimum of inef senior soil deliv and available soil space
-Cjhb=&==================================================================
-c           grb 5-7-00 add following test to prevent small rounding errors
+!jhb=&==================================================================
+!           grb 5-7-00 add following test to prevent small rounding errors
             if (holds1.gt.-.1.and.holds1.lt.0.1) holds1=0 
-Cjhb=&==================================================================
+!jhb=&==================================================================
             soil_cus(m,l)     = soil_cus(m,l)     + holds1
             soil_cus(m,13)    = soil_cus(m,13)    + holds1
             soil_cus(nyrs1,l) = soil_cus(nyrs1,l) + holds1
-Cjhb=&==================================================================
-C           calculate existing junior and other water that have been pushed out
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           calculate existing junior and other water that have been pushed out
+!jhb=&==================================================================
             if(iprtysm.eq.1)then !use priorities in soil moisture accounting
-c             pushed out jr sm = jr before - max possible jr after
-c             pushed out jr sm = jr before - (spcapz-new sr total sm)
-c             pushed out jr sm = soiltotj - (spcapz-(soiltots+holds1))
+!             pushed out jr sm = jr before - max possible jr after
+!             pushed out jr sm = jr before - (spcapz-new sr total sm)
+!             pushed out jr sm = soiltotj - (spcapz-(soiltots+holds1))
               pojsm=max(0.0,soiltotj-(spcapz-(soiltots+holds1)))          !pushed out junior water by senior
-c             pushed out oth sm = oth before - max possible oth after
-cjhb Feb 2011 FIXED a logic problem in the following code that occasionally caused
-cjhb Feb 2011   an errant "pushed out other" value that resulted in
-cjhb Feb 2011   negative soil moisture values
-c             pushed out oth sm = oth before - (spcapz-(new sr total sm+new jr total)
-c             pushed out oth sm = soiltoto - (spcapz-(soiltots+holds1+(soiltotj-pojsm))
+!             pushed out oth sm = oth before - max possible oth after
+!jhb Feb 2011 FIXED a logic problem in the following code that occasionally caused
+!jhb Feb 2011   an errant "pushed out other" value that resulted in
+!jhb Feb 2011   negative soil moisture values
+!             pushed out oth sm = oth before - (spcapz-(new sr total sm+new jr total)
+!             pushed out oth sm = soiltoto - (spcapz-(soiltots+holds1+(soiltotj-pojsm))
               poosm=max(0.0,
      &                  soiltoto-(spcapz-(soiltots+holds1+
      &                                            (soiltotj-pojsm))))    !pushed out other water by senior
@@ -4427,45 +4431,45 @@ c             pushed out oth sm = soiltoto - (spcapz-(soiltots+holds1+(soiltotj-
             endif
             soiltotj = soiltotj-pojsm                                    !this is ok, since either pojsm or holdj1 is >0 but not both
             soiltoto = soiltoto-poosm                                    !this is ok, since either poosm or holdo1 is >0 but not both
-Cjhb=&==================================================================
-C           CALCULATE JUNIOR DIVERSIONS INTO SOIL MOISTURE
-Cjhb=&==================================================================
-C           current soil moisture space available
-C           soil moisture calculations for whole structure
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           CALCULATE JUNIOR DIVERSIONS INTO SOIL MOISTURE
+!jhb=&==================================================================
+!           current soil moisture space available
+!           soil moisture calculations for whole structure
+!jhb=&==================================================================
             if(iprtysm.eq.1)then !use priorities in soil moisture accounting
               smspc=max(0.0,spcapz-(soiltots+holds1)-(soiltotj))        !move out other water to make room for new junior water
             else !do not use priorities in soil moisture accounting
               smspc=max(0.0,spcapz-(soiltot+holds1))
             endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
             holdj1=min(inefj,smspc) !minimum of inef junior soil deliv and soil space
-Cjhb=&==================================================================
-c           grb 5-7-00 add following test to prevent small rounding errors
+!jhb=&==================================================================
+!           grb 5-7-00 add following test to prevent small rounding errors
             if (holdj1.gt.-.1.and.holdj1.lt.0.1) holdj1=0 
-Cjhb=&==================================================================
+!jhb=&==================================================================
             soil_cuj(m,l)     = soil_cuj(m,l)     + holdj1
             soil_cuj(m,13)    = soil_cuj(m,13)    + holdj1
             soil_cuj(nyrs1,l) = soil_cuj(nyrs1,l) + holdj1
-Cjhb=&==================================================================
-C           calculate additional existing other water that has been pushed out by junior
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           calculate additional existing other water that has been pushed out by junior
+!jhb=&==================================================================
             if(iprtysm.eq.1)then !use priorities in soil moisture accounting
-c             pushed out oth sm = oth before - max possible oth after
-c             pushed out oth sm = oth before - (total sm space - (new sr total sm + new jr total))
-c             pushed out oth sm = soiltoto - (spcapz-(soiltots+holds1+soiltotj+holdj1))
+!             pushed out oth sm = oth before - max possible oth after
+!             pushed out oth sm = oth before - (total sm space - (new sr total sm + new jr total))
+!             pushed out oth sm = soiltoto - (spcapz-(soiltots+holds1+soiltotj+holdj1))
               poosmbj=max(0.0,
      &              soiltoto-(spcapz-(soiltots+holds1+soiltotj+holdj1))) !pushed out other water by junior
             else
               poosmbj=0.0                                                !pushed out other water by junior
             endif
             soiltoto = soiltoto-poosmbj                                  !this is ok, since either poosm or holdo1 is >0 but not both (if water was pushed out, then there is no room to add!)
-Cjhb=&==================================================================
-C           CALCULATE OTHER DIVERSIONS INTO SOIL MOISTURE
-Cjhb=&==================================================================
-C           current soil moisture space available
-C           soil moisture calculations for whole structure
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           CALCULATE OTHER DIVERSIONS INTO SOIL MOISTURE
+!jhb=&==================================================================
+!           current soil moisture space available
+!           soil moisture calculations for whole structure
+!jhb=&==================================================================
             if(iprtysm.eq.1)then !use priorities in soil moisture accounting
               smspc=max(0.0,spcapz-(soiltots+holds1)
      &                            -(soiltotj+holdj1)
@@ -4475,121 +4479,125 @@ Cjhb=&==================================================================
      &                            -(soiltotj+holdj1)
      &                            - soiltoto)                            !calculate remaining soil moisture space for new other water, if any
             endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
             holdo1=min(inefo,smspc) !minimum of inef junior soil deliv and soil space
-Cjhb=&==================================================================
-c           grb 5-7-00 add following test to prevent small rounding errors
+!jhb=&==================================================================
+!           grb 5-7-00 add following test to prevent small rounding errors
             if (holdo1.gt.-.1.and.holdo1.lt.0.1) holdo1=0 
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!           jhb 3-4-11 add following to continue to keep track of soil
+!             moisture space because we are adding gw to sm later
+            smspc = smspc - holdo1 
+!jhb=&==================================================================
             soil_cuo(m,l)     = soil_cuo(m,l)     + holdo1
             soil_cuo(m,13)    = soil_cuo(m,13)    + holdo1
             soil_cuo(nyrs1,l) = soil_cuo(nyrs1,l) + holdo1
-Cjhb=&==================================================================
-Cjhb          create new array storing pushed out "other" soil moisture
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb          create new array storing pushed out "other" soil moisture
+!jhb=&==================================================================
             soil_cujout(m,l)=soil_cujout(m,l)+pojsm
             soil_cujout(m,13)=soil_cujout(m,13)+pojsm
-           soil_cujout(nyrs1,1)=soil_cujout(nyrs1,l)+pojsm
+            soil_cujout(nyrs1,1)=soil_cujout(nyrs1,l)+pojsm
             soil_cuoout(m,l)=soil_cuoout(m,l)+poosm+poosmbj
             soil_cuoout(m,13)=soil_cuoout(m,13)+poosm+poosmbj
-           soil_cuoout(nyrs1,1)=soil_cuoout(nyrs1,l)+poosm+poosmbj
-Cjhb=&==================================================================
+            soil_cuoout(nyrs1,1)=soil_cuoout(nyrs1,l)+poosm+poosmbj
+!jhb=&==================================================================
 
-Cjhb=&==================================================================
-C           OLD CODE
-cCjhb=&==================================================================
-cC-----------------Senior Diversion to Soil Zone
-c             if(gmode(i,m) .eq. 1) then
-cCjhb=&==================================================================
-cc              gw mode 1 - maximize supply - no sw for gw spr acreage,
-cc              put on spr acreage first
-cCjhb=&==================================================================
-cc              LftOvr=[senior farm deliv] - [total used deliv]
-cc              LftOvr=[left-over senior water]
-c               LftOvr=holdfs-(sfcu+gfcu)/fleff(i,m)-sscu/speff(i,m)
-cc              LftOvrSF=[left-over senior water]*[sw fl acres]/([sw fl acres]+[sw sp acres]+[gw fl acres])
-cc              LftOvrSF=excess senior water distr to sw fl, sw sp, gw fl, but NOT gw sp 
-c               LftOvrSF=LftOvr*(swflac(i,m))
-c     &                 /(swflac(i,m)+swgwflac(i,m)+swspac(i,m))
-cc              LftOvrSS=[left-over senior water]*[sw sp acres]/([sw fl acres]+[sw sp acres]+[gw fl acres])
-c               LftOvrSS=LftOvr*(swspac(i,m))
-c     &                 /(swflac(i,m)+swgwflac(i,m)+swspac(i,m))
-c               sfshare=max(0.,LftOvrSF*fleff(i,m))
-c               ssshare=max(0.,LftOvrSS*speff(i,m))
-c               swshare=sfshare+ssshare
-cc              LftOvrGF=[left-over senior water]*[gw fl acres]/([sw fl acres]+[sw sp acres]+[gw fl acres])
-c               LftOvrGF=LftOvr*(swgwflac(i,m))
-c     &                 /(swflac(i,m)+swgwflac(i,m)+swspac(i,m))
-c               gfshare=max(0.,LftOvrGF*fleff(i,m))
-c               gsshare=0.
-c               gwshare=gfshare+gsshare
-c             else
-cCjhb=&==================================================================
-cc              gw mode 2 or 3 - mutual ditch
-cCjhb=&==================================================================
-c               sfshare=max(0.,(sfshare-sfcu/fleff(i,m))*fleff(i,m))
-c               ssshare=max(0.,(ssshare-sscu/speff(i,m))*speff(i,m))
-c               swshare=sfshare+ssshare
-c               gfshare=max(0.,(gfshare-gfcu/fleff(i,m))*fleff(i,m))
-c               gsshare=max(0.,(gsshare-gscu/speff(i,m))*speff(i,m))
-c               gwshare=gfshare+gsshare
-c             endif
-cCjhb=&==================================================================
-c             if(isuply.eq.1.or.isuply.eq.4) holds1 =
-c     :		   min(swshare+gfshare+gsshare,(spcapz-soiltot))
-c             if((isuply.eq.2.or.isuply.eq.3).and.iprtysm.eq.0) holds1= 
-c     :		   min(holdfs*wghteff-holds,(spcapz-soiltot))
-cc grb 5-9-00 add following line for senior water to soil zone if water rights operated
-c             If((isuply.eq.2.or.isuply.eq.3).and.iprtysm.eq.1) holds1=
-c     :          min(holdfs*wghteff-holds,(spcapz-soiltots-soiltoto))
-cCjhb=&==================================================================
-cc grb 5-7-00 add following test to prevent small rounding errors
-c             if (holds1.gt.-.1.and.holds1.lt.0.1) holds1=0 
-cCjhb=&==================================================================
-c             soil_cus(m,l) = soil_cus(m,l) +holds1
-c             soil_cus(m,13)=soil_cus(m,13)+holds1
-c             soil_cus(nyrs1,l)=soil_cus(nyrs1,l)+holds1
-cCjhb=&==================================================================
-cc grb add logic for senior water pushing out junior water - following 10 lines
-c             pojsm=0
-c             if (iprtysm.gt.0.and.(isuply.eq.2.or.isuply.eq.3)) then
-cc grb 05-25-01 add hold1 to following statement to avoid exceed soil capacity
-c                if ((soiltot+holds1).gt.spcapz) then
-c                     pojsm=soiltot+holds1-spcapz
-c                endif
-c                if (pojsm.le.0.and.pojsm.ge.-.1) pojsm=0
-c                soil_cujout(m,l)=soil_cujout(m,l)+pojsm
-c                soil_cujout(m,13)=soil_cujout(m,13)+pojsm
-c                soil_cujout(nyrs1,1)=soil_cujout(nyrs1,l)+pojsm
-c                soiltotj=soiltotj-pojsm
-c                soiltot=soiltot-pojsm
-c             endif
-cC-----------------Junior Diversion to Soil Zone                               
-c             holdj1=min(holdfj*wghteff-holdj,spcapz-
-c     :                  (soiltot+ holds1))
-c             if (holdj1.gt.-.1.and.holdj1.lt.0.1) holdj1=0 
-c             soil_cuj(m,l) = soil_cuj(m,l)+holdj1
-c             soil_cuj(m,13)=soil_cuj(m,13)+holdj1
-c             soil_cuj(nyrs1,l)=soil_cuj(nyrs1,l)+holdj1
-cC-----------------Other Diversion to Soil Zone              
-c             holdo1 = min(holdfo*wghteff-holdo,spcapz - (soiltot+ 
-c     :               holds1 + holdj1))
-c             if (holdo1.gt.-.1.and.holdo1.lt.0.1) holdo1=0 
-c             soil_cuo(m,l) = soil_cuo(m,l)+holdo1
-c             soil_cuo(m,13)=soil_cuo(m,13)+holdo1
-c             soil_cuo(nyrs1,l)=soil_cuo(nyrs1,l)+holdo1
-cCjhb=&==================================================================
+!jhb=&==================================================================
+!           OLD CODE
+!Cjhb=&==================================================================
+!C-----------------Senior Diversion to Soil Zone
+!             if(gmode(i,m) .eq. 1) then
+!Cjhb=&==================================================================
+!c              gw mode 1 - maximize supply - no sw for gw spr acreage,
+!c              put on spr acreage first
+!Cjhb=&==================================================================
+!c              LftOvr=[senior farm deliv] - [total used deliv]
+!c              LftOvr=[left-over senior water]
+!               LftOvr=holdfs-(sfcu+gfcu)/fleff(i,m)-sscu/speff(i,m)
+!c              LftOvrSF=[left-over senior water]*[sw fl acres]/([sw fl acres]+[sw sp acres]+[gw fl acres])
+!c              LftOvrSF=excess senior water distr to sw fl, sw sp, gw fl, but NOT gw sp 
+!               LftOvrSF=LftOvr*(swflac(i,m))
+!     &                 /(swflac(i,m)+swgwflac(i,m)+swspac(i,m))
+!c              LftOvrSS=[left-over senior water]*[sw sp acres]/([sw fl acres]+[sw sp acres]+[gw fl acres])
+!               LftOvrSS=LftOvr*(swspac(i,m))
+!     &                 /(swflac(i,m)+swgwflac(i,m)+swspac(i,m))
+!               sfshare=max(0.,LftOvrSF*fleff(i,m))
+!               ssshare=max(0.,LftOvrSS*speff(i,m))
+!               swshare=sfshare+ssshare
+!c              LftOvrGF=[left-over senior water]*[gw fl acres]/([sw fl acres]+[sw sp acres]+[gw fl acres])
+!               LftOvrGF=LftOvr*(swgwflac(i,m))
+!     &                 /(swflac(i,m)+swgwflac(i,m)+swspac(i,m))
+!               gfshare=max(0.,LftOvrGF*fleff(i,m))
+!               gsshare=0.
+!               gwshare=gfshare+gsshare
+!             else
+!Cjhb=&==================================================================
+!c              gw mode 2 or 3 - mutual ditch
+!Cjhb=&==================================================================
+!               sfshare=max(0.,(sfshare-sfcu/fleff(i,m))*fleff(i,m))
+!               ssshare=max(0.,(ssshare-sscu/speff(i,m))*speff(i,m))
+!               swshare=sfshare+ssshare
+!               gfshare=max(0.,(gfshare-gfcu/fleff(i,m))*fleff(i,m))
+!               gsshare=max(0.,(gsshare-gscu/speff(i,m))*speff(i,m))
+!               gwshare=gfshare+gsshare
+!             endif
+!Cjhb=&==================================================================
+!             if(isuply.eq.1.or.isuply.eq.4) holds1 =
+!     :		   min(swshare+gfshare+gsshare,(spcapz-soiltot))
+!             if((isuply.eq.2.or.isuply.eq.3).and.iprtysm.eq.0) holds1= 
+!     :		   min(holdfs*wghteff-holds,(spcapz-soiltot))
+!c grb 5-9-00 add following line for senior water to soil zone if water rights operated
+!             If((isuply.eq.2.or.isuply.eq.3).and.iprtysm.eq.1) holds1=
+!     :          min(holdfs*wghteff-holds,(spcapz-soiltots-soiltoto))
+!Cjhb=&==================================================================
+!c grb 5-7-00 add following test to prevent small rounding errors
+!             if (holds1.gt.-.1.and.holds1.lt.0.1) holds1=0 
+!Cjhb=&==================================================================
+!             soil_cus(m,l) = soil_cus(m,l) +holds1
+!             soil_cus(m,13)=soil_cus(m,13)+holds1
+!             soil_cus(nyrs1,l)=soil_cus(nyrs1,l)+holds1
+!Cjhb=&==================================================================
+!c grb add logic for senior water pushing out junior water - following 10 lines
+!             pojsm=0
+!             if (iprtysm.gt.0.and.(isuply.eq.2.or.isuply.eq.3)) then
+!c grb 05-25-01 add hold1 to following statement to avoid exceed soil capacity
+!                if ((soiltot+holds1).gt.spcapz) then
+!                     pojsm=soiltot+holds1-spcapz
+!                endif
+!                if (pojsm.le.0.and.pojsm.ge.-.1) pojsm=0
+!                soil_cujout(m,l)=soil_cujout(m,l)+pojsm
+!                soil_cujout(m,13)=soil_cujout(m,13)+pojsm
+!                soil_cujout(nyrs1,1)=soil_cujout(nyrs1,l)+pojsm
+!                soiltotj=soiltotj-pojsm
+!                soiltot=soiltot-pojsm
+!             endif
+!C-----------------Junior Diversion to Soil Zone                               
+!             holdj1=min(holdfj*wghteff-holdj,spcapz-
+!     :                  (soiltot+ holds1))
+!             if (holdj1.gt.-.1.and.holdj1.lt.0.1) holdj1=0 
+!             soil_cuj(m,l) = soil_cuj(m,l)+holdj1
+!             soil_cuj(m,13)=soil_cuj(m,13)+holdj1
+!             soil_cuj(nyrs1,l)=soil_cuj(nyrs1,l)+holdj1
+!C-----------------Other Diversion to Soil Zone              
+!             holdo1 = min(holdfo*wghteff-holdo,spcapz - (soiltot+ 
+!     :               holds1 + holdj1))
+!             if (holdo1.gt.-.1.and.holdo1.lt.0.1) holdo1=0 
+!             soil_cuo(m,l) = soil_cuo(m,l)+holdo1
+!             soil_cuo(m,13)=soil_cuo(m,13)+holdo1
+!             soil_cuo(nyrs1,l)=soil_cuo(nyrs1,l)+holdo1
+!Cjhb=&==================================================================
 
-Cjhb=&==================================================================
-C           CALCULATE TOTAL DIVERSIONS INTO SOIL MOISTURE
-Cjhb=&==================================================================
-C-----------------Total Diversion to Soil Zone                       
+!jhb=&==================================================================
+!           CALCULATE TOTAL DIVERSIONS INTO SOIL MOISTURE
+!jhb=&==================================================================
+!-----------------Total Diversion to Soil Zone                       
             holdt1 = holds1+holdj1+holdo1
             soil_cu(m,l)     = soil_cus(m,l)+soil_cuj(m,l)+soil_cuo(m,l)
             soil_cu(m,13)    = soil_cu(m,13)    + holdt1
             soil_cu(nyrs1,l) = soil_cu(nyrs1,l) + holdt1
-Cjhb        ------------------------------------------------------------
-c           grb 05-11-00 adding additional check on soil moisture contents - next six lines
+!jhb        ------------------------------------------------------------
+!           grb 05-11-00 adding additional check on soil moisture contents - next six lines
             if(soil_cu(m,l).lt.(-0.05)) then
               write(0,*)
      &          "Stopping in WSUPSUM-soil moisture less than zero"
@@ -4609,103 +4617,103 @@ c           grb 05-11-00 adding additional check on soil moisture contents - nex
               write(0,*) "soiltot=",soiltot
               stop
             endif       
-Cjhb        ------------------------------------------------------------
-C--         update soil moisture contents for diversions to soil
-Cjhb        ------------------------------------------------------------
+!jhb        ------------------------------------------------------------
+!--         update soil moisture contents for diversions to soil
+!jhb        ------------------------------------------------------------
             soiltots = soiltots + holds1
             soiltotj = soiltotj + holdj1
             soiltoto = soiltoto + holdo1
             soiltot  = soiltots + soiltotj + soiltoto
-Cjhb=&==================================================================
+!jhb=&==================================================================
 
-Cjhb=&==================================================================
-C           CALCULATE DIVERSIONS TO UNMET IWR FROM SOIL MOISTURE
-Cjhb=&==================================================================
-c           grb 5-05-2000 need initialization of swhold and other variables in next 3 lines
+!jhb=&==================================================================
+!           CALCULATE DIVERSIONS TO UNMET IWR FROM SOIL MOISTURE
+!jhb=&==================================================================
+!           grb 5-05-2000 need initialization of swhold and other variables in next 3 lines
             sfhold=0.0
             sshold=0.0
             swhold=0.0
             gfhold=0.0
             gshold=0.0
-Cjhb        ------------------------------------------------------------
-Cjhb        check for unmet IWR
-Cjhb        ------------------------------------------------------------
+!jhb        ------------------------------------------------------------
+!jhb        check for unmet IWR
+!jhb        ------------------------------------------------------------
             IF (holds+holdj+holdo.lt.reqreq(m,l)) then !there is unmet IWR
-Cjhb          ----------------------------------------------------------
-Cjhb          old way
-Cjhb          ----------------------------------------------------------
-Cjhb          use soil moisture water to meet unmet IWR
-Cjhb          first on sw fl, then on sw spr, then on gw fl, then on gw spr
-Cjhb          gmode=1 or gmode=3, no soil moisture to gw spr land
-Cjhb          ----------------------------------------------------------
-c              sfhold=min(sfreq(m,l)-sfcu,
-c     &                   soiltot)
-Cjhb          ----------------------------------------------------------
-c              sshold=min(ssreq(m,l)-sscu,
-c     &                   soiltot-sfhold)
-Cjhb          ----------------------------------------------------------
-c              swhold=sfhold+sshold
-Cjhb          ----------------------------------------------------------
-Cjhb          note that gfreq(m,l) and gsreq(m,l) have ALREADY been reduced by the CU from sw sources
-Cjhb          ----------------------------------------------------------
-c              gfhold=min(gfreq(m,l),
-c     &                   soiltot-sfhold-sshold)
-Cjhb          ----------------------------------------------------------
-c              select case (gmode(i,m))
-c                case (1,3) !no soil moisture for gw spr cu
-c                  gshold=0.0
-c                case default
-c                  gshold=min(gsreq(m,l),
-c     &                       soiltot-sfhold-sshold-gfhold)
-c              end select
-Cjhb          ----------------------------------------------------------
-Cjhb          new way
-Cjhb          ----------------------------------------------------------
-Cjhb          total soil moisture water available is prorated to meet
-Cjhb            unmet IWR on each land category by acreage
-Cjhb          note: if gmode=1 or gmode=3, no soil moisture to gw spr
-Cjhb            land at all- split the total between the other three
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!jhb          old way
+!jhb          ----------------------------------------------------------
+!jhb          use soil moisture water to meet unmet IWR
+!jhb          first on sw fl, then on sw spr, then on gw fl, then on gw spr
+!jhb          gmode=1 or gmode=3, no soil moisture to gw spr land
+!jhb          ----------------------------------------------------------
+!              sfhold=min(sfreq(m,l)-sfcu,
+!     &                   soiltot)
+!jhb          ----------------------------------------------------------
+!              sshold=min(ssreq(m,l)-sscu,
+!     &                   soiltot-sfhold)
+!jhb          ----------------------------------------------------------
+!              swhold=sfhold+sshold
+!jhb          ----------------------------------------------------------
+!jhb          note that gfreq(m,l) and gsreq(m,l) have ALREADY been reduced by the CU from sw sources
+!jhb          ----------------------------------------------------------
+!              gfhold=min(gfreq(m,l),
+!     &                   soiltot-sfhold-sshold)
+!jhb          ----------------------------------------------------------
+!              select case (gmode(i,m))
+!                case (1,3) !no soil moisture for gw spr cu
+!                  gshold=0.0
+!                case default
+!                  gshold=min(gsreq(m,l),
+!     &                       soiltot-sfhold-sshold-gfhold)
+!              end select
+!jhb          ----------------------------------------------------------
+!jhb          new way
+!jhb          ----------------------------------------------------------
+!jhb          total soil moisture water available is prorated to meet
+!jhb            unmet IWR on each land category by acreage
+!jhb          note: if gmode=1 or gmode=3, no soil moisture to gw spr
+!jhb            land at all- split the total between the other three
+!jhb          ----------------------------------------------------------
               select case (gmode(i,m))
                 case (1,3) !no soil moisture for gw spr cu
                   SMTotAcr=t_area(i,m)-swgwspac(i,m)
                 case default
                   SMTotAcr=t_area(i,m)
               end select
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
               if(SMTotAcr.gt.0.0)then
-Cjhb          ----------------------------------------------------------
-Cjhb            sfhold=min(unmet IWR, avail soil moisture)
+!jhb          ----------------------------------------------------------
+!jhb            sfhold=min(unmet IWR, avail soil moisture)
                 sfhold=min(sfreq(m,l)-sfcu,soiltot*swflac(i,m)/SMTotAcr)
-Cjhb            sshold=min(unmet IWR, avail soil moisture)
+!jhb            sshold=min(unmet IWR, avail soil moisture)
                 sshold=min(ssreq(m,l)-sscu,soiltot*swspac(i,m)/SMTotAcr)
                 swhold=sfhold+sshold
-Cjhb            gfhold=min(unmet IWR, avail soil moisture)
+!jhb            gfhold=min(unmet IWR, avail soil moisture)
                 gfhold=min(gfreq(m,l),soiltot*swgwflac(i,m)/SMTotAcr)
-Cjhb            --------------------------------------------------------
+!jhb            --------------------------------------------------------
                 select case (gmode(i,m))
                   case (1,3) !no soil moisture for gw spr cu
-Cjhb                gshold=0.0
+!jhb                gshold=0.0
                     gshold=0.0
                   case default
-Cjhb                gshold=min(unmet IWR, avail soil moisture)
+!jhb                gshold=min(unmet IWR, avail soil moisture)
                     gshold=min(gsreq(m,l),
      &                         soiltot*swgwspac(i,m)/SMTotAcr)
                 end select
-Cjhb            --------------------------------------------------------
-c               old code
-Cjhb            --------------------------------------------------------
-c               withdraw water from soil zone, soiltot=contents       
-c                swhold=min((swreq(m,l) - swcu),soiltots)
-c                if (isuply.eq.2.or.isuply.eq.3) swhold=
-c     :            min(swreq(m,l)-swcu,soiltot) 
-c                gfhold=min(gfreq(m,l),(soiltots-swhold))
-c                if(gmode(i,m) .ne. 2) then
-c                  gshold = 0
-c                else
-c                  gshold=min(gsreq(m,l),(soiltots-swhold-gfhold))
-c                endif
-Cjhb            --------------------------------------------------------
+!jhb            --------------------------------------------------------
+!               old code
+!jhb            --------------------------------------------------------
+!               withdraw water from soil zone, soiltot=contents       
+!                swhold=min((swreq(m,l) - swcu),soiltots)
+!                if (isuply.eq.2.or.isuply.eq.3) swhold=
+!     :            min(swreq(m,l)-swcu,soiltot) 
+!                gfhold=min(gfreq(m,l),(soiltots-swhold))
+!                if(gmode(i,m) .ne. 2) then
+!                  gshold = 0
+!                else
+!                  gshold=min(gsreq(m,l),(soiltots-swhold-gfhold))
+!                endif
+!jhb            --------------------------------------------------------
               else
                 sfhold=0.0
                 sshold=0.0
@@ -4713,35 +4721,35 @@ Cjhb            --------------------------------------------------------
                 gfhold=0.0
                 gshold=0.0
               endif
-Cjhb          ----------------------------------------------------------
-Cjhb          reset the IWR on gw lands to account for soil moisture meeting some CU
-Cjhb          the remaining CU on gw lands (gfreq and gsreq) will be met by pumping (if possible) later in the code
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!jhb          reset the IWR on gw lands to account for soil moisture meeting some CU
+!jhb          the remaining CU on gw lands (gfreq and gsreq) will be met by pumping (if possible) later in the code
+!jhb          ----------------------------------------------------------
               gfreq(m,l) = gfreq(m,l) - gfhold
               gfreqdef(m,l) = max(gfreqdef(m,l)-gfhold,0.0)
               gsreq(m,l) = gsreq(m,l) - gshold
               gsreqdef(m,l) = max(gsreqdef(m,l)-gshold,0.0)
               gwreqdef(m,l) = gfreqdef(m,l) + gsreqdef(m,l)
-Cjhb          ----------------------------------------------------------
-Cjhb          holdcrop = total CU from soil moisture
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!jhb          holdcrop = total CU from soil moisture
+!jhb          ----------------------------------------------------------
               holdcrop = sfhold + sshold + gfhold + gshold
-Cjhb          ----------------------------------------------------------
-cc             grb 5-10-00 include total soil moisture if operating water rights - correction to LRCWE - next two lines
-c              if (isuply.eq.2.or.isuply.eq.3) holdcrop=
-c     &          min(swreq(m,l)-swcu,soiltot) 
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!c             grb 5-10-00 include total soil moisture if operating water rights - correction to LRCWE - next two lines
+!              if (isuply.eq.2.or.isuply.eq.3) holdcrop=
+!     &          min(swreq(m,l)-swcu,soiltot) 
+!jhb          ----------------------------------------------------------
               cropcusoil(m,l)     = cropcusoil(m,l)     + holdcrop
               cropcusoil(m,13)    = cropcusoil(m,13)    + holdcrop
               cropcusoil(nyrs1,l) = cropcusoil(nyrs1,l) + holdcrop
-Cjhb          ----------------------------------------------------------
-c              if (soiltot.gt. 0) then ! this was to prevent division by 0 i think
-Cjhb          --------------------------------------------------------
-Cjhb          now split the total cu from soil moisture over the priority soil moisture pools
-Cjhb          notice the order is now SENIOR then JUNIOR then OTHER if soil moisture priority accounting is on
-Cjhb          (it used to be sr then other then jr)
-Cjhb          otherwise just prorate accd to the relative size of the various pools
-Cjhb          --------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!              if (soiltot.gt. 0) then ! this was to prevent division by 0 i think
+!jhb          --------------------------------------------------------
+!jhb          now split the total cu from soil moisture over the priority soil moisture pools
+!jhb          notice the order is now SENIOR then JUNIOR then OTHER if soil moisture priority accounting is on
+!jhb          (it used to be sr then other then jr)
+!jhb          otherwise just prorate accd to the relative size of the various pools
+!jhb          --------------------------------------------------------
               select case (iprtysm)
                 case (1)
                   holdcrops = min(holdcrop,
@@ -4822,10 +4830,10 @@ Cjhb          --------------------------------------------------------
               cropcusoilo(m,l)     = cropcusoilo(m,l)     + holdcropo
               cropcusoilo(m,13)    = cropcusoilo(m,13)    + holdcropo
               cropcusoilo(nyrs1,l) = cropcusoilo(nyrs1,l) + holdcropo
-c              endif
-Cjhb          ----------------------------------------------------------
-Cjhb          reset soil moisture pool values after being used to for unmet IWR
-Cjhb          ----------------------------------------------------------
+!              endif
+!jhb          ----------------------------------------------------------
+!jhb          reset soil moisture pool values after being used to for unmet IWR
+!jhb          ----------------------------------------------------------
               soiltot  = soiltot  - holdcrop
               soiltots = soiltots - holdcrops
               soiltotj = soiltotj - holdcropj
@@ -4834,19 +4842,23 @@ Cjhb          ----------------------------------------------------------
               if(soiltots .gt. -0.001.and.soiltots.lt.0.001)soiltots=0.0
               if(soiltotj .gt. -0.001.and.soiltotj.lt.0.001)soiltotj=0.0
               if(soiltoto .gt. -0.001.and.soiltoto.lt.0.001)soiltoto=0.0
+!jhb=&==================================================================
+  !           jhb 3-4-11 add following to continue to keep track of soil
+!               moisture space because we are adding gw to sm later
+              smspc = spcapz - soiltot 
             endif
-Cjhb        ------------------------------------------------------------
-Cjhb        soil moisture error checking
-Cjhb        ------------------------------------------------------------
+!jhb        ------------------------------------------------------------
+!jhb        soil moisture error checking
+!jhb        ------------------------------------------------------------
             if (soiltot.lt.(-.05)) then
               write(0,*) "error-soil<0",soiltot,holdcrop,spcapz
             endif
             if (soiltot.gt.(spcapz+.05)) then 
               write(0,*)"error-soil>cap",soiltot,holdt1,spcapz
               write(0,*) 'structure = ', twdid
-c              pause
+!              pause
             endif
-Cjhb        ------------------------------------------------------------
+!jhb        ------------------------------------------------------------
             soiltotts(m,l)      = soiltotts(m,l)      + soiltots
             soiltotts(m,13)     = soiltotts(m,13)     + soiltotts(m,l)
             soiltotts(nyrs1,l)  = soiltotts(nyrs1,l)  + soiltots
@@ -4865,69 +4877,90 @@ Cjhb        ------------------------------------------------------------
             soiltott(nyrs1,13)  = soiltott(nyrs1,13)  + soiltot
             wbu(i,nyrs1,13)     = wbu(i,nyrs1,13)     + wbu(i,m,l)
             wbu(i,nyrs1,l)      = wbu(i,nyrs1,l)      + wbu(i,m,l)
-Cjhb        ------------------------------------------------------------
-Cjhb        now estimate cu from sw source and soil moisture
-Cjhb        ------------------------------------------------------------
-C-----------------Senior Estimated Crop CU
+!jhb        ------------------------------------------------------------
+!jhb        now estimate cu from sw source and soil moisture
+!jhb        ------------------------------------------------------------
+!-----------------Senior Estimated Crop CU
 47          holdests = holdcrops + holds
             estcrps(m,l)     = estcrps(m,l)     + holdests
             estcrps(m,13)    = estcrps(m,13)    + holdests
             estcrps(nyrs1,l) = estcrps(nyrs1,l) + holdests
-C-----------------Junior Estimated Crop CU
+!-----------------Junior Estimated Crop CU
             holdestj = holdcropj + holdj
             estcrpj(m,l)     = estcrpj(m,l)     + holdestj
             estcrpj(m,13)    = estcrpj(m,13)    + holdestj
             estcrpj(nyrs1,l) = estcrpj(nyrs1,l) + holdestj
-C-----------------Other Estimated Crop CU
+!-----------------Other Estimated Crop CU
             holdesto = holdcropo + holdo
             estcrpo(m,l)     = estcrpo(m,l)     + holdesto
             estcrpo(m,13)    = estcrpo(m,13)    + holdesto
             estcrpo(nyrs1,l) = estcrpo(nyrs1,l) + holdesto
-C-----------------Total Estimated Crop CU
+!-----------------Total Estimated Crop CU
             holdestt = holdcrops + holdcropj + holdcropo + holdt
             estcrpt(i,m,l)     = estcrpt(i,m,l)     + holdestt  
             estcrpt(i,m,13)    = estcrpt(i,m,13)    + holdestt
             estcrpt(i,nyrs1,l) = estcrpt(i,nyrs1,l) + holdestt
 
-Cjhb=&==================================================================
-C           CALCULATE PUMPING TO UNMET IWR
-Cjhb=&==================================================================
-c           now try to make up deficit by pumping
+!jhb=&==================================================================
+!           CALCULATE PUMPING TO UNMET IWR
+!jhb=&==================================================================
+!           now try to make up deficit by pumping
             if(isuply .eq. 4) then
-Cjhb          ----------------------------------------------------------
-Cjhb          groundwater scenario
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!jhb          groundwater scenario
+!jhb          ----------------------------------------------------------
               if(iflag2(i) .eq. 1) then
-Cjhb            --------------------------------------------------------
-Cjhb            has historical pumping data in the PVH file
-Cjhb            --------------------------------------------------------
+!jhb            --------------------------------------------------------
+!jhb            has historical pumping data in the PVH file
+!jhb            --------------------------------------------------------
                 if((gsreq(m,l)+gfreq(m,l)) .gt. 0) then
-Cjhb              ------------------------------------------------------
-Cjhb              still has unmet IWR
-Cjhb                gfreq and gsreq were reduced by cu from sw sources and cu from soil moisture
-Cjhb              ------------------------------------------------------
-Cjhb                old way
-Cjhb              ------------------------------------------------------
-Cjhb                prorate historical pumping to fl and spr lands by unmet IWR
-Cjhb              ------------------------------------------------------
-Cjhb                12/07 change back to old method
-Cjhb              ------------------------------------------------------
+!jhb              ------------------------------------------------------
+!jhb              still has unmet IWR
+!jhb                gfreq and gsreq were reduced by cu from sw sources and cu from soil moisture
+!jhb              ------------------------------------------------------
+!jhb                old way
+!jhb              ------------------------------------------------------
+!jhb                prorate historical pumping to fl and spr lands by unmet IWR
+!jhb              ------------------------------------------------------
+!jhb                12/07 change back to old method
+!jhb              ------------------------------------------------------
 !                  gsdiv(m,l)=
 !     &              mprate(i,m,l)*gsreq(m,l)/(gsreq(m,l)+gfreq(m,l))
 !                  gsdiv(m,l)=max(gsdiv(m,l),0.)
 !                  gfdiv(m,l)=
 !     &              mprate(i,m,l)*gfreq(m,l)/(gsreq(m,l)+gfreq(m,l))
 !                  gfdiv(m,l)=max(gfdiv(m,l),0.)
-Cjhb              ------------------------------------------------------
-Cjhb 2/17/2011    distribute pvh (preset) pumping to spr first, then fl
-Cjhb              ------------------------------------------------------
+!jhb              ------------------------------------------------------
+!jhb 2/17/2011    distribute pvh (preset) pumping to spr first, then fl
+!jhb              ------------------------------------------------------
                   gsdiv(m,l)=min(mprate(i,m,l), gsreq(m,l)/speff(i,m))
-                  gfdiv(m,l)=mprate(i,m,l)-gsdiv(m,l)
-Cjhb              ------------------------------------------------------
-Cjhb                an unused way
-Cjhb              ------------------------------------------------------
-Cjhb                prorate historical pumping to fl and spr lands by acreage
-Cjhb              ------------------------------------------------------
+!jhb              ------------------------------------------------------
+!jhb 3/04/2011    change this logic to:
+!jhb                1.  first meet any unmet IWR on gw fl lands
+!jhb                2.  then put excess efficient pumping into soil
+!jhb                      moisture as space is avail.
+!jhb                3.  and then finally add any remaining pumping
+!jhb                      into the gw pumping to flood irrig category
+!jhb              ------------------------------------------------------
+!                 gfdiv(m,l)=mprate(i,m,l)-gsdiv(m,l)
+                  gfdiv(m,l) = max(min(mprate(i,m,l)-gsdiv(m,l),
+     &                             gfreq(m,l)/fleff(i,m)),0.0)
+                  mprate_x=max(mprate(i,m,l)-gsdiv(m,l)-gfdiv(m,l),0.0)
+                  smre_eff=(swgwflac(i,m)*fleff(i,m)+
+     &                      swgwspac(i,m)*speff(i,m))/
+     &                     (swgwflac(i,m)+swgwspac(i,m))
+                  gw2sm=min(mprate_x,smspc/smre_eff)
+                  gfdiv(m,l) = gfdiv(m,l)+
+     &                         max(mprate_x-gw2sm,0.0)
+                  gwholds1=gw2sm*smre_eff
+                  gwholdj1=0.0
+                  gwholdo1=0.0
+                  gwholdt1=gwholds1+gwholdj1+gwholdo1
+!jhb              ------------------------------------------------------
+!jhb                an unused way
+!jhb              ------------------------------------------------------
+!jhb                prorate historical pumping to fl and spr lands by acreage
+!jhb              ------------------------------------------------------
 !                  if((swgwflac(i,m)+swgwspac(i,m)).gt.0.0)then
 !                    gsdiv(m,l)=mprate(i,m,l)*swgwspac(i,m)/
 !     &                           (swgwflac(i,m)+swgwspac(i,m))
@@ -4940,23 +4973,39 @@ Cjhb              ------------------------------------------------------
 !                    gfdiv(m,l)=0.0
 !                  endif
                 else
-Cjhb              ------------------------------------------------------
-Cjhb              no unmet IWR
-Cjhb              ------------------------------------------------------
-Cjhb                old way
-Cjhb              ------------------------------------------------------
-Cjhb                 put all historical pumping on flood land
-Cjhb              ------------------------------------------------------
-Cjhb                12/07 change back to old method
-Cjhb              ------------------------------------------------------
-                  gfdiv(m,l)=mprate(i,m,l)
-                  gfdiv(m,l)=max(gfdiv(m,l),0.)
+!jhb              ------------------------------------------------------
+!jhb              no unmet IWR
+!jhb              ------------------------------------------------------
+!jhb                old way
+!jhb              ------------------------------------------------------
+!jhb                 put all historical pumping on flood land
+!jhb              ------------------------------------------------------
+!jhb                12/07 change back to old method
+!jhb              ------------------------------------------------------
+!jhb 3/04/2011    change this logic to:
+!jhb                1.  first put excess efficient pumping into soil
+!jhb                      moisture as space is avail.
+!jhb                2.  and then add any remaining pumping
+!jhb                      into the gw pumping to flood irrig category
+!jhb              ------------------------------------------------------
+!                  gfdiv(m,l)=mprate(i,m,l)
+!                  gfdiv(m,l)=max(gfdiv(m,l),0.)
                   gsdiv(m,l)=0
-Cjhb              ------------------------------------------------------
-Cjhb                new way
-Cjhb              ------------------------------------------------------
-Cjhb                prorate historical pumping to fl and spr lands by acreage
-Cjhb              ------------------------------------------------------
+!jhb              ------------------------------------------------------
+                  smre_eff=(swgwflac(i,m)*fleff(i,m)+
+     &                      swgwspac(i,m)*speff(i,m))/
+     &                     (swgwflac(i,m)+swgwspac(i,m))
+                  gw2sm=min(mprate(i,m,l),smspc/smre_eff)
+                  gfdiv(m,l) = max(mprate(i,m,l)-gw2sm,0.0)
+                  gwholds1=gw2sm*smre_eff
+                  gwholdj1=0.0
+                  gwholdo1=0.0
+                  gwholdt1=gwholds1+gwholdj1+gwholdo1
+!jhb              ------------------------------------------------------
+!jhb                new way
+!jhb              ------------------------------------------------------
+!jhb                prorate historical pumping to fl and spr lands by acreage
+!jhb              ------------------------------------------------------
 !                  if((swgwflac(i,m)+swgwspac(i,m)).gt.0.0)then
 !                    gsdiv(m,l)=mprate(i,m,l)*swgwspac(i,m)/
 !     &                           (swgwflac(i,m)+swgwspac(i,m))
@@ -4969,16 +5018,24 @@ Cjhb              ------------------------------------------------------
 !                    gfdiv(m,l)=0.0
 !                  endif
                 endif
+!jhb              ------------------------------------------------------
+!jhb 3/04/2011    keep track of this new output
+!jhb              ------------------------------------------------------
+                gwdivsm(m,l) = gw2sm 
+                soiltot  = soiltot + gwholdt1
+                soiltots = soiltots + gwholds1
+                soiltotj = soiltotj + gwholdj1
+                soiltoto = soiltoto + gwholdo1
               else 
-Cjhb            --------------------------------------------------------
-Cjhb            does NOT have historical pumping data in the PVH file
-Cjhb              meet unmet IWR on spr lands first, fl lands last, up to max pumping rate, mprate
-Cjhb            --------------------------------------------------------
-cjhb            add check for deficit irrigation parameter
+!jhb            --------------------------------------------------------
+!jhb            does NOT have historical pumping data in the PVH file
+!jhb              meet unmet IWR on spr lands first, fl lands last, up to max pumping rate, mprate
+!jhb            --------------------------------------------------------
+!jhb            add check for deficit irrigation parameter
                 if(def_irr_frac(i,m).lt.1.0)then
-Cjhb              --------------------------------------------------------
-Cjhb              old way
-Cjhb              --------------------------------------------------------
+!jhb              --------------------------------------------------------
+!jhb              old way
+!jhb              --------------------------------------------------------
                   if((gsreqdef(m,l)/speff(i,m)) .gt. mprate(i,m,l)) then
                      if(ipresim .ne. 1) call lw_update(57,bas_id(i))
                   endif 
@@ -4992,9 +5049,9 @@ Cjhb              --------------------------------------------------------
      &                         mprate(i,m,l)-gsdiv(m,l))
                   gfdiv(m,l)=max(gfdiv(m,l),0.)
                 else
-Cjhb              --------------------------------------------------------
-Cjhb              old way
-Cjhb              --------------------------------------------------------
+!jhb              --------------------------------------------------------
+!jhb              old way
+!jhb              --------------------------------------------------------
                   if((gsreq(m,l)/speff(i,m)) .gt. mprate(i,m,l)) then
                      if(ipresim .ne. 1) call lw_update(57,bas_id(i))
                   endif 
@@ -5007,11 +5064,11 @@ Cjhb              --------------------------------------------------------
                   gfdiv(m,l)=min(gfreq(m,l)/fleff(i,m),
      &                         mprate(i,m,l)-gsdiv(m,l))
                   gfdiv(m,l)=max(gfdiv(m,l),0.)
-Cjhb              --------------------------------------------------------
-Cjhb              new way
-Cjhb              --------------------------------------------------------
-Cjhb              prorate max pumping to fl and spr lands by acreage
-Cjhb              --------------------------------------------------------
+!jhb              --------------------------------------------------------
+!jhb              new way
+!jhb              --------------------------------------------------------
+!jhb              prorate max pumping to fl and spr lands by acreage
+!jhb              --------------------------------------------------------
 !                  if((swgwflac(i,m)+swgwspac(i,m)).gt.0.0)then
 !                    gsdiv(m,l)=min(gsreq(m,l)/speff(i,m),
 !     &                           mprate(i,m,l)*swgwspac(i,m)/
@@ -5026,65 +5083,100 @@ Cjhb              --------------------------------------------------------
 !                    gfdiv(m,l)=0.0
 !                  endif
                 endif
+!jhb              --------------------------------------------------------
+!jhb              go ahead and update these totals here, even though for
+!jhb                now there are not any gw to sm deliveries in this case (yet)
+                gw2sm = 0.0
+                gwdivsm(m,l) = 0.0
+                gwholds1 = 0.0
+                gwholdj1 = 0.0
+                gwholdo1 = 0.0
+                gwholdt1 = gwholds1 + gwholdj1 + gwholdo1 
+                smre_eff=(swgwflac(i,m)*fleff(i,m)+
+     &                    swgwspac(i,m)*speff(i,m))/
+     &                   (swgwflac(i,m)+swgwspac(i,m))
+!jhb              --------------------------------------------------------
+                soiltot  = soiltot + gwholdt1
+                soiltots = soiltots + gwholds1
+                soiltotj = soiltotj + gwholdj1
+                soiltoto = soiltoto + gwholdo1
               endif
-Cjhb          ----------------------------------------------------------
-              gdiv(m,l)      = gsdiv(m,l)     + gfdiv(m,l)
+!jhb          ----------------------------------------------------------
+!jhb          added the gw to sm component to the balance 
+!              gdiv(m,l)      = gsdiv(m,l)    + gfdiv(m,l)
+              gdiv(m,l)      = gsdiv(m,l)    + gfdiv(m,l) + gwdivsm(m,l)
+!jhb          ----------------------------------------------------------
               gdiv(m,13)     = gdiv(m,13)     + gdiv(m,l)
               gdiv(nyrs1,l)  = gdiv(nyrs1,l)  + gdiv(m,l)
               gsdiv(m,13)    = gsdiv(m,13)    + gsdiv(m,l)
               gsdiv(nyrs1,l) = gsdiv(nyrs1,l) + gsdiv(m,l)
               gfdiv(m,13)    = gfdiv(m,13)    + gfdiv(m,l)
               gfdiv(nyrs1,l) = gfdiv(nyrs1,l) + gfdiv(m,l)
-Cjhb          ----------------------------------------------------------
-Cjhb          determine CU met by groundwater pumping
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!jhb          added the gw to sm component to the balance 
+              gwdivsm(m,13)    = gwdivsm(m,13)    + gwdivsm(m,l)
+              gwdivsm(nyrs1,l) = gwdivsm(nyrs1,l) + gwdivsm(m,l)
+!jhb          ----------------------------------------------------------
+!jhb          determine CU met by groundwater pumping
+!jhb          ----------------------------------------------------------
               if(iflag2(i) .eq. 1) then
-Cjhb            --------------------------------------------------------
-Cjhb            has historical pumping data in the PVH file
-Cjhb            --------------------------------------------------------
-c                gwtemp=gsdiv(m,l)*speff(i,m)+gfdiv(m,l)*fleff(i,m)
-c                gwcu(m,l)=min(gwtemp,(gsreq(m,l)+gfreq(m,l)))
-c                if(gwcu(m,l) .lt. 1) gwcu(m,l)=0.
+!jhb            --------------------------------------------------------
+!jhb            has historical pumping data in the PVH file
+!jhb            --------------------------------------------------------
+!                gwtemp=gsdiv(m,l)*speff(i,m)+gfdiv(m,l)*fleff(i,m)
+!                gwcu(m,l)=min(gwtemp,(gsreq(m,l)+gfreq(m,l)))
+!                if(gwcu(m,l) .lt. 1) gwcu(m,l)=0.
                 gwtempf=gfdiv(m,l)*fleff(i,m)
                 gwcuf=min(gwtempf,gfreq(m,l))
                 gwtemps=gsdiv(m,l)*speff(i,m)
                 gwcus=min(gwtemps,gsreq(m,l))
-                gwcu(m,l)=gwcuf+gwcus
-                if(gwcu(m,l) .lt. 1) gwcu(m,l)=0.
+!jhb          ----------------------------------------------------------
+!jhb          added the gw to sm component to the balance 
+                gwcusm=gwdivsm(m,l)*smre_eff
+!                gwcu(m,l)=gwcuf+gwcus
+                gwcu(m,l)=gwcuf+gwcus+gwcusm
+                if(gwcu(m,l) .lt. 1.) gwcu(m,l)=0.
               else
-Cjhb            --------------------------------------------------------
-Cjhb            does NOT have historical pumping data in the PVH file
-Cjhb            --------------------------------------------------------
+!jhb            --------------------------------------------------------
+!jhb            does NOT have historical pumping data in the PVH file
+!jhb            --------------------------------------------------------
                 gwcu(m,l)=gsdiv(m,l)*speff(i,m) + gfdiv(m,l)*fleff(i,m)
                 gwtempf=gfdiv(m,l)*fleff(i,m)
                 gwcuf=min(gwtempf,gfreq(m,l))
                 gwtemps=gsdiv(m,l)*speff(i,m)
                 gwcus=min(gwtemps,gsreq(m,l))
-                gwcu(m,l)=gwcuf+gwcus
-                if(gwcu(m,l) .lt. 1) gwcu(m,l)=0.
+!jhb          ----------------------------------------------------------
+!jhb          added the gw to sm component to the balance 
+                gwcusm=gwdivsm(m,l)*smre_eff
+!                gwcu(m,l)=gwcuf+gwcus
+                gwcu(m,l)=gwcuf+gwcus+gwcusm
+                if(gwcu(m,l) .lt. 1.) gwcu(m,l)=0.
               endif
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
               gwcu(m,13)    = gwcu(m,13)    + gwcu(m,l)
               gwcu(nyrs1,l) = gwcu(nyrs1,l) + gwcu(m,l)
-Cjhb          ----------------------------------------------------------
-Cjhb          total gw pumping that did not go to CU on gw lands
-Cjhb          ----------------------------------------------------------
+!jhb          ----------------------------------------------------------
+!jhb          total gw pumping that did not go to CU on gw lands
+!jhb          ----------------------------------------------------------
               gwrof         = gfdiv(m,l)    - gwcuf
               gwros         = gsdiv(m,l)    - gwcus
-              gwro(m,l)     = gwrof         + gwros
+!jhb          ----------------------------------------------------------
+!jhb          added the gw to sm component to the balance 
+              gwrosm        = gwdivsm(m,l)  - gwcusm
+              gwro(m,l)     = gwrof + gwros + gwrosm
               gwro(m,13)    = gwro(m,13)    + gwro(m,l)
               gwro(nyrs1,l) = gwro(nyrs1,l) + gwro(m,l)
             endif
 
-Cjhb=&==================================================================
-C           after pass 1 through wsupsum (itime=1)
-C           and if the remaining surface water IWR (swreq) is nonzero
-C           only  calculate and sum (for an average later)
-C           the percentage shortage on sw only lands
-Cjhb=&==================================================================
-c
-c Determine surface water only land shortage by WD
-c  check here
+!jhb=&==================================================================
+!           after pass 1 through wsupsum (itime=1)
+!           and if the remaining surface water IWR (swreq) is nonzero
+!           only  calculate and sum (for an average later)
+!           the percentage shortage on sw only lands
+!jhb=&==================================================================
+!
+! Determine surface water only land shortage by WD
+!  check here
              if(itime .eq. 1) then
                if(swreq(m,l) .gt. 0) then
                  met=(swcu+swhold)/swreq(m,l)
@@ -5120,62 +5212,62 @@ c  check here
                  idcnt(id,m,l)=idcnt(id,m,l)+1
                endif
              endif
-C-----------------Senior Unlagged Return Flow
-Cjhb=&==================================================================
-c jhb 5-16-07 tailwater is now grouped with other water (not senior)
-c jhb 5-16-07 so it should be lagged with it as well
-c             holdlags(m,l) = holdps-holds-holds1-arech(m,l)+tail(i,m,l)
-c jhb 8-09-07 ray b rquest: include the recharge water in the unused (lagged) portion
-c             holdlags(m,l) = holdps-holds-holds1-arech(m,l)
+!-----------------Senior Unlagged Return Flow
+!jhb=&==================================================================
+! jhb 5-16-07 tailwater is now grouped with other water (not senior)
+! jhb 5-16-07 so it should be lagged with it as well
+!             holdlags(m,l) = holdps-holds-holds1-arech(m,l)+tail(i,m,l)
+! jhb 8-09-07 ray b rquest: include the recharge water in the unused (lagged) portion
+!             holdlags(m,l) = holdps-holds-holds1-arech(m,l)
              holdlags(m,l) = holdps-holds-holds1
-c            ew/jhb 09/2008 - these calculations will not be correct when tail() < 0
+!            ew/jhb 09/2008 - these calculations will not be correct when tail() < 0
              if(tail(i,m,l).lt.0.0)then
-c              fix this value to account for negative tailwater adjustments to farm deliveries
-c              negative tailwater adjustments should NOT show up in unused water
+!              fix this value to account for negative tailwater adjustments to farm deliveries
+!              negative tailwater adjustments should NOT show up in unused water
                holdlags(m,l)=holdlags(m,l)+sen_adj
              endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
              ulags(m,l) = ulags(m,l)+ holdlags(m,l)
              ulags(m,13)=ulags(m,13)+holdlags(m,l)
              ulags(nyrs1,l) =ulags(nyrs1,l)+ holdlags(m,l)
-C-----------------Junior Unlagged Return Flow
+!-----------------Junior Unlagged Return Flow
 
-c grb 4-17-00 add pushed out junior water from soil moisture to unlagged return flows
-Cjhb=&==================================================================
-c jhb 5-16-07 new soil moisture accounting has three kinds of "pushed out" water
-c             pojsm - junior soil moisture pushed out by senior water
-c             poosm - other soil moisture pushed out by senior water
-c             poosmbj - other soil moisture pushed out by junior water
-Cjhb=&==================================================================
+! grb 4-17-00 add pushed out junior water from soil moisture to unlagged return flows
+!jhb=&==================================================================
+! jhb 5-16-07 new soil moisture accounting has three kinds of "pushed out" water
+!             pojsm - junior soil moisture pushed out by senior water
+!             poosm - other soil moisture pushed out by senior water
+!             poosmbj - other soil moisture pushed out by junior water
+!jhb=&==================================================================
              holdlagj(m,l) = holdpj-holdj-holdj1+pojsm
-c            ew/jhb 09/2008 - these calculations will not be correct when tail() < 0
+!            ew/jhb 09/2008 - these calculations will not be correct when tail() < 0
              if(tail(i,m,l).lt.0.0)then
-c              fix this value to account for negative tailwater adjustments to farm deliveries
-c              negative tailwater adjustments should NOT show up in unused water
+!              fix this value to account for negative tailwater adjustments to farm deliveries
+!              negative tailwater adjustments should NOT show up in unused water
                holdlagj(m,l)=holdlagj(m,l)+jun_adj
              endif
              ulagj(m,l) =ulagj(m,l)+ holdlagj(m,l)
              ulagj(m,13)=ulagj(m,13)+holdlagj(m,l)
              ulagj(nyrs1,l) =ulagj(nyrs1,l)+holdlagj(m,l)
-C-----------------Other Unlagged Return Flow						  
-Cjhb=&==================================================================
-c jhb 5-16-07 add pushed out "other" soil moisture
-c jhb 5-16-07 tailwater is now grouped with other water (not senior)
-c jhb 5-16-07 so it should be lagged with it as well
-c             holdlago(m,l)=holdpo-holdo-holdo1
+!-----------------Other Unlagged Return Flow						  
+!jhb=&==================================================================
+! jhb 5-16-07 add pushed out "other" soil moisture
+! jhb 5-16-07 tailwater is now grouped with other water (not senior)
+! jhb 5-16-07 so it should be lagged with it as well
+!             holdlago(m,l)=holdpo-holdo-holdo1
              holdlago(m,l)=holdpo-holdo-holdo1+poosm+poosmbj
      &                     +tail(i,m,l)
-Cjhb=&==================================================================
-c            ew/jhb 09/2008 - these calculations will not be correct when tail() < 0
+!jhb=&==================================================================
+!            ew/jhb 09/2008 - these calculations will not be correct when tail() < 0
              if(tail(i,m,l).lt.0.0)then
-c              fix this value to account for negative tailwater adjustments to farm deliveries
-c              negative tailwater adjustments should NOT show up in unused water
+!              fix this value to account for negative tailwater adjustments to farm deliveries
+!              negative tailwater adjustments should NOT show up in unused water
                holdlago(m,l)=holdlago(m,l)-tail(i,m,l)+oth_adj
              endif
              ulago(m,l) = ulago(m,l)+ holdlago(m,l)
              ulago(m,13)=ulago(m,13)+holdlago(m,l)
              ulago(nyrs1,l) =ulago(nyrs1,l)+holdlago(m,l)
-C-----------------Total Unlagged Return Flow						 
+!-----------------Total Unlagged Return Flow						 
              holdlagt(m,l)= holdlags(m,l)+holdlagj(m,l)+holdlago(m,l)-
      :                      closs(m,l)
              ulagt(m,l)=ulagt(m,l)+ holdlagt(m,l)
@@ -5184,33 +5276,33 @@ C-----------------Total Unlagged Return Flow
              tdp(m,l) = gwro(m,l)+ulagt(m,l)
              tdp(m,13) = tdp(m,13)+gwro(m,l)+ulagt(m,l)
              tdp(nyrs1,l)=tdp(nyrs1,l)+gwro(m,l)+ulagt(m,l)
-C-----------------Senior Surface WAter Return Flow 1st Month
+!-----------------Senior Surface WAter Return Flow 1st Month
              holdlgs=holdlags(m,l)*retn(i,1)
              lagrets(m,l) = lagrets(m,l)+holdlgs
              lagrets(m,13)=lagrets(m,13)+holdlgs
              lagrets(nyrs1,l)=lagrets(nyrs1,l)+holdlgs
-C-----------------Junior Surface Water Return Flow 1st Month        
+!-----------------Junior Surface Water Return Flow 1st Month        
              holdlgj=holdlagj(m,l)*retn(i,1)
              lagretj(m,l) = lagretj(m,l)+holdlgj
              lagretj(m,13)=lagretj(m,13)+holdlgj
              lagretj(nyrs1,l)=lagretj(nyrs1,l)+holdlgj
-C-----------------Other Surface Water Return Flow 1st Month
+!-----------------Other Surface Water Return Flow 1st Month
              holdlgo=holdlago(m,l)*retn(i,1)
              lagreto(m,l) = lagreto(m,l)+holdlgo
              lagreto(m,13)=lagreto(m,13)+holdlgo
              lagreto(nyrs1,l)=lagreto(nyrs1,l)+holdlgo
-C-----------------Total Surface Water Return Flow 1st Month        
+!-----------------Total Surface Water Return Flow 1st Month        
              holdlgt=holdlagt(m,l)*retn(i,1)
              lagrett(m,l) = lagrett(m,l)+holdlgt
              lagrett(m,13)=lagrett(m,13)+holdlgt
              lagrett(nyrs1,l)=lagrett(nyrs1,l)+holdlgt
-C-----------------Surface Diversion to CU and SM
+!-----------------Surface Diversion to CU and SM
              holddiv=holdt+holdt1
              divcu(m,l)=divcu(m,l)+holddiv
              divcu(m,13)=divcu(m,13)+holddiv
              divcu(nyrs1,l)=divcu(nyrs1,l)+holddiv
 
-c  process delayed return flows
+!  process delayed return flows
              rets = 0
              retj = 0
              reto = 0
@@ -5246,69 +5338,69 @@ c  process delayed return flows
                rett = rett + holdlagt(isoyr,isomo)*retn(i,j+1)
               endif
 111        enddo
-C-----------------Senior Lagged Return Flow
+!-----------------Senior Lagged Return Flow
               laglates(m,l) = laglates(m,l)+rets
               laglates(m,13) = laglates(m,13)+rets
               laglates(nyrs1,l) = laglates(nyrs1,l)+rets
-C-----------------Junior Lagged Return Flow		        				
+!-----------------Junior Lagged Return Flow		        				
               laglatej(m,l) = laglatej(m,l)+retj
               laglatej(m,13) = laglatej(m,13)+retj
               laglatej(nyrs1,l) = laglatej(nyrs1,l)+retj
-C-----------------Other Lagged Return Flow		        				
+!-----------------Other Lagged Return Flow		        				
               laglateo(m,l) = laglateo(m,l)+reto
               laglateo(m,13) = laglateo(m,13)+reto
               laglateo(nyrs1,l) = laglateo(nyrs1,l)+reto
-C-----------------Total Lagged Return Flow		        				
+!-----------------Total Lagged Return Flow		        				
               laglatet(m,l) = laglatet(m,l)+rett
               laglatet(m,13) = laglatet(m,13)+rett
               laglatet(nyrs1,l) = laglatet(nyrs1,l)+rett
-C-----------------Total Returns
+!-----------------Total Returns
               holdtret=holdlgt+rett		        
               totret(m,l) = totret(m,l)+holdtret
               totret(m,13) = totret(m,13)+holdtret
               totret(nyrs1,l) = totret(nyrs1,1)+holdtret
-C----Senior River Depletion		   
-c grb 5-12-00 change sign of depletion
+!----Senior River Depletion		   
+! grb 5-12-00 change sign of depletion
               holddeps=-(holdlgs+rets-holdps)
 	        deps(m,l) = deps(m,l)+holddeps
               deps(m,13)=deps(m,13)+holddeps
               deps(nyrs1,l)=deps(nyrs1,l)+holddeps
-C-----------------Junior River Depletion
-c grb 5-12-00 change sign of depletion			
+!-----------------Junior River Depletion
+! grb 5-12-00 change sign of depletion			
               holddepj=-(holdlgj+retj-holdpj)
               depj(m,l) = depj(m,l)+holddepj
               depj(m,13)=depj(m,13)+holddepj
               depj(nyrs1,l)=depj(nyrs1,l)+holddepj
-C-----------------Other River Depletion  
-c grb 5-12-00 change sign of depletion
+!-----------------Other River Depletion  
+! grb 5-12-00 change sign of depletion
 	        holddepo=-(holdlgo+reto-holdpo)
               depo(m,l) = depo(m,l)+holddepo
               depo(m,13)=depo(m,13)+holddepo
               depo(nyrs1,l)=depo(nyrs1,l)+holddepo
-C-----------------Total River Depletion
-c grb 5-12-00 change sign of depletion	
+!-----------------Total River Depletion
+! grb 5-12-00 change sign of depletion	
               holddept=-(holdlgt+rett-divsup(i,m,l))                 
               dept(m,l) = dept(m,l)+holddept
               dept(m,13)=dept(m,13)+holddept
               dept(nyrs1,l)=dept(nyrs1,l)+holddept
 455           continue
-cjhb          ==========================================================
-cjhb 05-18-07 modified to better check the divisors...
-cjhb          ==========================================================
-C-----------------Application Efficiency and "system" efficiency
-c              if (divcu(m,l).ge.0.and.(seniorf(m,l)+juniorf(m,l)+
-c     :            otherf(m,l)-arech(m,l)).gt.0.) then
-c                 effcu(m,l)=(divcu(m,l)/(seniorf(m,l)+
-c     :           juniorf(m,l)+otherf(m,l)-arech(m,l)))*100
-c                 seffcu(m,l)=(divcu(m,l)/(divsup(i,m,l)
-c     :           -arech(m,l)))*100
-c              else
-c
-c ew 8/23/00 if not diversions or demands, set eff = maximum
-c                 effcu(m,l) =0
-c                 seffcu(m,l) =0
-c              endif
-cjhb          ==========================================================
+!jhb          ==========================================================
+!jhb 05-18-07 modified to better check the divisors...
+!jhb          ==========================================================
+!-----------------Application Efficiency and "system" efficiency
+!              if (divcu(m,l).ge.0.and.(seniorf(m,l)+juniorf(m,l)+
+!     :            otherf(m,l)-arech(m,l)).gt.0.) then
+!                 effcu(m,l)=(divcu(m,l)/(seniorf(m,l)+
+!     :           juniorf(m,l)+otherf(m,l)-arech(m,l)))*100
+!                 seffcu(m,l)=(divcu(m,l)/(divsup(i,m,l)
+!     :           -arech(m,l)))*100
+!              else
+!
+! ew 8/23/00 if not diversions or demands, set eff = maximum
+!                 effcu(m,l) =0
+!                 seffcu(m,l) =0
+!              endif
+!jhb          ==========================================================
               if (divcu(m,l).ge.0.and.(seniorf(m,l)+juniorf(m,l)+
      :            otherf(m,l)-arech(m,l)).gt.0.) then
                  effcu(m,l)=(divcu(m,l)/(seniorf(m,l)+
@@ -5323,45 +5415,45 @@ cjhb          ==========================================================
               else
                  seffcu(m,l)=0.0
               endif
-cjhb          ==========================================================
+!jhb          ==========================================================
               if(gdiv(m,l) .gt. 0) then
                  effgw(m,l)=(gwcu(m,l)/gdiv(m,l))
               else
                  effgw(m,l)=0.0
               endif
-cjhb          ==========================================================
-c    &"1111X22233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000"
-c    &"----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
-c    &"    |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |                                  SW Farm Headgate Delivery                            |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  | Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |"
-c    &"    |   |---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
-c    &"    |   |swflac |swspac |swgwfl.|swgwsp.| t_area| ettot | ettot | ettot | ettot | ettot |effppt |effppt |effppt |effppt |effppt | reqt  | reqt  | reqt  | reqt  | reqt  |wbused |wbused |wbused |wbused |wbused |reqreq |reqreq |reqreq |reqreq |reqreq |sfshare|ssshare|gfshare|gsshare| arech | fdiv  | holdfs| holdfj| holdfo| tail  |  fdiv | sfcu  | sscu  | gfcu  | gscu  | holdt | holds | holdj | holdo | holdt | holds1| holds1| holdo1| holdt1| pojsm | poosm |poosmbj|       | ulags | ulagj | ulago | ulagt | sfhold| sshold| gfhold| gshold|holdcrp holdcrpsholdcrpjholdcrpoholdcrp| gfdiv | gsdiv | gdiv  | mprate| gwcuf | gwcus |  gwcu | gwrof | gwros |  gwro |   *   |   *   |   *   |   *   |       |   *   |   *   |   *   |   *   |       |"
-c    &"    |   |---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
-c    &"    |   |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW|  re-  | Total | senior| junior| other | other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | junior| other | other | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total |SW & GW|SW & GW| Total |  Max  |SW & GW|SW & GW| Total |SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |"
-c    &"    |   |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr| charge|       | sw div| sw div| sw div|  tail |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       | by sr | by sr | by jr |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |  Flood|Sprnklr|       |  Rate |  Flood|Sprnklr|       |  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |"
-c    &"Year|Mon|(Acres)|(Acres)|(Acres)|(Acres)|(Acres)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|  (AF) |   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|"
-c    &"----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
+!jhb          ==========================================================
+!    &"1111X22233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000111111112222222233333333444444445555555566666666777777778888888899999999000000001111111122222222333333334444444455555555666666667777777788888888999999990000000011111111222222223333333344444444555555556666666677777777888888889999999900000000"
+!    &"----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
+!    &"    |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |                                  SW Farm Headgate Delivery                            |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  | Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |"
+!    &"    |   |---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
+!    &"    |   |swflac |swspac |swgwfl.|swgwsp.| t_area| ettot | ettot | ettot | ettot | ettot |effppt |effppt |effppt |effppt |effppt | reqt  | reqt  | reqt  | reqt  | reqt  |wbused |wbused |wbused |wbused |wbused |reqreq |reqreq |reqreq |reqreq |reqreq |sfshare|ssshare|gfshare|gsshare| arech | fdiv  | holdfs| holdfj| holdfo| tail  |  fdiv | sfcu  | sscu  | gfcu  | gscu  | holdt | holds | holdj | holdo | holdt | holds1| holds1| holdo1| holdt1| pojsm | poosm |poosmbj|       | ulags | ulagj | ulago | ulagt | sfhold| sshold| gfhold| gshold|holdcrp holdcrpsholdcrpjholdcrpoholdcrp| gfdiv | gsdiv | gdiv  | mprate| gwcuf | gwcus |  gwcu | gwrof | gwros |  gwro |   *   |   *   |   *   |   *   |       |   *   |   *   |   *   |   *   |       |"
+!    &"    |   |---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
+!    &"    |   |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW|  re-  | Total | senior| junior| other | other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | junior| other | other | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total |SW & GW|SW & GW| Total |  Max  |SW & GW|SW & GW| Total |SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |"
+!    &"    |   |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr| charge|       | sw div| sw div| sw div|  tail |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       | by sr | by sr | by jr |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |  Flood|Sprnklr|       |  Rate |  Flood|Sprnklr|       |  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |"
+!    &"Year|Mon|(Acres)|(Acres)|(Acres)|(Acres)|(Acres)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|  (AF) |   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|"
+!    &"----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|"
 
-c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-c         |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |      SW River Diversion       |       SW River Delivery       |  Tail |                                  SW Farm Headgate Delivery                    |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  | Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |
-c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-c         |   |swflac |swspac |swgwfl.|swgwsp.| t_area| ettot | ettot | ettot | ettot | ettot |effppt |effppt |effppt |effppt |effppt | reqt  | reqt  | reqt  | reqt  | reqt  |wbused |wbused |wbused |wbused |wbused |reqreq |reqreq |reqreq |reqreq |reqreq | holdps| holdpj| holdpo| divsup| holdps| holdpj| holdpo| divsup|  tail |sfshare|ssshare|gfshare|gsshare| arech | fdiv  | holdfs| holdfj| holdfo|  fdiv | sfcu  | sscu  | gfcu  | gscu  | holdt | holds | holdj | holdo | holdt | holds1| holds1| holdo1| holdt1| pojsm | poosm |poosmbj|       | ulags | ulagj | ulago | ulagt | sfhold| sshold| gfhold| gshold|holdcrp holdcrpsholdcrpjholdcrpoholdcrp| gfdiv | gsdiv | gdiv  | mprate| gwcuf | gwcus |  gwcu | gwrof | gwros |  gwro |   *   |   *   |   *   |   *   |       |   *   |   *   |   *   |   *   |       |"
-c         |   |swflac |swspac |swgwfl.|swgwsp.| t_area| ettot | ettot | ettot | ettot | ettot |effppt |effppt |effppt |effppt |effppt | reqt  | reqt  | reqt  | reqt  | reqt  |wbused |wbused |wbused |wbused |wbused |reqreq |reqreq |reqreq |reqreq |reqreq | holdps| holdpj| holdpo| divsup| *ceff | *ceff | *ceff | *ceff |       |sfshare|ssshare|gfshare|gsshare| arech | fdiv  | holdfs| holdfj| holdfo|  fdiv | sfcu  | sscu  | gfcu  | gscu  | holdt | holds | holdj | holdo | holdt | holds1| holds1| holdo1| holdt1| pojsm | poosm |poosmbj|       | ulags | ulagj | ulago | ulagt | sfhold| sshold| gfhold| gshold|holdcrp holdcrpsholdcrpjholdcrpoholdcrp| gfdiv | gsdiv | gdiv  | mprate| gwcuf | gwcus |  gwcu | gwrof | gwros |  gwro |   *   |   *   |   *   |   *   |       |   *   |   *   |   *   |   *   |       |"
-c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-c         |   |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | Total |SW Only|SW Only|SW & GW|SW & GW|  re-  | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | junior| other | other | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total |SW & GW|SW & GW| Total |  Max  |SW & GW|SW & GW| Total |SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |
-c         |   |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr| charge|       | sw div| sw div| sw div|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       | by sr | by sr | by jr |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |  Flood|Sprnklr|       |  Rate |  Flood|Sprnklr|       |  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |
-c     Year|Mon|(Acres)|(Acres)|(Acres)|(Acres)|(Acres)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|
-c     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
-cjhb &==================================================================
-cjhb &        OUTPUT THE DETAILS OF THE FOUR LAND CATEGORY
-cjhb &        WATER BUDGET ACCOUNTING
-cjhb &==================================================================
+!     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
+!         |   |           Irrigated Acreage           |          Potential Crop ET            |           Effective Precip            |     Irrigation Water Requirement      |    Winter Precip Carryover Used       |           IWR after WCO               |      SW River Diversion       |       SW River Delivery       |  Tail |                                  SW Farm Headgate Delivery                    |                                   SW to CU                            |     SW to Soil Moisture       |   *Pushed Out* Soil Moisture  | Non-consumed SW (incl sm rel) |                            Soil Moisture To CU                        |      Groundwater Pumping      |   GW Pumping To CU    |Non-Consumed GW Pumping|              Total CU                 |          Total CU Shortage            |
+!     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
+!         |   |swflac |swspac |swgwfl.|swgwsp.| t_area| ettot | ettot | ettot | ettot | ettot |effppt |effppt |effppt |effppt |effppt | reqt  | reqt  | reqt  | reqt  | reqt  |wbused |wbused |wbused |wbused |wbused |reqreq |reqreq |reqreq |reqreq |reqreq | holdps| holdpj| holdpo| divsup| holdps| holdpj| holdpo| divsup|  tail |sfshare|ssshare|gfshare|gsshare| arech | fdiv  | holdfs| holdfj| holdfo|  fdiv | sfcu  | sscu  | gfcu  | gscu  | holdt | holds | holdj | holdo | holdt | holds1| holds1| holdo1| holdt1| pojsm | poosm |poosmbj|       | ulags | ulagj | ulago | ulagt | sfhold| sshold| gfhold| gshold|holdcrp holdcrpsholdcrpjholdcrpoholdcrp| gfdiv | gsdiv | gdiv  | mprate| gwcuf | gwcus |  gwcu | gwrof | gwros |  gwro |   *   |   *   |   *   |   *   |       |   *   |   *   |   *   |   *   |       |"
+!         |   |swflac |swspac |swgwfl.|swgwsp.| t_area| ettot | ettot | ettot | ettot | ettot |effppt |effppt |effppt |effppt |effppt | reqt  | reqt  | reqt  | reqt  | reqt  |wbused |wbused |wbused |wbused |wbused |reqreq |reqreq |reqreq |reqreq |reqreq | holdps| holdpj| holdpo| divsup| *ceff | *ceff | *ceff | *ceff |       |sfshare|ssshare|gfshare|gsshare| arech | fdiv  | holdfs| holdfj| holdfo|  fdiv | sfcu  | sscu  | gfcu  | gscu  | holdt | holds | holdj | holdo | holdt | holds1| holds1| holdo1| holdt1| pojsm | poosm |poosmbj|       | ulags | ulagj | ulago | ulagt | sfhold| sshold| gfhold| gshold|holdcrp holdcrpsholdcrpjholdcrpoholdcrp| gfdiv | gsdiv | gdiv  | mprate| gwcuf | gwcus |  gwcu | gwrof | gwros |  gwro |   *   |   *   |   *   |   *   |       |   *   |   *   |   *   |   *   |       |"
+!     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
+!         |   |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | Total |SW Only|SW Only|SW & GW|SW & GW|  re-  | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total | senior| junior| other | Total | junior| other | other | Total | senior| junior| other | Total |SW Only|SW Only|SW & GW|SW & GW| Total | senior| junior| other | Total |SW & GW|SW & GW| Total |  Max  |SW & GW|SW & GW| Total |SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |SW Only|SW Only|SW & GW|SW & GW| Total |
+!         |   |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr| charge|       | sw div| sw div| sw div|       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |       |       |       |       | by sr | by sr | by jr |       |       |       |       |       |  Flood|Sprnklr|  Flood|Sprnklr|       |       |       |       |       |  Flood|Sprnklr|       |  Rate |  Flood|Sprnklr|       |  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |  Flood|Sprnklr|  Flood|Sprnklr|       |
+!     Year|Mon|(Acres)|(Acres)|(Acres)|(Acres)|(Acres)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|   (AF)|
+!     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|-----------------------|-----------------------|---------------------------------------|---------------------------------------|
+!jhb &==================================================================
+!jhb &        OUTPUT THE DETAILS OF THE FOUR LAND CATEGORY
+!jhb &        WATER BUDGET ACCOUNTING
+!jhb &==================================================================
               if((trim(s4catid).ne."").and.(ipresim.ne.1))then
                 if(trim(twdid(1:12)) .eq. trim(s4catid))then
                 if(t_area(i,m).eq.0.0)then
-c                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.1,4F8.1,32X,5F8.1,9F8.1,16X,3F8.1,16X,3F8.1,16X,3F8.1,5F8.1,5F8.1)')
+!                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.1,4F8.1,32X,5F8.1,9F8.1,16X,3F8.1,16X,3F8.1,16X,3F8.1,5F8.1,5F8.1)')
                   write(413,'(I4,1X,I3,5F8.1,5F8.1,5F8.1,5F8.1,5F8.1,5F8
-     &.1,4F8.1,4F8.1,F8.1,10F8.1,9F8.1,4F8.1,4F8.1,4F8.1,9F8.1,4F8.1,3F8
-     &.1,3F8.1,5F8.1,5F8.1)')
+     &.1,4F8.1,4F8.1,F8.1,10F8.1,9F8.1,4F8.1,4F8.1,4F8.1,9F8.1,5F8.1,4F8
+     &.1,4F8.1,5F8.1,5F8.1)')
      &            nyr1+m-1,l,                                           !year and month index
      &            swflac(i,m),swspac(i,m),swgwflac(i,m),swgwspac(i,m),  !irrigated acreage
      &            t_area(i,m),                                          !irrigated acreage
@@ -5407,9 +5499,10 @@ c                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.
      &            ulagt(m,l),                                           !nonconsumed sw
      &            sfhold,sshold,gfhold,gshold,holdcrop,                 !sm to cu
      &            holdcrops,holdcropj,holdcropo,holdcrop,               !sm to cu
-     &            gfdiv(m,l),gsdiv(m,l),gdiv(m,l),mprate(i,m,l),        !gw pumping
-     &            gwcuf,gwcus,gwcu(m,l),                                !gw pumping to cu
-     &            gwrof,gwros,gwro(m,l),                                !unconsumed gw pumping
+     &            gfdiv(m,l),gsdiv(m,l),gwdivsm(m,l),                   !gw pumping
+     &            gdiv(m,l),mprate(i,m,l),                              !gw pumping
+     &            gwcuf,gwcus,gwcusm,gwcu(m,l),                         !gw pumping to cu
+     &            gwrof,gwros,gwrosm,gwro(m,l),                         !unconsumed gw pumping
      &            sfcu+sfhold,                                          !total cu on sw fl
      &            sscu+sshold,                                          !total cu on sw sp
      &            gfcu+gfhold+gwcuf,                                    !total cu on gw fl
@@ -5421,9 +5514,9 @@ c                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.
      &          reqreq(m,l)*0.0-gscu-gshold-gwcus,                      !total shortage on gw sp
      &            reqreq(m,l)-holdt-holdcrop-gwcu(m,l)                  !total shortage
                 else
-c                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.1,4F8.1,32X,5F8.1,9F8.1,16X,3F8.1,16X,3F8.1,16X,3F8.1,5F8.1,5F8.1)')
+!                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.1,4F8.1,32X,5F8.1,9F8.1,16X,3F8.1,16X,3F8.1,16X,3F8.1,5F8.1,5F8.1)')
                   write(413,'(I4,1X,I3,5F8.1,5F8.1,5F8.1,5F8.1,5F8.1,5F8
-     &.1,4F8.1,4F8.1,F8.1,10F8.1,9F8.1,4F8.1,4F8.1,4F8.1,9F8.1,4F8.1,3F8
+     &.1,4F8.1,4F8.1,F8.1,10F8.1,9F8.1,4F8.1,4F8.1,4F8.1,9F8.1,5F8.1,3F8
      &.1,3F8.1,5F8.1,5F8.1)')
      &            nyr1+m-1,l,                                           !year and month index
      &            swflac(i,m),swspac(i,m),swgwflac(i,m),swgwspac(i,m),  !irrigated acreage
@@ -5470,9 +5563,10 @@ c                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.
      &            ulagt(m,l),                                           !nonconsumed sw
      &            sfhold,sshold,gfhold,gshold,holdcrop,                 !sm to cu
      &            holdcrops,holdcropj,holdcropo,holdcrop,               !sm to cu
-     &            gfdiv(m,l),gsdiv(m,l),gdiv(m,l),mprate(i,m,l),        !gw pumping
-     &            gwcuf,gwcus,gwcu(m,l),                                !gw pumping to cu
-     &            gwrof,gwros,gwro(m,l),                                !unconsumed gw pumping
+     &            gfdiv(m,l),gsdiv(m,l),gwdivsm(m,l),                   !gw pumping
+     &            gdiv(m,l),mprate(i,m,l),                              !gw pumping
+     &            gwcuf,gwcus,gwcusm,gwcu(m,l),                         !gw pumping to cu
+     &            gwrof,gwros,gwrosm,gwro(m,l),                         !unconsumed gw pumping
      &            sfcu+sfhold,                                          !total cu on sw fl
      &            sscu+sshold,                                          !total cu on sw sp
      &            gfcu+gfhold+gwcuf,                                    !total cu on gw fl
@@ -5486,9 +5580,9 @@ c                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.
                 endif
                 endif
               endif
-cjhb &==================================================================
+!jhb &==================================================================
 300         continue
-c    end of month loop
+!    end of month loop
         do l=1,12
            gwp(i,m,l)=gdiv(m,l)
         enddo
@@ -5500,8 +5594,8 @@ c    end of month loop
                 seffcu(m,13)=(divcu(m,13)/(seniorf(m,13)+
      :          juniorf(m,13)+otherf(m,13)+closs(m,13)-arech(m,13)))*100
               else
-c
-c ew 8/23/00 if not diversions or demands, set eff = maximum
+!
+! ew 8/23/00 if not diversions or demands, set eff = maximum
                  effcu(m,13) =0
                  seffcu(m,13) =0
               endif
@@ -5511,12 +5605,12 @@ c ew 8/23/00 if not diversions or demands, set eff = maximum
                  effgw(m,13)=0
               endif
 400     continue
-c    end of year loop
+!    end of year loop
 
-c grb 05-04-2000 added return if in presimulation- following line
-c       ----------------------------------------------------------------
+! grb 05-04-2000 added return if in presimulation- following line
+!       ----------------------------------------------------------------
         if (ipresim.eq.1)  goto 5780
-c       ----------------------------------------------------------------  
+!       ----------------------------------------------------------------  
 
         ceff(i,nyrs1)=0.0
         sfeff(i,nyrs1)=0.0
@@ -5572,7 +5666,7 @@ c       ----------------------------------------------------------------
              do if1=1,iflood
                ifx=if1*2-1
                ify=if1*2
-c
+!
                if(grass(i,m,l,ifx).lt.-1.0)then
                  grass(i,m,13,ifx) = -999.0
                else
@@ -5580,8 +5674,8 @@ c
                  grass(i,nyrs1,l,ifx)=grass(i,nyrs1,l,ifx)+
      1                                grass(i,m,l,ifx)
                endif
-c
-c rrb 2003/06/20; Do not sum area
+!
+! rrb 2003/06/20; Do not sum area
                grass(i,m,13,ify) =  grass(i,m,l,ify)
                grass(i,nyrs1,l,ify)=grass(i,nyrs1,l,ify)+
      1                              grass(i,m,l,ify)
@@ -5589,9 +5683,9 @@ c rrb 2003/06/20; Do not sum area
              end do
            enddo
           enddo
-c
-c -- calculate yearly total - if missing months, total = -999
-c
+!
+! -- calculate yearly total - if missing months, total = -999
+!
       do 405 m=1,nyrs   
           if(iyear(m) .eq. 1) then
              ettot(i,m,13)= -999
@@ -5660,12 +5754,12 @@ c
              reqreqts(nyrs1,13) = reqreqts(nyrs1,13)+reqreqts(m,13)
              divsup(i,nyrs1,13) = divsup(i,nyrs1,13)+divsup(i,m,13)
              wbu(i,nyrs1,13) =wbu(i,nyrs1,13)+wbu(i,m,13)
-c
-c
-c _________________________________________________________
-c
-c rrb 2003/05/19; Allow up to 5 subirrigated crops
-c            grass(i,nyrs1,13) = grass(i,nyrs1,13)+grass(i,m,13)
+!
+!
+! _________________________________________________________
+!
+! rrb 2003/05/19; Allow up to 5 subirrigated crops
+!            grass(i,nyrs1,13) = grass(i,nyrs1,13)+grass(i,m,13)
              tail(i,nyrs1,13) = tail(i,nyrs1,13) + tail(i,m,13)
              do if1=1,iflood
                ifx=if1*2-1
@@ -5732,10 +5826,10 @@ c            grass(i,nyrs1,13) = grass(i,nyrs1,13)+grass(i,m,13)
              reqreqts(nyrs1,13) = reqreqts(nyrs1,13)/iyct
              wbu(i,nyrs1,13)= wbu(i,nyrs1,13)/iyct
              divsup(i,nyrs1,13) = divsup(i,nyrs1,13)/iyct
-c _________________________________________________________
-c
-c rrb 2003/05/19; Allow up to 5 subirrigated crops
-c            grass(i,nyrs1,13) = grass(i,nyrs1,13)/iyct
+! _________________________________________________________
+!
+! rrb 2003/05/19; Allow up to 5 subirrigated crops
+!            grass(i,nyrs1,13) = grass(i,nyrs1,13)/iyct
              tail(i,nyrs1,13)=tail(i,nyrs1,13)/iyct
             
              do if1=1,iflood
@@ -5744,9 +5838,9 @@ c            grass(i,nyrs1,13) = grass(i,nyrs1,13)/iyct
                grass(i,nyrs1,13,ifx) = grass(i,nyrs1,13,ifx)/iyct
                grass(i,nyrs1,13,ify) = grass(i,nyrs1,13,ify)/iyct
              end do
-c
-c _________________________________________________________
-c
+!
+! _________________________________________________________
+!
              ddhmonot(nyrs1,13)=ddhmonot(nyrs1,13)/iyct
              seniorf(nyrs1,13)=seniorf(nyrs1,13)/iyct
              juniorf(nyrs1,13)=juniorf(nyrs1,13)/iyct
@@ -5800,8 +5894,8 @@ c
                seffcu(nyrs1,13) =(divcu(nyrs1,13)/
      :        (divsup(i,nyrs1,13)+tail(i,nyrs1,13)-arech(nyrs1,13)))*100
              else
-c
-c ew 8/23/00 if not diversions or demands, set eff = maximum
+!
+! ew 8/23/00 if not diversions or demands, set eff = maximum
                  effcu(nyrs1,13) =0
                  seffcu(nyrs1,13) =0
              endif
@@ -5817,12 +5911,12 @@ c ew 8/23/00 if not diversions or demands, set eff = maximum
              reqreqts(nyrs1,13) = -999
              divsup(i,nyrs1,13) = -999
              wbu(i,nyrs1,13)= -999
-c
-c _________________________________________________________
-c
-c
-c rrb 2003/05/19; Allow up to 5 subirrigated crops
-c 
+!
+! _________________________________________________________
+!
+!
+! rrb 2003/05/19; Allow up to 5 subirrigated crops
+! 
              tail(i,nyrs1,13)=-999
              do if1=1,iflood
                ifx=if1*2-1
@@ -5830,8 +5924,8 @@ c
                grass(i,nyrs1,13,ifx) = -999
                grass(i,nyrs1,13,ify) = -999
              end do
-c
-c _________________________________________________________
+!
+! _________________________________________________________
 
              ddhmonot(nyrs1,13)= -999
              seniorf(nyrs1,13)= -999
@@ -5881,9 +5975,9 @@ c _________________________________________________________
              seffcu(nyrs1,13)= -999
              effgw(nyrs1,13)= -999
            endif
-c
-c -- calculate average monthly values for all years - divide total by # values
-c
+!
+! -- calculate average monthly values for all years - divide total by # values
+!
          do 410 l=1,12
            if(imonth(l) .ge. 1) then
              ettot(i,nyrs1,l)=ettot(i,nyrs1,l)/imonth(l)
@@ -5891,12 +5985,12 @@ c
              reqt(i,nyrs1,l)=reqt(i,nyrs1,l)/imonth(l)
              reqreqts(nyrs1,l) = reqreqts(nyrs1,l)/imonth(l)
              divsup(i,nyrs1,l) = divsup(i,nyrs1,l)/imonth(l)
-c
-c _________________________________________________________
-c
-c
-c rrb 2003/05/19; Allow up to 5 subirrigated crops
-c 
+!
+! _________________________________________________________
+!
+!
+! rrb 2003/05/19; Allow up to 5 subirrigated crops
+! 
              tail(i,nyrs1,l)=tail(i,nyrs1,l)/imonth(l)
              do if1=1,iflood
                ifx=if1*2-1
@@ -5904,8 +5998,8 @@ c
                grass(i,nyrs1,l,ifx) = grass(i,nyrs1,l,ifx)/imonth(l)
                grass(i,nyrs1,l,ify) = grass(i,nyrs1,l,ify)/imonth(l)
              end do
-c
-c _________________________________________________________
+!
+! _________________________________________________________
 
              ddhmonot(nyrs1,l)=ddhmonot(nyrs1,l)/imonth(l)
              seniorf(nyrs1,l)=seniorf(nyrs1,l)/imonth(l)
@@ -5956,16 +6050,16 @@ c _________________________________________________________
              depj(nyrs1,l)=depj(nyrs1,l)/imonth(l)
              depo(nyrs1,l)=depo(nyrs1,l)/imonth(l)
              dept(nyrs1,l)=dept(nyrs1,l)/imonth(l)
-c             if (divcu(nyrs1,l).ge.0.and.(seniorF(nyrs1,l)+
-c     :       juniorf(nyrs1,l)+otherf(nyrs1,l)-arech(nyrs1,l)).gt.0) then
-cjhb 051807    =========================================================
-cjhb 092307    change average monthly efficiency to be a simple average of the non zero monthly efficiencies
-cjhb 051807    =========================================================
-c                 effcu(nyrs1,l) =(divcu(nyrs1,l)/(seniorf(nyrs1,l)+
-c     :           juniorf(nyrs1,l)+otherf(nyrs1,l)-arech(nyrs1,l)))*100
-c                 seffcu(nyrs1,l) =(divcu(nyrs1,l)/(divsup(i,nyrs1,l)
-c     :           -arech(nyrs1,l)))*100
-cjhb 051807    =========================================================
+!             if (divcu(nyrs1,l).ge.0.and.(seniorF(nyrs1,l)+
+!     :       juniorf(nyrs1,l)+otherf(nyrs1,l)-arech(nyrs1,l)).gt.0) then
+!jhb 051807    =========================================================
+!jhb 092307    change average monthly efficiency to be a simple average of the non zero monthly efficiencies
+!jhb 051807    =========================================================
+!                 effcu(nyrs1,l) =(divcu(nyrs1,l)/(seniorf(nyrs1,l)+
+!     :           juniorf(nyrs1,l)+otherf(nyrs1,l)-arech(nyrs1,l)))*100
+!                 seffcu(nyrs1,l) =(divcu(nyrs1,l)/(divsup(i,nyrs1,l)
+!     :           -arech(nyrs1,l)))*100
+!jhb 051807    =========================================================
                sumeff=0.0
                sumeffcnt=0.0
                sumseff=0.0
@@ -5990,19 +6084,19 @@ cjhb 051807    =========================================================
                else
                  seffcu(nyrs1,l) = 0.0
                endif
-cjhb 051807    =========================================================
-c             else
-cc ew 8/23/00 if no diversions or demands, set eff = 0 for now, but be sure
-c            to set to maximum when printed to def or wef file
-c                 effcu(nyrs1,l) = 0.
-c                 seffcu(nyrs1,l) = 0.
-c             endif
-c             if (gdiv(nyrs1,l).gt.0) then
-cjhb 051807    =========================================================
-cjhb 092307    change average monthly efficiency to be a simple average of the non zero monthly efficiencies
-cjhb 051807    =========================================================
-c                 effgw(nyrs1,l) = (gwcu(nyrs1,l)/gdiv(nyrs1,l))
-cjhb 051807    =========================================================
+!jhb 051807    =========================================================
+!             else
+!c ew 8/23/00 if no diversions or demands, set eff = 0 for now, but be sure
+!            to set to maximum when printed to def or wef file
+!                 effcu(nyrs1,l) = 0.
+!                 seffcu(nyrs1,l) = 0.
+!             endif
+!             if (gdiv(nyrs1,l).gt.0) then
+!jhb 051807    =========================================================
+!jhb 092307    change average monthly efficiency to be a simple average of the non zero monthly efficiencies
+!jhb 051807    =========================================================
+!                 effgw(nyrs1,l) = (gwcu(nyrs1,l)/gdiv(nyrs1,l))
+!jhb 051807    =========================================================
                sumeff=0.0
                sumeffcnt=0.0
                do m=1,nyrs
@@ -6016,22 +6110,22 @@ cjhb 051807    =========================================================
                else
                  effgw(nyrs1,l) = 0.0
                endif
-cjhb 051807    =========================================================
-c             else
-c                 effgw(nyrs1,l) = 0.
-c             endif
+!jhb 051807    =========================================================
+!             else
+!                 effgw(nyrs1,l) = 0.
+!             endif
           else
              ettot(i,nyrs1,l) = -999
              effppt(i,nyrs1,l) = -999
              reqt(i,nyrs1,l) = -999
              reqreqts(nyrs1,l) = -999
              divsup(i,nyrs1,l) = -999
-c
-c _________________________________________________________
-c
-c
-c rrb 2003/05/19; Allow up to 5 subirrigated crops
-c 
+!
+! _________________________________________________________
+!
+!
+! rrb 2003/05/19; Allow up to 5 subirrigated crops
+! 
              tail(i,nyrs1,l)=-999
              do if1=1,iflood
                ifx=if1*2-1
@@ -6039,9 +6133,9 @@ c
                grass(i,nyrs1,l,ifx) = -999
                grass(i,nyrs1,l,ify) = -999
              end do
-c
-c _________________________________________________________
-c
+!
+! _________________________________________________________
+!
              ddhmonot(nyrs1,l)= -999
              seniorf(nyrs1,l)= -999
              juniorf(nyrs1,l)= -999
@@ -6110,29 +6204,29 @@ c
         endif
         fleff(i,nyrs1)=fleff(i,nyrs1)/nyrs
         speff(i,nyrs1)=speff(i,nyrs1)/nyrs
-c
-c if typout(i) .lt. 3, do not write out detailed water budget
-c
-c        if(typout(i) .lt. 3) goto 577     
+!
+! if typout(i) .lt. 3, do not write out detailed water budget
+!
+!        if(typout(i) .lt. 3) goto 577     
         IOUTP=1
-c
-c--write out header information depending on isuply option
-c
-Cjhb=&==================================================================
-Cjhb      the following works now with new version of sper (but how did it work before??!)
-Cjhb=&==================================================================
+!
+!--write out header information depending on isuply option
+!
+!jhb=&==================================================================
+!jhb      the following works now with new version of sper (but how did it work before??!)
+!jhb=&==================================================================
         eff(i)=ceff(i,1)*(sper(i,1)*speff(i,1)+(1-sper(i,1))*fleff(i,1))
-Cjhb=&==================================================================
-Cjhb      structure data when ISUPLY=1
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      structure data when ISUPLY=1
+!jhb=&==================================================================
         if(isuply .eq. 1) then
           write(256,719) bas_id(i)
           write(256,751)
           write(256,708) scapatot(i,1)
           write(256,781) totmo
           write(256,709) eff(i)
-c
-c ew 03/12/04 include note in header if drain/tailwater is available to structure
+!
+! ew 03/12/04 include note in header if drain/tailwater is available to structure
           if(itail(i) .eq. 1) then
              write(256,722)
           else
@@ -6147,36 +6241,36 @@ c ew 03/12/04 include note in header if drain/tailwater is available to structur
           write(256,705)
           write(256,706)
           write(256,700)
-Cjhb=&==================================================================
-Cjhb      writing the binary file data record for this structure
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      writing the binary file data record for this structure
+!jhb=&==================================================================
           IF(LBD3OUT .AND. ITIME.EQ.2) THEN
           ENDIF
-Cjhb=&==================================================================
+!jhb=&==================================================================
         endif
 
-Cjhb=&==================================================================
-Cjhb      structure data when ISUPLY=2
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      structure data when ISUPLY=2
+!jhb=&==================================================================
         if (isuply .eq. 2) then
           write(256,819) bas_id(i)
           write(256,851)
           write(256,808) scapatot(i,1)
           write(256,883) senmo,junmo,othmo
           write(256,809) eff(i)
-c
-c ew 03/12/04 include note in header if drain/tailwater is available to structure
+!
+! ew 03/12/04 include note in header if drain/tailwater is available to structure
           if(itail(i) .eq. 1) then
              write(256,822) 
           else
              write(256,851)
           endif
-c grb 06-29-00 add administration processing type
+! grb 06-29-00 add administration processing type
           if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,824) adminent
-c grb 11-08-00 correct print of senior and junior amount to subscripted values
-c          if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,810) senaspt+junaspt
-c	    if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,811) senaspt
-c          if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,812) junaspt
+! grb 11-08-00 correct print of senior and junior amount to subscripted values
+!          if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,810) senaspt+junaspt
+!	    if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,811) senaspt
+!          if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,812) junaspt
       if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,810) senasp(I)+junasp(I)
 	    if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,811) senasp(I)
           if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,812) junasp(I)
@@ -6195,29 +6289,29 @@ c          if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,812) junaspt
           write(256,805)
           write(256,806)
           write(256,800)
-Cjhb=&==================================================================
-Cjhb      writing the binary file data record for this structure
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      writing the binary file data record for this structure
+!jhb=&==================================================================
           IF(LBD3OUT .AND. ITIME.EQ.2) THEN
             IF(IDAILY.EQ.3 .OR. IDAILY.EQ.5) THEN
             ELSEIF(IDAILY.NE.3 .AND. IDAILY.NE.5) THEN
             ELSE
             ENDIF
           ENDIF
-Cjhb=&==================================================================
+!jhb=&==================================================================
         endif
 
-Cjhb=&==================================================================
-Cjhb      structure data when ISUPLY=3
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      structure data when ISUPLY=3
+!jhb=&==================================================================
         if (isuply .eq. 3) then
           write(256,919) bas_id(i)
           write(256,951)
           write(256,908) scapatot(i,1)
           write(256,983) senmo,junmo,othmo
           write(256,909) eff(i)
-c
-c ew 03/12/04 include note in header if drain/tailwater is available to structure
+!
+! ew 03/12/04 include note in header if drain/tailwater is available to structure
           if(itail(i) .eq. 1) then
              write(256,922) 
           else
@@ -6230,7 +6324,7 @@ c ew 03/12/04 include note in header if drain/tailwater is available to structur
           write(256,980) (retn(i,j)*100,j=1,24)
           write(256,970)
           write(256,951)
-c grb 06-29-00 add variable administration processes
+! grb 06-29-00 add variable administration processes
           if (IDAILY.EQ.3.OR.IDAILY.EQ.5)write(256,824) adminent
           if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,810) senaspt+junaspt
 	    if (IDAILY.EQ.3.OR.IDAILY.EQ.5) write(256,811) senaspt
@@ -6250,21 +6344,21 @@ c grb 06-29-00 add variable administration processes
           write(256,905)
           write(256,906)
           write(256,900)
-Cjhb=&==================================================================
-Cjhb      writing the binary file data record for this structure
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      writing the binary file data record for this structure
+!jhb=&==================================================================
           IF(LBD3OUT .AND. ITIME.EQ.2) THEN
             IF(IDAILY.EQ.3 .OR. IDAILY.EQ.5) THEN
             ELSEIF(IDAILY.NE.3 .AND. IDAILY.NE.5) THEN
             ELSE
             ENDIF
           ENDIF
-Cjhb=&==================================================================
+!jhb=&==================================================================
         endif
 
-Cjhb=&==================================================================
-Cjhb      structure data when ISUPLY=4
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      structure data when ISUPLY=4
+!jhb=&==================================================================
         if(isuply .eq. 4) then
           write(256,619) bas_id(i)
           write(256,651)
@@ -6272,7 +6366,7 @@ Cjhb=&==================================================================
            if(gper(i,m).eq. 0. .or. sper(i,m) .eq. 0.) then
               write(256,608) scapatot(i,1)
            else
-c              write(256,608) scapatot(i,1)*gper(i,1)*sper(i,1)
+!              write(256,608) scapatot(i,1)*gper(i,1)*sper(i,1)
               if(t_area(i,m).gt.0.0)then
                 write(256,608) scapatot(i,1)*
      &            (swflac(i,m)+swspac(i,m)+swgwflac(i,m))/t_area(i,m)
@@ -6340,10 +6434,10 @@ c              write(256,608) scapatot(i,1)*gper(i,1)*sper(i,1)
               write(256,5606)
               write(256,5600)
           end select
-Cjhb=&==================================================================
-Cjhb      writing the binary file data record for this structure
-Cjhb        note: I replaced M with 1 in the following lines...
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb      writing the binary file data record for this structure
+!jhb        note: I replaced M with 1 in the following lines...
+!jhb=&==================================================================
           IF(LBD3OUT .AND. ITIME.EQ.2) THEN
             IF(GMODE(I,1) .EQ. 1) THEN
               IF(GPER(I,1).EQ.0 .OR. SPER(I,1).EQ.0) THEN
@@ -6354,17 +6448,17 @@ Cjhb=&==================================================================
           ENDIF
         endif !isuply .eq. 4
 
-C-----Report forms (isuply=1, 2, 3, 4) for detailed water budget
+!-----Report forms (isuply=1, 2, 3, 4) for detailed water budget
 ***********************************************************************
 *  Report Form for ISUPLY = 1 - Supply Limited, no water rights considered
 ***********************************************************************
         if (isuply .eq. 1) then
-c
-c write totals for each year (for structure i)
-c
+!
+! write totals for each year (for structure i)
+!
           imiss = 0
           do 7065 m=1,nyrs
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !            if (missflag(i,m).eq.1) then
 !              method='Prorated  '
 !              method2='Prorated  '
@@ -6387,11 +6481,11 @@ c grb 05-20-00 set method descriptor
      :        divcu(m,13),seffcu(m,13),soiltott(m,12),crop_cut(m,13),
      :        cropcusoil(m,13),estcrpt(i,m,13)
 7065      continue
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
           write(256,751)
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !          if (imiss.eq.1) method='Prorated  '
 !          if(imiss.eq.0) method='Calculated'
           method ='Calculated'
@@ -6413,9 +6507,9 @@ c grb 05-20-00 set method descriptor
           do k1=1,3
             write(256,751) 
           enddo
-c
-c  write monthly average for all years (for structure i)
-c
+!
+!  write monthly average for all years (for structure i)
+!
           write(256,718) nyr1, nyr2
             if((ulagt(nyrs1,l).lt.-998.0).or.
      &         (closs(nyrs1,l).lt.-998.0)) then
@@ -6430,7 +6524,7 @@ c
      :        soil_cu(nyrs1,l),nonconsumed,
      :        divcu(nyrs1,l),seffcu(nyrs1,l),soiltott(nyrs1,l),
      :        crop_cut(nyrs1,l),cropcusoil(nyrs1,l),estcrpt(i,nyrs1,l)
-c           comeff(l)=ceff(i,nyrs1)*(seffcu(nyrs1,l)/100)
+!           comeff(l)=ceff(i,nyrs1)*(seffcu(nyrs1,l)/100)
             comeff(l)=seffcu(nyrs1,l)/100
             if(comeff(l) .lt. 0.005) then
               comeff(l)=ceff(i,nyrs1)*sfeff(i,nyrs1)
@@ -6441,9 +6535,9 @@ c           comeff(l)=ceff(i,nyrs1)*(seffcu(nyrs1,l)/100)
             twdid=bas_id(i)
             write(5,660) twdid(1:12),(comeff(l)*100,l=1,12),twdid(13:24)
           endif
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
             if((ulagt(nyrs1,13).lt.-998.0).or.
      &         (closs(nyrs1,13).lt.-998.0)) then
               nonconsumed=-999.0
@@ -6457,14 +6551,14 @@ c
      :      nonconsumed,divcu(nyrs1,13),
      :      seffcu(nyrs1,13),soiltott(nyrs1,13)/nyrs/12,
      :      crop_cut(nyrs1,13),cropcusoil(nyrs1,13),estcrpt(i,nyrs1,13)
-c
-c write out monthly values for each year (for structure i)
-c
+!
+! write out monthly values for each year (for structure i)
+!
           do k1=1,2
             write(256,751) 
           enddo
           do m=1,nyrs
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !            if (missflag(i,m).eq.1) method='Prorated  '
 !            if(missflag(i,m).eq.0) method='Calculated'
             method ='Calculated'
@@ -6481,10 +6575,10 @@ c grb 05-20-00 set method descriptor
               write(0,*)'  processed through structure #',i
             endif
             do l=1,12
-C=====================================================
-Cjhb          add shortage calculation to bd1 output
+!=====================================================
+!jhb          add shortage calculation to bd1 output
               SHORTAGE=reqreqts(m,l)-estcrpt(i,m,l)
-C=====================================================
+!=====================================================
             if((ulagt(m,l).lt.-998.0).or.(closs(m,l).lt.-998.0)) then
               nonconsumed=-999.0
             else
@@ -6497,71 +6591,71 @@ C=====================================================
      :          divcu(m,l),seffcu(m,l),soiltott(m,l),
      :          crop_cut(m,l),cropcusoil(m,l),estcrpt(i,m,l)
 
-Cjhb====================================================================
-Cjhb  write a record to the binary file if binary output option selected
-Cjhb  report structure:
-Cjhb=&==================================================================
+!jhb====================================================================
+!jhb  write a record to the binary file if binary output option selected
+!jhb  report structure:
+!jhb=&==================================================================
                 IF(LBD1OUT.and.(ipresim.ne.1)) THEN
                   WRITE(UNIT=IBD1UN)
-Cjhb====================================================================
-Cjhb  write index values as the first three values and then the month string
-Cjhb  (don't really need this last parameter),
-Cjhb=&==================================================================
-Cjhb  1 INTEGER I - basin index
-Cjhb  2 INTEGER NYR1+M-1 - year
-Cjhb  3 INTEGER L - month index
-Cjhb  4 CHAR*3 AMN(L) - abbr month string  ***REPORT***
+!jhb====================================================================
+!jhb  write index values as the first three values and then the month string
+!jhb  (don't really need this last parameter),
+!jhb=&==================================================================
+!jhb  1 INTEGER I - basin index
+!jhb  2 INTEGER NYR1+M-1 - year
+!jhb  3 INTEGER L - month index
+!jhb  4 CHAR*3 AMN(L) - abbr month string  ***REPORT***
      :            I,NYR1+M-1,L,AMN(L),
-Cjhb====================================================================
-Cjhb  write some annual but non-monthly time series report data
-Cjhb=&==================================================================
-Cjhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
-Cjhb  5 REAL t_area(i,m) - annual total crop acreage
-Cjhb  6 REAL m_area(i,m,l) - annual modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
-Cjhb  7 CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
-Cjhb :            comment(m),t_area(i,m),method,
+!jhb====================================================================
+!jhb  write some annual but non-monthly time series report data
+!jhb=&==================================================================
+!jhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
+!jhb  5 REAL t_area(i,m) - annual total crop acreage
+!jhb  6 REAL m_area(i,m,l) - annual modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
+!jhb  7 CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
+!jhb :            comment(m),t_area(i,m),method,
      :            t_area(i,m),m_area(i,m,l),method,
-Cjhb====================================================================
-Cjhb  now write the monthly data (report and other) into the record
-Cjhb=&==================================================================
-Cjhb  8 REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
-Cjhb  9 REAL effppt(i,m,l) - Effective Precip  ***REPORT***
+!jhb====================================================================
+!jhb  now write the monthly data (report and other) into the record
+!jhb=&==================================================================
+!jhb  8 REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
+!jhb  9 REAL effppt(i,m,l) - Effective Precip  ***REPORT***
      :            ettot(i,m,l),effppt(i,m,l),
-Cjhb  10 REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
-Cjhb  11 REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
-Cjhb  12 REAL reqreqts(m,l) - IWR After Winter Precip  ***REPORT***
+!jhb  10 REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
+!jhb  11 REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
+!jhb  12 REAL reqreqts(m,l) - IWR After Winter Precip  ***REPORT***
      :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
-Cjhb  13 REAL ddhmonot(m,l) - River Diversion Acct. - Historic Diversion  ***REPORT***
+!jhb  13 REAL ddhmonot(m,l) - River Diversion Acct. - Historic Diversion  ***REPORT***
      :            ddhmonot(m,l),
-Cjhb  14 REAL ceff(i,m) - River Diversion Acct. - conveyance Efficiency
-Cjhb  15 REAL closs(m,l) - River Diversion Acct. - conveyance Loss
-Cjhb  16 REAL fdiv(m,l) - River Diversion Acct. - Farm Headgate Diversion
-C removed Cjhb  16 REAL arech(m,l) - River Diversion Acct. - Sprinkler FHG (Not Applied)
-C added   Cjhb  17 REAL tail(i,m,l) - Tail water,
-c removed - in here twice Cjhb  17 REAL sfeff(i,m) - River Diversion Acct. - Max Applic Effic
-Cjhb :            ceff(i,m),closs(m,l),fdiv(m,l),arech(m,l),sfeff(i,m),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),sfeff(i,m),
+!jhb  14 REAL ceff(i,m) - River Diversion Acct. - conveyance Efficiency
+!jhb  15 REAL closs(m,l) - River Diversion Acct. - conveyance Loss
+!jhb  16 REAL fdiv(m,l) - River Diversion Acct. - Farm Headgate Diversion
+! removed Cjhb  16 REAL arech(m,l) - River Diversion Acct. - Sprinkler FHG (Not Applied)
+! added   Cjhb  17 REAL tail(i,m,l) - Tail water,
+! removed - in here twice Cjhb  17 REAL sfeff(i,m) - River Diversion Acct. - Max Applic Effic
+!jhb :            ceff(i,m),closs(m,l),fdiv(m,l),arech(m,l),sfeff(i,m),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),sfeff(i,m),
      :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
-Cjhb  18 REAL crop_cut(m,l) - River Diversion Acct. - SW to CU                  ***REPORT***
-Cjhb  19 REAL soil_cu(m,l) - River Diversion Acct. - SW to Soil                 ***REPORT***
-Cjhb  20 REAL divcu(m,l) - River Diversion Acct. - SW to CU & Soil              ***REPORT***
-Cjhb  21 REAL ulagt(m,l) - River Diversion Acct. - SW_Non_Consumed           ***REPORT***
+!jhb  18 REAL crop_cut(m,l) - River Diversion Acct. - SW to CU                  ***REPORT***
+!jhb  19 REAL soil_cu(m,l) - River Diversion Acct. - SW to Soil                 ***REPORT***
+!jhb  20 REAL divcu(m,l) - River Diversion Acct. - SW to CU & Soil              ***REPORT***
+!jhb  21 REAL ulagt(m,l) - River Diversion Acct. - SW_Non_Consumed           ***REPORT***
      :            crop_cut(m,l),soil_cu(m,l),divcu(m,l),
      :            ulagt(m,l),
-Cjhb  22 REAL sfeff(i,m) - River Diversion Acct. - Max Application Effic (%)
-Cjhb  23 REAL effcu(m,l) - River Diversion Acct. - Calc SW Applic Effic    
-Cjhb  24 REAL seffcu(m,l) - River Diversion Acct. - Calc SW System Effic      ***REPORT***
+!jhb  22 REAL sfeff(i,m) - River Diversion Acct. - Max Application Effic (%)
+!jhb  23 REAL effcu(m,l) - River Diversion Acct. - Calc SW Applic Effic    
+!jhb  24 REAL seffcu(m,l) - River Diversion Acct. - Calc SW System Effic      ***REPORT***
      :            sfeff(i,m),effcu(m,l),seffcu(m,l),
-Cjhb  25 REAL soiltott(m,l) - SW Soil Content ***REPORT***
+!jhb  25 REAL soiltott(m,l) - SW Soil Content ***REPORT***
      :            soiltott(m,l),
-Cjhb  26 REAL crop_cut(m,l) - Crop CU from SW           ***REPORT***
-Cjhb  27 REAL cropcusoil(m,l) - Crop CU from Soil         ***REPORT***
-Cjhb  28 REAL estcrpt(i,m,l) - Total Crop CU             ***REPORT***
-Cjhb  29 REAL SHORTAGE - CU Shortage             
+!jhb  26 REAL crop_cut(m,l) - Crop CU from SW           ***REPORT***
+!jhb  27 REAL cropcusoil(m,l) - Crop CU from Soil         ***REPORT***
+!jhb  28 REAL estcrpt(i,m,l) - Total Crop CU             ***REPORT***
+!jhb  29 REAL SHORTAGE - CU Shortage             
      :            crop_cut(m,l),cropcusoil(m,l),estcrpt(i,m,l),SHORTAGE
-Cjhb====================================================================
-c                 update the "district" (sb = sub basin) totals that change by month
-Cjhb====================================================================
+!jhb====================================================================
+!                 update the "district" (sb = sub basin) totals that change by month
+!jhb====================================================================
                   if(ettot(i,m,l).gt.-999.0)then
                     sbettot(sbsb(i),m,l)=
      :                sbettot(sbsb(i),m,l)+ettot(i,m,l)
@@ -6781,34 +6875,34 @@ Cjhb====================================================================
      :                bshortage(m,l)+shortage
                   endif
                   
-Cjhb====================================================================
+!jhb====================================================================
                 ENDIF !(LBD1OUT)
-Cjhb====================================================================
+!jhb====================================================================
               enddo !l=1,12
-Cjhb====================================================================
-c             update the district totals that only change annually
-Cjhb====================================================================
+!jhb====================================================================
+!             update the district totals that only change annually
+!jhb====================================================================
               IF(LBD1OUT.and.(ipresim.ne.1)) THEN
               ENDIF
-Cjhb====================================================================
+!jhb====================================================================
          enddo !do m=1,nyrs
-Cjhb====================================================================
+!jhb====================================================================
            write(256,751)
            write(256,751)
            write(256,751)
       endif !(isuply .eq. 1)
 
-C**********************************************************************
-C  Report Form for ISUPLY = 2 - Supply Limited, water rights considered
-C**********************************************************************
+!**********************************************************************
+!  Report Form for ISUPLY = 2 - Supply Limited, water rights considered
+!**********************************************************************
         if (isuply .eq. 2) then
-c
-c write totals for each year (for structure i)
-c
+!
+! write totals for each year (for structure i)
+!
           imiss=0
           do m=1,nyrs
 
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (missflag(i,m).eq.1) then
 !	      method='Prorated  '
 !              method2='Prorated  '
@@ -6830,19 +6924,19 @@ c grb 05-20-00 set method descriptor
      :    seniorf(m,13),juniorf(m,13),otherf(m,13),divsup(i,m,13),
      :    crop_cus(m,13),crop_cuj(m,13),crop_cuo(m,13),crop_cut(m,13),
      :    soil_cus(m,13),soil_cuj(m,13),soil_cuo(m,13),soil_cu(m,13),
-c     :    ulags(m,13),ulagj(m,13),ulago(m,13),ulagt(m,13),divcu(m,13),
+!     :    ulags(m,13),ulagj(m,13),ulago(m,13),ulagt(m,13),divcu(m,13),
      :    ulags(m,13),ulagj(m,13),ulago(m,13),nonconsumed,divcu(m,13),
      :    seffcu(m,13),soiltotts(m,12),soiltottj(m,12),
      :    soiltotto(m,12),soiltott(m,12),crop_cut(m,13),
      :    cropcusoil(m,13),estcrps(m,13),estcrpj(m,13),estcrpo(m,13),
      :    estcrpt(i,m,13),estcrpj(m,13)
         enddo
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
           write(256,851) 
 
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (imiss.eq.1) method='Prorated  '
 !         if(imiss.eq.0) method='Calculated'
           method ='Calculated'
@@ -6864,7 +6958,7 @@ c grb 05-20-00 set method descriptor
      :    soil_cus(nyrs1,13),soil_cuj(nyrs1,13),
      :    soil_cuo(nyrs1,13),soil_cu(nyrs1,13),
      :    ulags(nyrs1,13),ulagj(nyrs1,13),
-c     :    ulago(nyrs1,13),ulagt(nyrs1,13),
+!     :    ulago(nyrs1,13),ulagt(nyrs1,13),
      :    ulago(nyrs1,13),nonconsumed,
      :    divcu(nyrs1,13),seffcu(nyrs1,13),
      :    soiltotts(nyrs1,13)/nyrs/12,soiltottj(nyrs1,13)/nyrs/12,
@@ -6873,9 +6967,9 @@ c     :    ulago(nyrs1,13),ulagt(nyrs1,13),
      :    estcrps(nyrs1,13),estcrpj(nyrs1,13),
      :    estcrpo(nyrs1,13),estcrpt(i,nyrs1,13),
      :    estcrpj(nyrs1,13)
-c
-c  write monthly average for all years (for structure i)
-c
+!
+!  write monthly average for all years (for structure i)
+!
          do k1=1,3
             write(256,851) 
          enddo
@@ -6895,7 +6989,7 @@ c
      :    crop_cuo(nyrs1,l),crop_cut(nyrs1,l),soil_cus(nyrs1,l),
      :    soil_cuj(nyrs1,l),soil_cuo(nyrs1,l),soil_cu(nyrs1,l),
      :    ulags(nyrs1,l),ulagj(nyrs1,l),ulago(nyrs1,l),
-c     :    ulagt(nyrs1,l),divcu(nyrs1,l),seffcu(nyrs1,l),
+!     :    ulagt(nyrs1,l),divcu(nyrs1,l),seffcu(nyrs1,l),
      :    nonconsumed,divcu(nyrs1,l),seffcu(nyrs1,l),
      :    soiltotts(nyrs1,l),soiltottj(nyrs1,l),soiltotto(nyrs1,l),
      :    soiltott(nyrs1,l),crop_cut(nyrs1,l),cropcusoil(nyrs1,l),
@@ -6906,9 +7000,9 @@ c     :    ulagt(nyrs1,l),divcu(nyrs1,l),seffcu(nyrs1,l),
 
 
 
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
             if((ulagt(nyrs1,13).lt.-998.0).or.
      &         (closs(nyrs1,13).lt.-998.0)) then
               nonconsumed=-999.0
@@ -6925,7 +7019,7 @@ c
      :    soil_cus(nyrs1,13),soil_cuj(nyrs1,13),
      :    soil_cuo(nyrs1,13),soil_cu(nyrs1,13),
      :    ulags(nyrs1,13),ulagj(nyrs1,13),
-c     :    ulago(nyrs1,13),ulagt(nyrs1,13),
+!     :    ulago(nyrs1,13),ulagt(nyrs1,13),
      :    ulago(nyrs1,13),nonconsumed,
      :    divcu(nyrs1,13),seffcu(nyrs1,13),
      :    soiltotts(nyrs1,13)/nyrs/12,soiltottj(nyrs1,13)/nyrs/12,
@@ -6934,12 +7028,12 @@ c     :    ulago(nyrs1,13),ulagt(nyrs1,13),
      :    estcrps(nyrs1,13),estcrpj(nyrs1,13),
      :    estcrpo(nyrs1,13),estcrpt(i,nyrs1,13),
      :    estcrpj(nyrs1,13)
-c write out monthly values for each year (for structure i)
+! write out monthly values for each year (for structure i)
           do k1=1,2
             write(256,851) 
           enddo
           do m=1,nyrs
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (missflag(i,m).eq.1) method='Prorated  '
 !         if(missflag(i,m).eq.0) method='Calculated'
             method ='Calculated'
@@ -6956,10 +7050,10 @@ c grb 05-20-00 set method descriptor
              write(0,*)'  processed through structure #',i
            endif
            do l=1,12
-C=====================================================
-Cjhb          add shortage calculation to bd1 output
+!=====================================================
+!jhb          add shortage calculation to bd1 output
               SHORTAGE=reqreqts(m,l)-estcrpt(i,m,l)
-C=====================================================
+!=====================================================
             if((ulagt(m,l).lt.-998.0).or.(closs(m,l).lt.-998.0)) then
               nonconsumed=-999.0
             else
@@ -6967,116 +7061,116 @@ C=====================================================
             endif
               write(256,829) amn(l),method,ettot(i,m,l),effppt(i,m,l),
      :           reqt(i,m,l),wbu(i,m,l),reqreqts(m,l)
-c                12/18/08 these are farm deliveries, do not match the label
-c                12/18/08 change to river diversions
-c                01/19/11 change back to farm deliveries
+!                12/18/08 these are farm deliveries, do not match the label
+!                12/18/08 change to river diversions
+!                01/19/11 change back to farm deliveries
      :          ,seniorf(m,l),juniorf(m,l),otherf(m,l)
      :          ,ddhmonot(m,l),crop_cus(m,l),crop_cuj(m,l)
      :          ,crop_cuo(m,l),crop_cut(m,l),soil_cus(m,l)
      :          ,soil_cuj(m,l),soil_cuo(m,l),soil_cu(m,l)
-c     :          ,ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l)
+!     :          ,ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l)
      :          ,ulags(m,l),ulagj(m,l),ulago(m,l),nonconsumed
      :          ,divcu(m,l),seffcu(m,l),soiltotts(m,l),soiltottj(m,l)
      :          ,soiltotto(m,l),soiltott(m,l),crop_cut(m,l)
      :          ,cropcusoil(m,l),estcrps(m,l),estcrpj(m,l)
      :          ,estcrpo(m,l),estcrpt(i,m,l),estcrpj(m,l)
 
-Cjhb====================================================================
-Cjhb  write a record to the binary file if binary output option selected
-Cjhb  report structure:
-Cjhb=&==================================================================
+!jhb====================================================================
+!jhb  write a record to the binary file if binary output option selected
+!jhb  report structure:
+!jhb=&==================================================================
                 IF(LBD1OUT.and.(ipresim.ne.1)) THEN
                   WRITE(UNIT=IBD1UN)
-Cjhb====================================================================
-Cjhb  write index values as the first three values and then the month string
-Cjhb  (don't really need this last parameter),
-Cjhb=&==================================================================
-Cjhb  1 INTEGER I - basin index
-Cjhb  2 INTEGER NYR1+M-1 - year
-Cjhb  3 INTEGER L - month index
-Cjhb  4 CHAR*3 AMN(L) - abbr month string  ***REPORT***
+!jhb====================================================================
+!jhb  write index values as the first three values and then the month string
+!jhb  (don't really need this last parameter),
+!jhb=&==================================================================
+!jhb  1 INTEGER I - basin index
+!jhb  2 INTEGER NYR1+M-1 - year
+!jhb  3 INTEGER L - month index
+!jhb  4 CHAR*3 AMN(L) - abbr month string  ***REPORT***
      :            I,NYR1+M-1,L,AMN(L),
-Cjhb====================================================================
-Cjhb  write some annual but non-monthly time series report data
-Cjhb=&==================================================================
-Cjhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
-Cjhb  5 REAL t_area(i,m) - annual Total Irrigated Acreage 
-Cjhb  6 REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
-Cjhb  7 CHAR*10 method - Analysis Method          - "Calculated" vs. "Prorated"  ***REPORT***
-Cjhb :            comment(m),t_area(i,m),method,
+!jhb====================================================================
+!jhb  write some annual but non-monthly time series report data
+!jhb=&==================================================================
+!jhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
+!jhb  5 REAL t_area(i,m) - annual Total Irrigated Acreage 
+!jhb  6 REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
+!jhb  7 CHAR*10 method - Analysis Method          - "Calculated" vs. "Prorated"  ***REPORT***
+!jhb :            comment(m),t_area(i,m),method,
      :            t_area(i,m), m_area(i,m,l), method,
-Cjhb====================================================================
-Cjhb  now write the monthly data (report and other) into the record
-Cjhb=&==================================================================
-Cjhb  8 REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
-Cjhb  9 REAL effppt(i,m,l) - Effective Precip  ***REPORT***
+!jhb====================================================================
+!jhb  now write the monthly data (report and other) into the record
+!jhb=&==================================================================
+!jhb  8 REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
+!jhb  9 REAL effppt(i,m,l) - Effective Precip  ***REPORT***
      :            ettot(i,m,l),effppt(i,m,l),
-Cjhb  10 REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
-Cjhb  11 REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
-Cjhb  12 REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
+!jhb  10 REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
+!jhb  11 REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
+!jhb  12 REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
      :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
-Cjhb  13 REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l)
-Cjhb  14 REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l)
-Cjhb  15 REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l)
-Cjhb  16 REAL ddhmonot(m,l) - River Diversion Acct. - Div By Priority - Total  ***REPORT***
-c                12/18/08 these are farm deliveries, do not match the label
-c                12/18/08 change to river diversions
-c                01/19/11 changed back to river diversions
+!jhb  13 REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l)
+!jhb  14 REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l)
+!jhb  15 REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l)
+!jhb  16 REAL ddhmonot(m,l) - River Diversion Acct. - Div By Priority - Total  ***REPORT***
+!                12/18/08 these are farm deliveries, do not match the label
+!                12/18/08 change to river diversions
+!                01/19/11 changed back to river diversions
      :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
-Cjhb  17 REAL ceff(i,m) - River Diversion Acct. - Conveyance Efficiency   
-Cjhb  18 REAL closs(m,l) - River Diversion Acct. - Conveyance Loss         
-Cjhb  19 REAL fdiv(m,l) - River Diversion Acct. - Farm Headgate Delivery  
+!jhb  17 REAL ceff(i,m) - River Diversion Acct. - Conveyance Efficiency   
+!jhb  18 REAL closs(m,l) - River Diversion Acct. - Conveyance Loss         
+!jhb  19 REAL fdiv(m,l) - River Diversion Acct. - Farm Headgate Delivery  
      :            ceff(i,m),closs(m,l),fdiv(m,l),
-Cjhb  20 REAL crop_cus(m,l) - River Diversion Acct. - Diversion to CU - Senior ***REPORT***
-Cjhb  21 REAL crop_cuj(m,l) - River Diversion Acct. - Diversion to CU - Junior ***REPORT***
+!jhb  20 REAL crop_cus(m,l) - River Diversion Acct. - Diversion to CU - Senior ***REPORT***
+!jhb  21 REAL crop_cuj(m,l) - River Diversion Acct. - Diversion to CU - Junior ***REPORT***
      :            crop_cus(m,l),crop_cuj(m,l),
-Cjhb  22 REAL crop_cuo(m,l) - River Diversion Acct. - Diversion to CU - Other ***REPORT***
-Cjhb  23 REAL crop_cut(m,l) - River Diversion Acct. - Diversion to CU - Total ***REPORT***
+!jhb  22 REAL crop_cuo(m,l) - River Diversion Acct. - Diversion to CU - Other ***REPORT***
+!jhb  23 REAL crop_cut(m,l) - River Diversion Acct. - Diversion to CU - Total ***REPORT***
      :            crop_cuo(m,l),crop_cut(m,l),
-Cjhb  24 REAL soil_cus(m,l) - River Diversion Acct. - Add to Soil Moisture - Senior ***REPORT***
-Cjhb  25 REAL soil_cuj(m,l) - River Diversion Acct. - Add to Soil Moisture - Junior ***REPORT***
+!jhb  24 REAL soil_cus(m,l) - River Diversion Acct. - Add to Soil Moisture - Senior ***REPORT***
+!jhb  25 REAL soil_cuj(m,l) - River Diversion Acct. - Add to Soil Moisture - Junior ***REPORT***
      :            soil_cus(m,l),soil_cuj(m,l),
-Cjhb  26 REAL soil_cuo(m,l) - River Diversion Acct. - Add to Soil Moisture - Other ***REPORT***
-Cjhb  27 REAL soil_cu(m,l) - River Diversion Acct. - Add to Soil Moisture - Total ***REPORT***
+!jhb  26 REAL soil_cuo(m,l) - River Diversion Acct. - Add to Soil Moisture - Other ***REPORT***
+!jhb  27 REAL soil_cu(m,l) - River Diversion Acct. - Add to Soil Moisture - Total ***REPORT***
      :            soil_cuo(m,l),soil_cu(m,l),
-Cjhb  28 REAL divcu(m,l) - River Diversion Acct. - Total Div to CU & Soil  ***REPORT***
+!jhb  28 REAL divcu(m,l) - River Diversion Acct. - Total Div to CU & Soil  ***REPORT***
      :            divcu(m,l),
-Cjhb  29 REAL ulags(m,l) - River Diversion Acct. - Non-Consumed - Senior ***REPORT*** includes canal losses - needs to be adjusted!!
-Cjhb  30 REAL ulagj(m,l) - River Diversion Acct. - Non-Consumed - Junior ***REPORT*** includes canal losses - needs to be adjusted!!
-Cjhb  31 REAL ulago(m,l) - River Diversion Acct. - Non-Consumed - Other ***REPORT*** includes canal losses - needs to be adjusted!!
-Cjhb  32 REAL ulagt(m,l) - River Diversion Acct. - Non-Consumed - Total ***REPORT*** does NOT include canal losses
+!jhb  29 REAL ulags(m,l) - River Diversion Acct. - Non-Consumed - Senior ***REPORT*** includes canal losses - needs to be adjusted!!
+!jhb  30 REAL ulagj(m,l) - River Diversion Acct. - Non-Consumed - Junior ***REPORT*** includes canal losses - needs to be adjusted!!
+!jhb  31 REAL ulago(m,l) - River Diversion Acct. - Non-Consumed - Other ***REPORT*** includes canal losses - needs to be adjusted!!
+!jhb  32 REAL ulagt(m,l) - River Diversion Acct. - Non-Consumed - Total ***REPORT*** does NOT include canal losses
      :            ulags(m,l)-holdps*(1.-ceff(i,m)),
      :            ulagj(m,l)-holdpj*(1.-ceff(i,m)),
      :            ulago(m,l)-holdpo*(1.-ceff(i,m)),
      :            ulagt(m,l),
-C removed Cjhb  31 REAL arech(m,l) - River Diversion Acct. - Eff Calc: Sprinkler FHG (Not Applied)
-C added   Cjhb  33 REAL tail(i,m,l) - River Diversion Acct. - Supply_Tail Water_Drains
-Cjhb  34 REAL sfeff(i,m) - River Diversion Acct. - Eff Calc: Max Application Effic   
-C    :            arech(m,l),sfeff(i,m),
+! removed Cjhb  31 REAL arech(m,l) - River Diversion Acct. - Eff Calc: Sprinkler FHG (Not Applied)
+! added   Cjhb  33 REAL tail(i,m,l) - River Diversion Acct. - Supply_Tail Water_Drains
+!jhb  34 REAL sfeff(i,m) - River Diversion Acct. - Eff Calc: Max Application Effic   
+!    :            arech(m,l),sfeff(i,m),
      :            tail(i,m,l),sfeff(i,m),
-Cjhb  35 REAL effcu(m,l) - River Diversion Acct. - Eff Calc: Calc Surface Water Applic Effic (%)
-Cjhb  36 REAL seffcu(m,l) - River Diversion Acct. - Calc SW System Effic      ***REPORT***
+!jhb  35 REAL effcu(m,l) - River Diversion Acct. - Eff Calc: Calc Surface Water Applic Effic (%)
+!jhb  36 REAL seffcu(m,l) - River Diversion Acct. - Calc SW System Effic      ***REPORT***
      :            effcu(m,l),seffcu(m,l),
-Cjhb  37 REAL soiltotts(m,l) - EOM SW Soil Content - Senior ***REPORT***
-Cjhb  38 REAL soiltottj(m,l) - EOM SW Soil Content - Junior ***REPORT***
-Cjhb  39 REAL soiltotto(m,l) - EOM SW Soil Content - Other ***REPORT***
-Cjhb  40 REAL soiltott(m,l) - EOM SW Soil Content - Total ***REPORT***
+!jhb  37 REAL soiltotts(m,l) - EOM SW Soil Content - Senior ***REPORT***
+!jhb  38 REAL soiltottj(m,l) - EOM SW Soil Content - Junior ***REPORT***
+!jhb  39 REAL soiltotto(m,l) - EOM SW Soil Content - Other ***REPORT***
+!jhb  40 REAL soiltott(m,l) - EOM SW Soil Content - Total ***REPORT***
      :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
      :            soiltott(m,l),
-Cjhb  41 REAL crop_cut(m,l) - Tot Crop CU from Div      ***REPORT***
-Cjhb  42 REAL cropcusoil(m,l) - Tot Crop CU from Soil     ***REPORT***
+!jhb  41 REAL crop_cut(m,l) - Tot Crop CU from Div      ***REPORT***
+!jhb  42 REAL cropcusoil(m,l) - Tot Crop CU from Soil     ***REPORT***
      :            crop_cut(m,l),cropcusoil(m,l),
-Cjhb  43 REAL estcrps(m,l) - Estimated Crop CU - By Water Rights - Senior  ***REPORT***
-Cjhb  44 REAL estcrpj(m,l) - Estimated Crop CU - By Water Rights - Junior  ***REPORT***
-Cjhb  45 REAL estcrpo(m,l) - Estimated Crop CU - By Water Rights - Other  ***REPORT***
-Cjhb  46 REAL estcrpt(i,m,l) - Estimated Crop CU - By Water Rights - Total  ***REPORT***
+!jhb  43 REAL estcrps(m,l) - Estimated Crop CU - By Water Rights - Senior  ***REPORT***
+!jhb  44 REAL estcrpj(m,l) - Estimated Crop CU - By Water Rights - Junior  ***REPORT***
+!jhb  45 REAL estcrpo(m,l) - Estimated Crop CU - By Water Rights - Other  ***REPORT***
+!jhb  46 REAL estcrpt(i,m,l) - Estimated Crop CU - By Water Rights - Total  ***REPORT***
      :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
-Cjhb  47 REAL estcrpj(m,l) - Replacement Requirement  ***REPORT***
-Cjhb  48 REAL SHORTAGE - Total Shortage
+!jhb  47 REAL estcrpj(m,l) - Replacement Requirement  ***REPORT***
+!jhb  48 REAL SHORTAGE - Total Shortage
      :            estcrpj(m,l),SHORTAGE
-Cjhb====================================================================
-c                 update the district totals that change by month
-Cjhb====================================================================
+!jhb====================================================================
+!                 update the district totals that change by month
+!jhb====================================================================
                   if(ettot(i,m,l).gt.-999.0)then
                     sbettot(sbsb(i),m,l)=
      :                sbettot(sbsb(i),m,l)+ettot(i,m,l)
@@ -7295,32 +7389,32 @@ Cjhb====================================================================
                     bshortage(m,l)=
      :                bshortage(m,l)+shortage
                   endif
-Cjhb====================================================================
+!jhb====================================================================
                 ENDIF !(LBD1OUT)
-Cjhb====================================================================
+!jhb====================================================================
               enddo !l=1,12
-Cjhb====================================================================
-c             update the district totals that only change annually
-Cjhb====================================================================
+!jhb====================================================================
+!             update the district totals that only change annually
+!jhb====================================================================
               IF(LBD1OUT.and.(ipresim.ne.1)) THEN
               ENDIF
-Cjhb====================================================================
+!jhb====================================================================
 7062       enddo !m=1,nyrs
          write(256,851)                          
          write(256,851)
          write(256,851)
          endif !(isuply .eq. 2)
 
-C********************************************************************************************
-C  Report Form for ISUPLY = 3 - Supply Limited, water rights and return flows considered
-C********************************************************************************************	
+!********************************************************************************************
+!  Report Form for ISUPLY = 3 - Supply Limited, water rights and return flows considered
+!********************************************************************************************	
         if (isuply .eq. 3) then
-c
-c write totals for each year (for structure i)
-c
+!
+! write totals for each year (for structure i)
+!
           imiss=0
           do m=1,nyrs
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (missflag(i,m).eq.1) then
 !	      method='Prorated  '
 !              method2='Prorated  '
@@ -7346,11 +7440,11 @@ c grb 05-20-00 set method descriptor
      :    ,laglateo(m,13),laglatet(m,13),totret(m,13),deps(m,13)
      :    ,depj(m,13),depo(m,13),dept(m,13),depj(m,13)
        enddo
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
           write(256,951)
-c grb 5-20-00 set method
+! grb 5-20-00 set method
 !         if (imiss.gt.0) method='Prorated  '
 !         if (imiss.eq.0) method='Calculated'
           method ='Calculated'
@@ -7380,9 +7474,9 @@ c grb 5-20-00 set method
      :    totret(nyrs1,13),deps(nyrs1,13),
      :    depj(nyrs1,13),depo(nyrs1,13),dept(nyrs1,13),
      :    depj(nyrs1,13)
-c
-c  write monthly average for all years (for structure i)
-c
+!
+!  write monthly average for all years (for structure i)
+!
           do k1=1,3
               write(256,951) 
           enddo 
@@ -7408,9 +7502,9 @@ c
      :    depj(nyrs1,l)
         enddo
 
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
           write(256,951)
           write(256,937) method,ettot(i,nyrs1,13),effppt(i,nyrs1,13),
      :    reqt(i,nyrs1,13),wbu(i,nyrs1,13)/nyrs/12,reqreqts(nyrs1,13),
@@ -7436,14 +7530,14 @@ c
      :    depj(nyrs1,13),depo(nyrs1,13),dept(nyrs1,13),
      :    depj(nyrs1,13)
 
-c
-c write out monthly values for each year (for structure i)
-c
+!
+! write out monthly values for each year (for structure i)
+!
           do k1=1,2
             write(256,951) 
           enddo
           do m=1,nyrs
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (missflag(i,m).eq.1) method='Prorated  '
 !         if(missflag(i,m).eq.0) method='Calculated'
             method ='Calculated'
@@ -7460,10 +7554,10 @@ c grb 05-20-00 set method descriptor
              write(0,*)'  processed through structure #',i
            endif
           do l=1,12
-C==================================================
-Cjhb        add shortage calculation to bd1 output
+!==================================================
+!jhb        add shortage calculation to bd1 output
             SHORTAGE=reqreqts(m,l)-estcrpt(i,m,l)
-C==================================================
+!==================================================
             write(256,929)  amn(l),method,ettot(i,m,l),effppt(i,m,l),
      :          reqt(i,m,l),wbu(i,m,l),reqreqts(m,l)
      :          ,seniorf(m,l),juniorf(m,l),otherf(m,l)
@@ -7480,116 +7574,116 @@ C==================================================
      :          laglatet(m,l),totret(m,l),deps(m,l),
      :          depj(m,l),depo(m,l),dept(m,l),depj(m,l)
 
-Cjhb====================================================================
-Cjhb  write a record to the binary file if binary output option selected
-Cjhb  report structure:
-Cjhb=&==================================================================
+!jhb====================================================================
+!jhb  write a record to the binary file if binary output option selected
+!jhb  report structure:
+!jhb=&==================================================================
                 IF(LBD1OUT.and.(ipresim.ne.1)) THEN
                   WRITE(UNIT=IBD1UN)
-Cjhb====================================================================
-Cjhb  write index values as the first three values and then the month string
-Cjhb  (don't really need this last parameter),
-Cjhb=&==================================================================
-Cjhb  (1) INTEGER I - basin index
-Cjhb  (2) INTEGER NYR1+M-1 - year
-Cjhb  (3) INTEGER L - month index
-Cjhb  (4) CHAR*3 AMN(L) - abbr month string  ***REPORT***
+!jhb====================================================================
+!jhb  write index values as the first three values and then the month string
+!jhb  (don't really need this last parameter),
+!jhb=&==================================================================
+!jhb  (1) INTEGER I - basin index
+!jhb  (2) INTEGER NYR1+M-1 - year
+!jhb  (3) INTEGER L - month index
+!jhb  (4) CHAR*3 AMN(L) - abbr month string  ***REPORT***
      :            I,NYR1+M-1,L,AMN(L),
-Cjhb====================================================================
-Cjhb  write some annual but non-monthly time series report data
-Cjhb=&==================================================================
-Cjhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
-Cjhb  (5) REAL t_area(i,m) - annual total crop acreage
-Cjhb  (6) REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
-Cjhb  (7) CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
-Cjhb :            comment(m),t_area(i,m),method,
+!jhb====================================================================
+!jhb  write some annual but non-monthly time series report data
+!jhb=&==================================================================
+!jhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
+!jhb  (5) REAL t_area(i,m) - annual total crop acreage
+!jhb  (6) REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
+!jhb  (7) CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
+!jhb :            comment(m),t_area(i,m),method,
      :            t_area(i,m), m_area(i,m,l), method,
-Cjhb====================================================================
-Cjhb  now write the monthly data (report and other) into the record
-Cjhb=&==================================================================
-Cjhb  (8) REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
-Cjhb  (9) REAL effppt(i,m,l) - Effective Precip  ***REPORT***
+!jhb====================================================================
+!jhb  now write the monthly data (report and other) into the record
+!jhb=&==================================================================
+!jhb  (8) REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
+!jhb  (9) REAL effppt(i,m,l) - Effective Precip  ***REPORT***
      :            ettot(i,m,l),effppt(i,m,l),
-Cjhb  (10) REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
-Cjhb  (11) REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
-Cjhb  (12) REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
+!jhb  (10) REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
+!jhb  (11) REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
+!jhb  (12) REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
      :            reqt(i,m,l), wbu(i,m,l), reqreqts(m,l),
-Cjhb  (13) REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT***
-Cjhb  (14) REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT***
-Cjhb  (15) REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT***
+!jhb  (13) REAL seniorf(m,l) - River Diversion Acct. - Div By Priority - Senior  ***REPORT***
+!jhb  (14) REAL juniorf(m,l) - River Diversion Acct. - Div By Priority - Junior  ***REPORT***
+!jhb  (15) REAL otherf(m,l) - River Diversion Acct. - Div By Priority - Other  ***REPORT***
      :            seniorf(m,l), juniorf(m,l), otherf(m,l),
-Cjhb  (16) REAL ddhmonot(m,l) - River Diversion Acct. - Div By Priority - Total  ***REPORT***
+!jhb  (16) REAL ddhmonot(m,l) - River Diversion Acct. - Div By Priority - Total  ***REPORT***
      :            ddhmonot(m,l),
-Cjhb  (17) REAL ceff(i,m) - River Diversion Acct. - Eff Calc: conveyance Efficiency
-Cjhb  (18) REAL closs(m,l) - River Diversion Acct. - Eff Calc: conveyance Loss
-Cjhb  (19) REAL fdiv(m,l) - River Diversion Acct. - Eff Calc: Farm Headgate Delivery  
+!jhb  (17) REAL ceff(i,m) - River Diversion Acct. - Eff Calc: conveyance Efficiency
+!jhb  (18) REAL closs(m,l) - River Diversion Acct. - Eff Calc: conveyance Loss
+!jhb  (19) REAL fdiv(m,l) - River Diversion Acct. - Eff Calc: Farm Headgate Delivery  
      :            ceff(i,m), closs(m,l), fdiv(m,l),
-Cjhb  (20) REAL crop_cus(m,l) - River Diversion Acct. - Diversion to CU - Senior ***REPORT***
-Cjhb  (21) REAL crop_cuj(m,l) - River Diversion Acct. - Diversion to CU - Junior ***REPORT***
-Cjhb  (22) REAL crop_cuo(m,l) - River Diversion Acct. - Diversion to CU - Other ***REPORT***
-Cjhb  (23) REAL crop_cut(m,l) - River Diversion Acct. - Diversion to CU - Total ***REPORT***
+!jhb  (20) REAL crop_cus(m,l) - River Diversion Acct. - Diversion to CU - Senior ***REPORT***
+!jhb  (21) REAL crop_cuj(m,l) - River Diversion Acct. - Diversion to CU - Junior ***REPORT***
+!jhb  (22) REAL crop_cuo(m,l) - River Diversion Acct. - Diversion to CU - Other ***REPORT***
+!jhb  (23) REAL crop_cut(m,l) - River Diversion Acct. - Diversion to CU - Total ***REPORT***
      :            crop_cus(m,l), crop_cuj(m,l),
      :            crop_cuo(m,l), crop_cut(m,l),
-Cjhb  (24) REAL soil_cus(m,l) - River Diversion Acct. - Add to Soil Moisture - Senior ***REPORT***
-Cjhb  (25) REAL soil_cuj(m,l) - River Diversion Acct. - Add to Soil Moisture - Junior ***REPORT***
-Cjhb  (26) REAL soil_cuo(m,l) - River Diversion Acct. - Add to Soil Moisture - Other ***REPORT***
-Cjhb  (27) REAL soil_cu(m,l) - River Diversion Acct. - Add to Soil Moisture - Total ***REPORT***
+!jhb  (24) REAL soil_cus(m,l) - River Diversion Acct. - Add to Soil Moisture - Senior ***REPORT***
+!jhb  (25) REAL soil_cuj(m,l) - River Diversion Acct. - Add to Soil Moisture - Junior ***REPORT***
+!jhb  (26) REAL soil_cuo(m,l) - River Diversion Acct. - Add to Soil Moisture - Other ***REPORT***
+!jhb  (27) REAL soil_cu(m,l) - River Diversion Acct. - Add to Soil Moisture - Total ***REPORT***
      :            soil_cus(m,l), soil_cuj(m,l),
      :            soil_cuo(m,l), soil_cu(m,l),
-Cjhb  (28) REAL divcu(m,l) - River Diversion Acct. - Total Div to CU & Soil    ***REPORT***
+!jhb  (28) REAL divcu(m,l) - River Diversion Acct. - Total Div to CU & Soil    ***REPORT***
      :            divcu(m,l),
-Cjhb  (29) REAL ulags(m,l) - River Diversion Acct. - Non-Consumed - Senior ***REPORT***
-Cjhb  (30) REAL ulagj(m,l) - River Diversion Acct. - Non-Consumed - Junior ***REPORT***
-Cjhb  (31) REAL ulago(m,l) - River Diversion Acct. - Non-Consumed - Other ***REPORT***
-Cjhb  (32) REAL ulagt(m,l) - River Diversion Acct. - Non-Consumed - Total ***REPORT***
+!jhb  (29) REAL ulags(m,l) - River Diversion Acct. - Non-Consumed - Senior ***REPORT***
+!jhb  (30) REAL ulagj(m,l) - River Diversion Acct. - Non-Consumed - Junior ***REPORT***
+!jhb  (31) REAL ulago(m,l) - River Diversion Acct. - Non-Consumed - Other ***REPORT***
+!jhb  (32) REAL ulagt(m,l) - River Diversion Acct. - Non-Consumed - Total ***REPORT***
      :            ulags(m,l), ulagj(m,l), ulago(m,l), ulagt(m,l),
-C removed Cjhb  (31) REAL arech(m,l) - River Diversion Acct. - Eff Calc: Sprinkler FHG (Not Applied)
-C     :            arech(m,l),sfeff(i,m),
-Cjhb  (33) REAL tail(i,m,l) - Tail water
-Cjhb  (34) REAL sfeff(i,m) - River Diversion Acct. - Eff Calc: Max Applic Effic
-Cjhb  (35) REAL effcu(m,l) - River Diversion Acct. - Eff Calc: Calc Surface Water Applic Effic (%)
-Cjhb  (36) REAL seffcu(m,l) - River Diversion Acct. - Eff Calc: System Effic (%)  ***REPORT***
+! removed Cjhb  (31) REAL arech(m,l) - River Diversion Acct. - Eff Calc: Sprinkler FHG (Not Applied)
+!     :            arech(m,l),sfeff(i,m),
+!jhb  (33) REAL tail(i,m,l) - Tail water
+!jhb  (34) REAL sfeff(i,m) - River Diversion Acct. - Eff Calc: Max Applic Effic
+!jhb  (35) REAL effcu(m,l) - River Diversion Acct. - Eff Calc: Calc Surface Water Applic Effic (%)
+!jhb  (36) REAL seffcu(m,l) - River Diversion Acct. - Eff Calc: System Effic (%)  ***REPORT***
      :            tail(i,m,l), sfeff(i,m), effcu(m,l), seffcu(m,l),
-Cjhb  (37) REAL soiltotts(m,l) - EOM SW Soil Content- Senior ***REPORT***
-Cjhb  (38) REAL soiltottj(m,l) - EOM SW Soil Content- Junior ***REPORT***
-Cjhb  (39) REAL soiltotto(m,l) - EOM SW Soil Content- Other ***REPORT***
-Cjhb  (40) REAL soiltott(m,l) - EOM SW Soil Content- Total ***REPORT***
+!jhb  (37) REAL soiltotts(m,l) - EOM SW Soil Content- Senior ***REPORT***
+!jhb  (38) REAL soiltottj(m,l) - EOM SW Soil Content- Junior ***REPORT***
+!jhb  (39) REAL soiltotto(m,l) - EOM SW Soil Content- Other ***REPORT***
+!jhb  (40) REAL soiltott(m,l) - EOM SW Soil Content- Total ***REPORT***
      :            soiltotts(m,l), soiltottj(m,l),
      :            soiltotto(m,l), soiltott(m,l),
-Cjhb  (41) REAL crop_cut(m,l) - Tot Crop CU from Div    ***REPORT***
-Cjhb  (42) REAL cropcusoil(m,l) - Total Crop from Soil    ***REPORT***
+!jhb  (41) REAL crop_cut(m,l) - Tot Crop CU from Div    ***REPORT***
+!jhb  (42) REAL cropcusoil(m,l) - Total Crop from Soil    ***REPORT***
      :            crop_cut(m,l), cropcusoil(m,l),
-Cjhb  (43) REAL estcrps(m,l) - Total Crop CU - Senior  ***REPORT***
-Cjhb  (44) REAL estcrpj(m,l) - Total Crop CU - Junior  ***REPORT***
-Cjhb  (45) REAL estcrpo(m,l) - Total Crop CU - Other   ***REPORT***
-Cjhb  (46) REAL estcrpt(i,m,l) - Total Crop CU           ***REPORT***
+!jhb  (43) REAL estcrps(m,l) - Total Crop CU - Senior  ***REPORT***
+!jhb  (44) REAL estcrpj(m,l) - Total Crop CU - Junior  ***REPORT***
+!jhb  (45) REAL estcrpo(m,l) - Total Crop CU - Other   ***REPORT***
+!jhb  (46) REAL estcrpt(i,m,l) - Total Crop CU           ***REPORT***
      &            estcrps(m,l), estcrpj(m,l),
      &            estcrpo(m,l), estcrpt(i,m,l),
-Cjhb  (47) REAL lagrets(m,l) - Months Return Flows - From This Months Div - Senior  ***REPORT***
-Cjhb  (48) REAL lagretj(m,l) - Months Return Flows - From This Months Div - Junior  ***REPORT***
-Cjhb  (49) REAL lagreto(m,l) - Months Return Flows - From This Months Div - Other  ***REPORT***
-Cjhb  (50) REAL lagrett(m,l) - Months Return Flows - From This Months Div - Total  ***REPORT***
+!jhb  (47) REAL lagrets(m,l) - Months Return Flows - From This Months Div - Senior  ***REPORT***
+!jhb  (48) REAL lagretj(m,l) - Months Return Flows - From This Months Div - Junior  ***REPORT***
+!jhb  (49) REAL lagreto(m,l) - Months Return Flows - From This Months Div - Other  ***REPORT***
+!jhb  (50) REAL lagrett(m,l) - Months Return Flows - From This Months Div - Total  ***REPORT***
      &            lagrets(m,l), lagretj(m,l),
      &            lagreto(m,l), lagrett(m,l),
-Cjhb  (51) REAL laglates(m,l) - Months Return Flows - From Prev Months Div - Senior  ***REPORT***
-Cjhb  (52) REAL laglatej(m,l) - Months Return Flows - From Prev Months Div - Junior  ***REPORT***
-Cjhb  (53) REAL laglateo(m,l) - Months Return Flows - From Prev Months Div - Other  ***REPORT***
+!jhb  (51) REAL laglates(m,l) - Months Return Flows - From Prev Months Div - Senior  ***REPORT***
+!jhb  (52) REAL laglatej(m,l) - Months Return Flows - From Prev Months Div - Junior  ***REPORT***
+!jhb  (53) REAL laglateo(m,l) - Months Return Flows - From Prev Months Div - Other  ***REPORT***
      &            laglates(m,l), laglatej(m,l), laglateo(m,l),
-Cjhb  (54) REAL laglatet(m,l) - Months Return Flows - From Prev Months Div - Total  ***REPORT***
-Cjhb  (55) REAL totret(m,l) - Months Return Flows - Total  ***REPORT***
+!jhb  (54) REAL laglatet(m,l) - Months Return Flows - From Prev Months Div - Total  ***REPORT***
+!jhb  (55) REAL totret(m,l) - Months Return Flows - Total  ***REPORT***
      &            laglatet(m,l), totret(m,l),
-Cjhb  (56) REAL deps(m,l) - River Depl(+)/Accr(-) - By Priority - Senior  ***REPORT***
-Cjhb  (57) REAL depj(m,l) - River Depl(+)/Accr(-) - By Priority - Junior  ***REPORT***
-Cjhb  (58) REAL depo(m,l) - River Depl(+)/Accr(-) - By Priority - Other  ***REPORT***
-Cjhb  (59) REAL dept(m,l) - River Depl(+)/Accr(-) - Total  ***REPORT***
-Cjhb  (60) REAL depj(m,l) - Replacement Requirement  ***REPORT***
+!jhb  (56) REAL deps(m,l) - River Depl(+)/Accr(-) - By Priority - Senior  ***REPORT***
+!jhb  (57) REAL depj(m,l) - River Depl(+)/Accr(-) - By Priority - Junior  ***REPORT***
+!jhb  (58) REAL depo(m,l) - River Depl(+)/Accr(-) - By Priority - Other  ***REPORT***
+!jhb  (59) REAL dept(m,l) - River Depl(+)/Accr(-) - Total  ***REPORT***
+!jhb  (60) REAL depj(m,l) - Replacement Requirement  ***REPORT***
      &            deps(m,l), depj(m,l), depo(m,l), dept(m,l),
      &            depj(m,l),
-Cjhb  (61) REAL SHORTAGE - Total CU Shortage
+!jhb  (61) REAL SHORTAGE - Total CU Shortage
      &            SHORTAGE
-Cjhb====================================================================
-c                 update the district totals that change by month
-Cjhb====================================================================
+!jhb====================================================================
+!                 update the district totals that change by month
+!jhb====================================================================
                   if(ettot(i,m,l).gt.-999.0)then
                     sbettot(sbsb(i),m,l)=
      :                sbettot(sbsb(i),m,l)+ettot(i,m,l)
@@ -7886,16 +7980,16 @@ Cjhb====================================================================
                     bshortage(m,l)=
      :                bshortage(m,l)+shortage
                   endif
-Cjhb====================================================================
+!jhb====================================================================
                 ENDIF !(LBD1OUT)
-Cjhb====================================================================
+!jhb====================================================================
               enddo !l=1,12
-Cjhb====================================================================
-c             update the district totals that only change annually
-Cjhb====================================================================
+!jhb====================================================================
+!             update the district totals that only change annually
+!jhb====================================================================
               IF(LBD1OUT.and.(ipresim.ne.1)) THEN
               ENDIF
-Cjhb====================================================================
+!jhb====================================================================
             enddo !m=1,nyrs
             write(256,951)
             write(256,951)
@@ -7905,12 +7999,12 @@ Cjhb====================================================================
 *  Report Form for ISUPLY = 4 - Supply Limited, ground water considered
 ***********************************************************************
       if (isuply .eq. 4) then
-c
-c write totals for each year (for structure i)
-c
+!
+! write totals for each year (for structure i)
+!
         imiss=0
         do 6065 m=1,nyrs
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (missflag(i,m).eq.1) then
 !	      method='Prorated  '
 !          method2='Prorated  '
@@ -7951,9 +8045,9 @@ c grb 05-20-00 set method descriptor
           endif
 
 6065    continue
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
         write(256,651)
           if(crop_cut(nyrs1,13) .gt. -998) then
              cutot=crop_cut(nyrs1,13)+gwcu(nyrs1,13)
@@ -7965,7 +8059,7 @@ c
              short=-999
           endif
 
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (imiss.eq.1) method='Prorated  '
 !         if(imiss.eq.0) method='Calculated'
           method ='Calculated'
@@ -7999,9 +8093,9 @@ c grb 05-20-00 set method descriptor
         do k1=1,3
            write(256,651) 
         enddo
-c
-c  write monthly average for all years (for structure i)
-c
+!
+!  write monthly average for all years (for structure i)
+!
         write(256,618) nyr1, nyr2
         do l=1,12
           if(crop_cut(nyrs1,l) .gt. -998) then
@@ -8036,7 +8130,7 @@ c
      :    (grass(i,nyrs1,l,ifx), ifx=1, iflood2),
      :     tail(i,nyrs1,l)
           endif
-c          comeff(l)=ceff(i,nyrs1)*(effcu(nyrs1,l)/100)
+!          comeff(l)=ceff(i,nyrs1)*(effcu(nyrs1,l)/100)
           comeff(l)=seffcu(nyrs1,l)/100.0
           if(comeff(l) .lt. 0.005) then
             comeff(l)=ceff(i,nyrs1)*sfeff(i,nyrs1)
@@ -8052,9 +8146,9 @@ c          comeff(l)=ceff(i,nyrs1)*(effcu(nyrs1,l)/100)
           write(6,660)twdid(1:12),(effgw(nyrs1,l)*100.0,l=1,12),
      :     twdid(13:24)
         endif
-c
-c  write annual average for all years (for structure i)
-c
+!
+!  write annual average for all years (for structure i)
+!
         write(256,651)
           if(crop_cut(nyrs1,13) .gt. -998) then
              cutot=crop_cut(nyrs1,13)+gwcu(nyrs1,13)
@@ -8087,18 +8181,18 @@ c
      :  gfdiv(nyrs1,13),short,(grass(i,nyrs1,13,ifx), ifx=1,iflood2),
      :     tail(i, nyrs1,13)
         endif
-c
-c write out monthly values for each year (for structure i)
-c
+!
+! write out monthly values for each year (for structure i)
+!
           do k1=1,2
            write(256,651) 
           enddo
-Cjhb=&==================================================================
-Cjhb  Start M (year) DO loop
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  Start M (year) DO loop
+!jhb=&==================================================================
           do m=1,nyrs
 
-c grb 05-20-00 set method descriptor
+! grb 05-20-00 set method descriptor
 !         if (missflag(i,m).eq.1) method='Prorated  '
 !         if(missflag(i,m).eq.0) method='Calculated'
             method ='Calculated'
@@ -8116,7 +8210,7 @@ c grb 05-20-00 set method descriptor
      &        0.0,
      &        swgwspac(i,m)+swgwflac(i,m)
           endif
-c          write(256,623) sper(i,m)*100,sper(i,m)*t_area(i,m)
+!          write(256,623) sper(i,m)*100,sper(i,m)*t_area(i,m)
           if(swgwspac(i,m)+swgwflac(i,m).gt.0.0)then
             write(256,623)
      &        swgwspac(i,m)/(swgwspac(i,m)+swgwflac(i,m))*100.0,
@@ -8140,9 +8234,9 @@ c          write(256,623) sper(i,m)*100,sper(i,m)*t_area(i,m)
           if( (mod(i,25).eq.0) .and. (m.eq.1)) then
             write(0,*)'  processed through structure #',i
           endif
-Cjhb=&==================================================================
-Cjhb  Start L (month) DO loop
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  Start L (month) DO loop
+!jhb=&==================================================================
               do l=1,12
               if(crop_cut(m,l) .gt. -998) then
                  cutot=crop_cut(m,l)+gwcu(m,l)
@@ -8153,13 +8247,13 @@ Cjhb=&==================================================================
                  cust=-999
                  short=-999
               endif
-C==================================================
-Cjhb        add shortage calculation to bd1 output
+!==================================================
+!jhb        add shortage calculation to bd1 output
             SHORTAGE=short
-C==================================================
-Cjhb=&==================================================================
-Cjhb  Start IFLOOD IF block
-Cjhb=&==================================================================
+!==================================================
+!jhb=&==================================================================
+!jhb  Start IFLOOD IF block
+!jhb=&==================================================================
                 if(iflood .eq. 0) then
                 write(256,611) amn(l),method,ettot(i,m,l),
      :          effppt(i,m,l),reqt(i,m,l),wbu(i,m,l),
@@ -8170,73 +8264,73 @@ Cjhb=&==================================================================
      :          soiltott(m,l),cutot,cropcusoil(m,l),
      :          custot(i,m,l),tdp(m,l)
 
-Cjhb====================================================================
-Cjhb  write index values as the first three values and then the month string
-Cjhb=&==================================================================
+!jhb====================================================================
+!jhb  write index values as the first three values and then the month string
+!jhb=&==================================================================
                 IF(LBD1OUT.and.(ipresim.ne.1)) THEN
                   WRITE(UNIT=IBD1UN)
-Cjhb====================================================================
-Cjhb  write index values as the first three values and then the month string
-Cjhb  (don't really need this last parameter),
-Cjhb=&==================================================================
-Cjhb  (1) INTEGER I - basin index
-Cjhb  (2) INTEGER NYR1+M-1 - year
-Cjhb  (3) INTEGER L - month index
-Cjhb  (4) CHAR*3 AMN(L) - abbr month string  ***REPORT***
+!jhb====================================================================
+!jhb  write index values as the first three values and then the month string
+!jhb  (don't really need this last parameter),
+!jhb=&==================================================================
+!jhb  (1) INTEGER I - basin index
+!jhb  (2) INTEGER NYR1+M-1 - year
+!jhb  (3) INTEGER L - month index
+!jhb  (4) CHAR*3 AMN(L) - abbr month string  ***REPORT***
      :            I,NYR1+M-1,L,AMN(L),
-Cjhb====================================================================
-Cjhb  write some annual but non-monthly time series report data
-Cjhb=&==================================================================
-Cjhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
-Cjhb  (5) REAL t_area(i,m) - annual 'Total Irrigated Acreage '
-Cjhb  (6) REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
-Cjhb  (7) CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
-Cjhb :            comment(m),t_area(i,m),method,
+!jhb====================================================================
+!jhb  write some annual but non-monthly time series report data
+!jhb=&==================================================================
+!jhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
+!jhb  (5) REAL t_area(i,m) - annual 'Total Irrigated Acreage '
+!jhb  (6) REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
+!jhb  (7) CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
+!jhb :            comment(m),t_area(i,m),method,
      :            t_area(i,m),m_area(i,m,l),method,
-Cjhb====================================================================
-Cjhb  now write the monthly data (report and other) into the record
-Cjhb=&==================================================================
-Cjhb  (8) REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
-Cjhb  (9) REAL effppt(i,m,l) - Effective Precip  ***REPORT***
+!jhb====================================================================
+!jhb  now write the monthly data (report and other) into the record
+!jhb=&==================================================================
+!jhb  (8) REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
+!jhb  (9) REAL effppt(i,m,l) - Effective Precip  ***REPORT***
      :            ettot(i,m,l),effppt(i,m,l),
-Cjhb  (10) REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
-Cjhb  (11) REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
-Cjhb  (12) REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
+!jhb  (10) REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
+!jhb  (11) REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
+!jhb  (12) REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
      :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
-Cjhb  (13) REAL ddhmonot(m,l) - River Diversion (SW) Acct. - Historic Diversion  ***REPORT***
+!jhb  (13) REAL ddhmonot(m,l) - River Diversion (SW) Acct. - Historic Diversion  ***REPORT***
      :            ddhmonot(m,l),
-Cjhb  (14) REAL ceff(i,m) - River Diversion (SW) Acct. - conveyance Efficiency  ***REPORT***
-Cjhb  (15) REAL closs(m,l) - River Diversion (SW) Acct. - conveyance Loss  ***REPORT***
-Cjhb  (16) REAL fdiv(m,l) - River Diversion (SW) Acct. - Farm Headgate Diversion  ***REPORT***
-Cjhb  (17) REAL tail(i,m,l) - Tail water
+!jhb  (14) REAL ceff(i,m) - River Diversion (SW) Acct. - conveyance Efficiency  ***REPORT***
+!jhb  (15) REAL closs(m,l) - River Diversion (SW) Acct. - conveyance Loss  ***REPORT***
+!jhb  (16) REAL fdiv(m,l) - River Diversion (SW) Acct. - Farm Headgate Diversion  ***REPORT***
+!jhb  (17) REAL tail(i,m,l) - Tail water
      :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
-Cjhb  (18) REAL arech(m,l) - River Diversion (SW) Acct. - Farm Deliver to Recharge  ***REPORT***
-Cjhb  (19) REAL sfeff(i,m) - River Diversion (SW) Acct. - Max Applic Effic  ***REPORT***
+!jhb  (18) REAL arech(m,l) - River Diversion (SW) Acct. - Farm Deliver to Recharge  ***REPORT***
+!jhb  (19) REAL sfeff(i,m) - River Diversion (SW) Acct. - Max Applic Effic  ***REPORT***
      :            arech(m,l),sfeff(i,m),
-Cjhb  (20) REAL crop_cut(m,l) - River Diversion (SW) Acct. - SW to CU           ***REPORT***
-Cjhb  (21) REAL soil_cu(m,l) - River Diversion (SW) Acct. - SW to Soil              ***REPORT***
-Cjhb  (22) REAL ulagt(m,l) - River Diversion (SW) Acct. - 'SW_Non_Consumed         '  ***REPORT***
+!jhb  (20) REAL crop_cut(m,l) - River Diversion (SW) Acct. - SW to CU           ***REPORT***
+!jhb  (21) REAL soil_cu(m,l) - River Diversion (SW) Acct. - SW to Soil              ***REPORT***
+!jhb  (22) REAL ulagt(m,l) - River Diversion (SW) Acct. - 'SW_Non_Consumed         '  ***REPORT***
      :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
-Cjhb  (23) REAL effcu(m,l) - River Diversion (SW) Acct. - Calc Surface Water Applic Effic (%)  ***REPORT***
-Cjhb  (24) REAL seffcu(m,l) - River Diversion (SW) Acct. - Calc SW System Effic      ***REPORT***
+!jhb  (23) REAL effcu(m,l) - River Diversion (SW) Acct. - Calc Surface Water Applic Effic (%)  ***REPORT***
+!jhb  (24) REAL seffcu(m,l) - River Diversion (SW) Acct. - Calc SW System Effic      ***REPORT***
      :            effcu(m,l),seffcu(m,l),
-Cjhb  (25) REAL gdiv(m,l) - GW Diversion Acct. - 'GW Diversion            ' ***REPORT***
-Cjhb  (26) REAL effgw(m,l) - GW Diversion Acct. - 'Calc GW Application Eff '  ***REPORT***
-Cjhb  (27) REAL gwcu(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
-Cjhb  (28) REAL gwro(m,l) - GW Diversion Acct. - 'GW - Non-Consumed       ' ***REPORT***
+!jhb  (25) REAL gdiv(m,l) - GW Diversion Acct. - 'GW Diversion            ' ***REPORT***
+!jhb  (26) REAL effgw(m,l) - GW Diversion Acct. - 'Calc GW Application Eff '  ***REPORT***
+!jhb  (27) REAL gwcu(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
+!jhb  (28) REAL gwro(m,l) - GW Diversion Acct. - 'GW - Non-Consumed       ' ***REPORT***
      :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
-Cjhb  (29) REAL soiltott(m,l) - Total Soil Moisture EOM Contents  ***REPORT***
+!jhb  (29) REAL soiltott(m,l) - Total Soil Moisture EOM Contents  ***REPORT***
      :            soiltott(m,l),
-Cjhb  (30) REAL cutot - Estimated Crop CU - From SW/GW Diversion  ***REPORT***
-Cjhb  (31) REAL cropcusoil(m,l) - Estimated Crop CU - From Soil Moisture  ***REPORT***
-Cjhb  (32) REAL custot(i,m,l) - Estimated Crop CU - Total  ***REPORT***
+!jhb  (30) REAL cutot - Estimated Crop CU - From SW/GW Diversion  ***REPORT***
+!jhb  (31) REAL cropcusoil(m,l) - Estimated Crop CU - From Soil Moisture  ***REPORT***
+!jhb  (32) REAL custot(i,m,l) - Estimated Crop CU - Total  ***REPORT***
      :            cutot,cropcusoil(m,l),custot(i,m,l),
-Cjhb  (33) REAL tdp(m,l) - Total Month Non-Consumed  ***REPORT***
-Cjhb  (34) REAL SHORTAGE - Total Shortage
+!jhb  (33) REAL tdp(m,l) - Total Month Non-Consumed  ***REPORT***
+!jhb  (34) REAL SHORTAGE - Total Shortage
      :            tdp(m,l),SHORTAGE
-Cjhb====================================================================
-c                 update the district totals that change by month
-Cjhb====================================================================
+!jhb====================================================================
+!                 update the district totals that change by month
+!jhb====================================================================
                   if(ettot(i,m,l).gt.-999.0)then
                     sbettot(sbsb(i),m,l)=
      :                sbettot(sbsb(i),m,l)+ettot(i,m,l)
@@ -8497,13 +8591,13 @@ Cjhb====================================================================
                     bshortage(m,l)=
      :                bshortage(m,l)+shortage
                   endif
-Cjhb====================================================================
+!jhb====================================================================
                 ENDIF !(LBD1OUT)
-Cjhb====================================================================
+!jhb====================================================================
 
-Cjhb=&==================================================================
-Cjhb  Continue IFLOOD IF block
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  Continue IFLOOD IF block
+!jhb=&==================================================================
                 else ! NOT (iflood .eq. 0)
                 write(256,631) amn(l),method,ettot(i,m,l),
      :          effppt(i,m,l),reqt(i,m,l),wbu(i,m,l),
@@ -8516,82 +8610,82 @@ Cjhb=&==================================================================
      :          (grass(i,m,l,ifx), ifx=1,iflood2),
      :          tail(i,m,l)
 
-Cjhb====================================================================
-Cjhb  write a record to the binary file if binary output option selected
-Cjhb  report structure:
-Cjhb  (note ITIME is necessary because this code is looped through twice
-Cjhb   first time is to determine avg values for filling in missing data)
-Cjhb=&==================================================================
+!jhb====================================================================
+!jhb  write a record to the binary file if binary output option selected
+!jhb  report structure:
+!jhb  (note ITIME is necessary because this code is looped through twice
+!jhb   first time is to determine avg values for filling in missing data)
+!jhb=&==================================================================
                 IF(LBD1OUT.and.(ipresim.ne.1)) THEN
                   WRITE(UNIT=IBD1UN)
-Cjhb====================================================================
-Cjhb  write index values as the first three values and then the month string
-Cjhb  (don't really need this last parameter),
-Cjhb=&==================================================================
-Cjhb  (1) INTEGER I - basin index
-Cjhb  (2) INTEGER NYR1+M-1 - year
-Cjhb  (3) INTEGER L - month index
-Cjhb  (4) CHAR*3 AMN(L) - abbr month string  ***REPORT***
+!jhb====================================================================
+!jhb  write index values as the first three values and then the month string
+!jhb  (don't really need this last parameter),
+!jhb=&==================================================================
+!jhb  (1) INTEGER I - basin index
+!jhb  (2) INTEGER NYR1+M-1 - year
+!jhb  (3) INTEGER L - month index
+!jhb  (4) CHAR*3 AMN(L) - abbr month string  ***REPORT***
      :            I,NYR1+M-1,L,AMN(L),
-Cjhb====================================================================
-Cjhb  write some annual but non-monthly time series report data
-Cjhb=&==================================================================
-Cjhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
-Cjhb  (5) REAL t_area(i,m) - annual 'Total Irrigated Acreage '
-Cjhb  (6) REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
-Cjhb  (7) CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
-Cjhb :            comment(m),t_area(i,m),method,
+!jhb====================================================================
+!jhb  write some annual but non-monthly time series report data
+!jhb=&==================================================================
+!jhb  CHAR*84 COMMENT(M) - annual water budget comment (REMOVED from binary file)
+!jhb  (5) REAL t_area(i,m) - annual 'Total Irrigated Acreage '
+!jhb  (6) REAL m_area(i,m,l) - monthly modeled crop acreage (=t_area if not missing data or missing divs are filled, =0 otherwise)
+!jhb  (7) CHAR*10 method - Analysis method - "Calculated" vs. "Prorated"  ***REPORT***
+!jhb :            comment(m),t_area(i,m),method,
      :            t_area(i,m),m_area(i,m,l),method,
-Cjhb====================================================================
-Cjhb  now write the monthly data (report and other) into the record
-Cjhb=&==================================================================
-Cjhb  (8) REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
-Cjhb  (9) REAL effppt(i,m,l) - Effective Precip  ***REPORT***
+!jhb====================================================================
+!jhb  now write the monthly data (report and other) into the record
+!jhb=&==================================================================
+!jhb  (8) REAL ettot(i,m,l) - Potential Crop ET  ***REPORT***
+!jhb  (9) REAL effppt(i,m,l) - Effective Precip  ***REPORT***
      :            ettot(i,m,l),effppt(i,m,l),
-Cjhb  (10) REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
-Cjhb  (11) REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
-Cjhb  (12) REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
+!jhb  (10) REAL reqt(i,m,l) - Irrigation Water Requirement IWR  ***REPORT***
+!jhb  (11) REAL wbu(i,m,l) - EOM Winter Precip Carryover  ***REPORT***
+!jhb  (12) REAL reqreqts(m,l) - IWR After WInter Precip  ***REPORT***
      :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
-Cjhb  (13) REAL ddhmonot(m,l) - River Diversion (SW) Acct. - River Diversion           ***REPORT***
+!jhb  (13) REAL ddhmonot(m,l) - River Diversion (SW) Acct. - River Diversion           ***REPORT***
      :            ddhmonot(m,l),
-Cjhb  (14) REAL ceff(i,m) - River Diversion (SW) Acct. - conveyance Efficiency  ***REPORT***
-Cjhb  (15) REAL closs(m,l) - River Diversion (SW) Acct. - conveyance Loss  ***REPORT***
-Cjhb  (16) REAL fdiv(m,l) - River Diversion (SW) Acct. - 'Farm Headgate Delivery  '  ***REPORT***
+!jhb  (14) REAL ceff(i,m) - River Diversion (SW) Acct. - conveyance Efficiency  ***REPORT***
+!jhb  (15) REAL closs(m,l) - River Diversion (SW) Acct. - conveyance Loss  ***REPORT***
+!jhb  (16) REAL fdiv(m,l) - River Diversion (SW) Acct. - 'Farm Headgate Delivery  '  ***REPORT***
      :            ceff(i,m),closs(m,l),fdiv(m,l),
-Cjhb  (17) REAL tail(i,m,l) - Supply_Tail Water_Drains
-Cjhb  (18) REAL arech(m,l) - River Diversion (SW) Acct. - 'Farm Deliver to Recharge'  ***REPORT***
-Cjhb  (19) REAL sfeff(i,m) - River Diversion (SW) Acct. - 'Max Application Effic   '  ***REPORT***
+!jhb  (17) REAL tail(i,m,l) - Supply_Tail Water_Drains
+!jhb  (18) REAL arech(m,l) - River Diversion (SW) Acct. - 'Farm Deliver to Recharge'  ***REPORT***
+!jhb  (19) REAL sfeff(i,m) - River Diversion (SW) Acct. - 'Max Application Effic   '  ***REPORT***
      :            tail(i,m,l),arech(m,l),sfeff(i,m),
-Cjhb  (20) REAL crop_cut(m,l) - River Diversion (SW) Acct. - SW to CU           ***REPORT***
-Cjhb  (21) REAL soil_cu(m,l) - River Diversion (SW) Acct. - SW to Soil               ***REPORT***
-Cjhb  (22) REAL ulagt(m,l) - River Diversion (SW) Acct. - 'SW_Non_Consumed         ' ***REPORT***
+!jhb  (20) REAL crop_cut(m,l) - River Diversion (SW) Acct. - SW to CU           ***REPORT***
+!jhb  (21) REAL soil_cu(m,l) - River Diversion (SW) Acct. - SW to Soil               ***REPORT***
+!jhb  (22) REAL ulagt(m,l) - River Diversion (SW) Acct. - 'SW_Non_Consumed         ' ***REPORT***
      :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
-Cjhb  (23) REAL effcu(m,l) - River Diversion (SW) Acct. - Calc Surface Water Applic Effic (%)  ***REPORT***
-Cjhb  (24) REAL seffcu(m,l) - River Diversion (SW) Acct. - Calc SW System Effic      ***REPORT***
+!jhb  (23) REAL effcu(m,l) - River Diversion (SW) Acct. - Calc Surface Water Applic Effic (%)  ***REPORT***
+!jhb  (24) REAL seffcu(m,l) - River Diversion (SW) Acct. - Calc SW System Effic      ***REPORT***
      :            effcu(m,l),seffcu(m,l),
-Cjhb  (25) REAL gdiv(m,l) - GW Diversion Acct. - 'GW Diversion            ' ***REPORT***
-Cjhb  (26) REAL effgw(m,l) - GW Diversion Acct. - 'Calc GW Application Eff '  ***REPORT***
-Cjhb  (27) REAL gwcu(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
-Cjhb  (28) REAL gwro(m,l) - GW Diversion Acct. - 'GW - Non-Consumed       ' ***REPORT***
+!jhb  (25) REAL gdiv(m,l) - GW Diversion Acct. - 'GW Diversion            ' ***REPORT***
+!jhb  (26) REAL effgw(m,l) - GW Diversion Acct. - 'Calc GW Application Eff '  ***REPORT***
+!jhb  (27) REAL gwcu(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
+!jhb  (28) REAL gwro(m,l) - GW Diversion Acct. - 'GW - Non-Consumed       ' ***REPORT***
      :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
-Cjhb  (29) REAL soiltott(m,l) - Total Soil Moisture EOM Contents  ***REPORT***
+!jhb  (29) REAL soiltott(m,l) - Total Soil Moisture EOM Contents  ***REPORT***
      :            soiltott(m,l),
-Cjhb  (30) REAL cutot - Estimated Crop CU - From SW/GW Diversion  ***REPORT***
-Cjhb  (31) REAL cropcusoil(m,l) - Estimated Crop CU - From Soil Moisture  ***REPORT***
-Cjhb  (32) REAL custot(i,m,l) - Estimated Crop CU - Total  ***REPORT***
+!jhb  (30) REAL cutot - Estimated Crop CU - From SW/GW Diversion  ***REPORT***
+!jhb  (31) REAL cropcusoil(m,l) - Estimated Crop CU - From Soil Moisture  ***REPORT***
+!jhb  (32) REAL custot(i,m,l) - Estimated Crop CU - Total  ***REPORT***
      :            cutot,cropcusoil(m,l),custot(i,m,l),
-Cjhb  (33) REAL tdp(m,l) - Total Month Non-Consumed  ***REPORT***
+!jhb  (33) REAL tdp(m,l) - Total Month Non-Consumed  ***REPORT***
      :            tdp(m,l),
-Cjhb  (34) REAL SHORTAGE - Total Shortage  ***REPORT***
-Cjhb  (35) REAL gsdiv(m,l) - GW div to Sprinkler  ***REPORT***
-Cjhb  (36) REAL gfdiv(m,l) - GW div to Flood  ***REPORT***
+!jhb  (34) REAL SHORTAGE - Total Shortage  ***REPORT***
+!jhb  (35) REAL gsdiv(m,l) - GW div to Sprinkler  ***REPORT***
+!jhb  (36) REAL gfdiv(m,l) - GW div to Flood  ***REPORT***
      :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
-Cjhb  2*IFLOOD REAL (grass(i,m,l,ifx),ifx=1,iflood2) - IWR Pasture  ***REPORT***
-Cjhb  REAL tail(i,m,l) - ???  ***REPORT***
+!jhb  2*IFLOOD REAL (grass(i,m,l,ifx),ifx=1,iflood2) - IWR Pasture  ***REPORT***
+!jhb  REAL tail(i,m,l) - ???  ***REPORT***
      :            (grass(i,m,l,ifx),ifx=1,iflood2)
-Cjhb====================================================================
-c                 update the district totals that change by month
-Cjhb====================================================================
+!jhb====================================================================
+!                 update the district totals that change by month
+!jhb====================================================================
                   if(ettot(i,m,l).gt.-999.0)then
                     sbettot(sbsb(i),m,l)=
      :                sbettot(sbsb(i),m,l)+ettot(i,m,l)
@@ -8860,42 +8954,42 @@ Cjhb====================================================================
      :                  bgrass(m,l,ifx)+grass(i,m,l,ifx)
                     endif
                   enddo
-Cjhb====================================================================
+!jhb====================================================================
                 ENDIF !(LBD1OUT)
-Cjhb====================================================================
-Cjhb=&==================================================================
-Cjhb  End IFLOOD IF block
-Cjhb=&==================================================================
+!jhb====================================================================
+!jhb=&==================================================================
+!jhb  End IFLOOD IF block
+!jhb=&==================================================================
                 endif !(iflood .eq. 0)
-Cjhb=&==================================================================
-Cjhb  End L (month) DO loop
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  End L (month) DO loop
+!jhb=&==================================================================
               enddo !l=1,12
-Cjhb====================================================================
-c             update the district totals that only change annually
-Cjhb====================================================================
+!jhb====================================================================
+!             update the district totals that only change annually
+!jhb====================================================================
               IF(LBD1OUT.and.(ipresim.ne.1)) THEN
               ENDIF
-Cjhb====================================================================
-Cjhb  End M (year) DO loop
-Cjhb=&==================================================================
+!jhb====================================================================
+!jhb  End M (year) DO loop
+!jhb=&==================================================================
           enddo !m=1,nyrs
 
            write(256,651)
            write(256,651)
            write(256,651)
                                                       
-Cjhb=&==================================================================
-Cjhb  End ISUPLY IF block
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  End ISUPLY IF block
+!jhb=&==================================================================
       endif !(isuply .eq. 4)
 
 *********************************************************************************************
 *  Keep Track of Project totals, averages
 *********************************************************************************************	
-c      
-c Total by year for all structures - if any structures missing, no total!!!
-c
+!      
+! Total by year for all structures - if any structures missing, no total!!!
+!
 
 577   do m=1,nyrs+1
         if(reqreqts(m,13) .gt. -998 .and. divsup(i,m,13) .gt. -998) then
@@ -8965,9 +9059,9 @@ c
         endif
       enddo
 
-c
-c -- add average monthly values for all structures (already accounts for missing values)
-c
+!
+! -- add average monthly values for all structures (already accounts for missing values)
+!
          do l=1,13
            if(reqreqts(nyrs1,l) .gt. -998) then
              reqreqts(nyrs2,l) = reqreqts(nyrs2,l)+reqreqts(nyrs1,l)
@@ -9105,7 +9199,7 @@ c
        enddo
       enddo
 
-c grb 05-05-2000 save soil moisture at end of presim period for start of simulation - next five lines
+! grb 05-05-2000 save soil moisture at end of presim period for start of simulation - next five lines
 5780  if (ipresim.eq.1) then
         endsoils(i)=soiltots
         endsoilj(i)=soiltotj
@@ -9113,17 +9207,17 @@ c grb 05-05-2000 save soil moisture at end of presim period for start of simulat
       endif
 
 578   continue    !end nbasin loop
-c
-c Determine average shortages for surface water only lands by water district
-c    set itime .eq. 2 and start nbasin loop again for aggregate structures 
-c
+!
+! Determine average shortages for surface water only lands by water district
+!    set itime .eq. 2 and start nbasin loop again for aggregate structures 
+!
       if(itime .eq. 1)  then
          do id=1,99
           do m=1,nyrs
             do j=1,12
               if(idcnt(id,m,j) .gt. 0) then
                 swmet(id,m,j) = swmet(id,m,j)/idcnt(id,m,j)
-c grb   add check on swmet       
+! grb   add check on swmet       
                 if (swmet(id,m,j).gt. (1.001)) then
                    write(0,*) "swmet>1",swmet(id,m,j),id,m,j
                    stop
@@ -9135,41 +9229,41 @@ c grb   add check on swmet
           enddo
          enddo
       endif
-Cjhb=&==================================================================
-Cjhb  the following code checks to see if this is first or second time
-Cjhb  through the water supply accounting code.
-Cjhb  if this was first time through, then close and reopen file unit 256,
-Cjhb  reset itime flag =2 and run through the entire nbasin loop again
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  the following code checks to see if this is first or second time
+!jhb  through the water supply accounting code.
+!jhb  if this was first time through, then close and reopen file unit 256,
+!jhb  reset itime flag =2 and run through the entire nbasin loop again
+!jhb=&==================================================================
       if(itime .eq. 1) then
         itime = 2
         close(256)
         OPEN (UNIT=256,FILE="temp2",STATUS='Unknown',IOSTAT=IERR)
         goto 45
       endif
-Cjhb=&==================================================================
-c       now write the subbasin and basin totals
-c       we are outside the structure and imiss2 (itime) caused loops
-c       so we can just check the LBD1OUT and ipresim flags
-c       ipresim can't be 1
-c       i.e. we either need to be here without soil moisture presimulation
-c       (in which case ipresim=0)
-c       or else we need to be here on the soil moisture presimulation second pass
-c       (in which case ipresim=2)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!       now write the subbasin and basin totals
+!       we are outside the structure and imiss2 (itime) caused loops
+!       so we can just check the LBD1OUT and ipresim flags
+!       ipresim can't be 1
+!       i.e. we either need to be here without soil moisture presimulation
+!       (in which case ipresim=0)
+!       or else we need to be here on the soil moisture presimulation second pass
+!       (in which case ipresim=2)
+!jhb=&==================================================================
       if(sboutput) then
       if(LBD1OUT.and.(ipresim.ne.1)) then
         do i=0,sbcount
           do m=1,nyrs
             do l=1,12
-Cjhb=&==================================================================
-c             here are some values that could not be calculated until now
-Cjhb=&==================================================================
-c             first is conveyance efficiency, ceff.
-c               set it equal to the total farm deliveries minus the
-c               total tail water deliveries divided by the total diversions
-c               note that this still works even (and especially) when the
-c               tailwater values are negative - as often happens in SPDSS
+!jhb=&==================================================================
+!             here are some values that could not be calculated until now
+!jhb=&==================================================================
+!             first is conveyance efficiency, ceff.
+!               set it equal to the total farm deliveries minus the
+!               total tail water deliveries divided by the total diversions
+!               note that this still works even (and especially) when the
+!               tailwater values are negative - as often happens in SPDSS
               tmp1=sbfdiv(i,m,l)-sbtail(i,m,l)
               tmp2=sbdivsup(i,m,l)
               sbceff(i,m,l)=0.0
@@ -9177,15 +9271,15 @@ c               tailwater values are negative - as often happens in SPDSS
                 sbceff(i,m,l)=tmp1/tmp2
               endif
 
-c             next is maximum application efficiency, sfeff.
-c               it is already calculated per structure as an area (within the structure) prorated value
-c               I have extended this to be an area prorated value over
-c               groups of structures.
-c               I sum the sfeff*area values for each structure in sbsfeff,
-c               and now divide by the total sbarea
-c               note that this is over ALL years in the analysis; since
-c               this is a theoretical maximum, it did not make sense to
-c               let missing data affect its value.
+!             next is maximum application efficiency, sfeff.
+!               it is already calculated per structure as an area (within the structure) prorated value
+!               I have extended this to be an area prorated value over
+!               groups of structures.
+!               I sum the sfeff*area values for each structure in sbsfeff,
+!               and now divide by the total sbarea
+!               note that this is over ALL years in the analysis; since
+!               this is a theoretical maximum, it did not make sense to
+!               let missing data affect its value.
               tmp1=sbsfeff(i,m,l)
               tmp2=sbtarea(i,m,l)
               sbsfeff(i,m,l)=0.0
@@ -9214,7 +9308,7 @@ c               let missing data affect its value.
               if(tmp2.gt.0.0)then
                 sbeffgw(i,m,l)=tmp1/tmp2
               endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
               select case (isuply)
                 case (1)
                   WRITE(UNIT=IBD1UN)
@@ -9222,24 +9316,24 @@ Cjhb=&==================================================================
      :              sbtarea(i,m,l),sbmarea(i,m,l),'N.A.      ',
      :              sbettot(i,m,l),sbeffppt(i,m,l),
      :              sbreqt(i,m,l),sbwbu(i,m,l),sbreqreq(i,m,l),
-c     :            ddhmonot(m,l),
+!     :            ddhmonot(m,l),
      :              sbdivsup(i,m,l),
-c     :            ceff(i,m),closs(m,l),
+!     :            ceff(i,m),closs(m,l),
      :              sbceff(i,m,l), sbcloss(i,m,l),
-c     :            fdiv(m,l),tail(i,m,l),
+!     :            fdiv(m,l),tail(i,m,l),
      :              sbfdiv(i,m,l), sbtail(i,m,l),
-c     :            crop_cut(m,l),soil_cu(m,l),
+!     :            crop_cut(m,l),soil_cu(m,l),
      :              sbcrop_cut(i,m,l), sbsoil_cu(i,m,l),
-c     :            divcu(m,l),ulagt(m,l),
+!     :            divcu(m,l),ulagt(m,l),
      :              sbdivcu(i,m,l), sbulagt(i,m,l),
-c     :            sfeff(i,m),effcu(m,l),seffcu(m,l),
+!     :            sfeff(i,m),effcu(m,l),seffcu(m,l),
      :              sbsfeff(i,m,l),sbeffcu(i,m,l),sbseffcu(i,m,l),
-c     :            soiltott(m,l),
+!     :            soiltott(m,l),
      :              sbsoiltott(i,m,l),
-c     :            crop_cut(m,l),cropcusoil(m,l),estcrpt(i,m,l),SHORTAGE
+!     :            crop_cut(m,l),cropcusoil(m,l),estcrpt(i,m,l),SHORTAGE
      :              sbcrop_cut(i,m,l), sbcropcusoil(i,m,l),
      &              sbestcrpt(i,m,l), sbshortage(i,m,l)
-Cjhb====================================================================
+!jhb====================================================================
                 case (2)
                   WRITE(UNIT=IBD1UN)
 !     :            I,NYR1+M-1,L,AMN(L),
@@ -9250,162 +9344,162 @@ Cjhb====================================================================
      :              sbettot(i,m,l),sbeffppt(i,m,l),
 !     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              sbreqt(i,m,l),sbwbu(i,m,l),sbreqreq(i,m,l),
-c     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
+!     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
      &              sbseniorf(i,m,l), sbjuniorf(i,m,l),
      &              sbotherf(i,m,l), sbdivsup(i,m,l),
 !     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              sbceff(i,m,l), sbcloss(i,m,l),
      :              sbfdiv(i,m,l),
-c     :            crop_cus(m,l),crop_cuj(m,l),
+!     :            crop_cus(m,l),crop_cuj(m,l),
      :              sbcrop_cus(i,m,l), sbcrop_cuj(i,m,l),
-c     :            crop_cuo(m,l),crop_cut(m,l),
+!     :            crop_cuo(m,l),crop_cut(m,l),
      :              sbcrop_cuo(i,m,l), sbcrop_cut(i,m,l),
-c     :            soil_cus(m,l),soil_cuj(m,l),
+!     :            soil_cus(m,l),soil_cuj(m,l),
      :              sbsoil_cus(i,m,l), sbsoil_cuj(i,m,l),
-c     :            soil_cuo(m,l),soil_cu(m,l),
+!     :            soil_cuo(m,l),soil_cu(m,l),
      :              sbsoil_cuo(i,m,l), sbsoil_cu(i,m,l),
-c     :            divcu(m,l),
+!     :            divcu(m,l),
      :              sbdivcu(i,m,l),
-c     :           ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
+!     :           ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
      :              sbulags(i,m,l),sbulagj(i,m,l),
      &              sbulago(i,m,l),sbulagt(i,m,l),
-c     :            tail(i,m,l),sfeff(i,m),
+!     :            tail(i,m,l),sfeff(i,m),
      :               sbtail(i,m,l), sbsfeff(i,m,l),
-c     :            effcu(m,l),seffcu(m,l),
+!     :            effcu(m,l),seffcu(m,l),
      :              sbeffcu(i,m,l),sbseffcu(i,m,l),
-c     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
-c     :            soiltott(m,l),
+!     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
+!     :            soiltott(m,l),
      :              sbsoiltotts(i,m,l), sbsoiltottj(i,m,l),
      :              sbsoiltotto(i,m,l), sbsoiltott(i,m,l),
-c     :            crop_cut(m,l),cropcusoil(m,l),
+!     :            crop_cut(m,l),cropcusoil(m,l),
      :              sbcrop_cut(i,m,l), sbcropcusoil(i,m,l),
-c     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
+!     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
      :              sbestcrps(i,m,l), sbestcrpj(i,m,l),
      &              sbestcrpo(i,m,l), sbestcrpt(i,m,l),
-c     :            estcrpj(m,l),SHORTAGE
+!     :            estcrpj(m,l),SHORTAGE
      :              sbestcrpj(i,m,l), sbshortage(i,m,l)
                 case (3)
                   WRITE(UNIT=IBD1UN)
-c     :            I,NYR1+M-1,L,AMN(L),
-c     :            t_area(i,m),method,
+!     :            I,NYR1+M-1,L,AMN(L),
+!     :            t_area(i,m),method,
      :              NBASIN+I+1,NYR1+M-1,L,AMN(L),
      :              sbtarea(i,m,l),sbmarea(i,m,l),'N.A.      ',
-c     :            ettot(i,m,l),effppt(i,m,l),
+!     :            ettot(i,m,l),effppt(i,m,l),
      :              sbettot(i,m,l),sbeffppt(i,m,l),
-c     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
+!     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              sbreqt(i,m,l),sbwbu(i,m,l),sbreqreq(i,m,l),
-c     :            seniorf(m,l),juniorf(m,l),otherf(m,l),
-c     :            ddhmonot(m,l),
+!     :            seniorf(m,l),juniorf(m,l),otherf(m,l),
+!     :            ddhmonot(m,l),
      :              sbseniorf(i,m,l), sbjuniorf(i,m,l),
      &              sbotherf(i,m,l), sbdivsup(i,m,l),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              sbceff(i,m,l), sbcloss(i,m,l),
      :              sbfdiv(i,m,l),
-c     :            crop_cus(m,l),crop_cuj(m,l),
-c     :            crop_cuo(m,l),crop_cut(m,l),
+!     :            crop_cus(m,l),crop_cuj(m,l),
+!     :            crop_cuo(m,l),crop_cut(m,l),
      :              sbcrop_cus(i,m,l), sbcrop_cuj(i,m,l),
      :              sbcrop_cuo(i,m,l), sbcrop_cut(i,m,l),
-c     :            soil_cus(m,l),soil_cuj(m,l),
-c     :            soil_cuo(m,l),soil_cu(m,l),
+!     :            soil_cus(m,l),soil_cuj(m,l),
+!     :            soil_cuo(m,l),soil_cu(m,l),
      :              sbsoil_cus(i,m,l), sbsoil_cuj(i,m,l),
      :              sbsoil_cuo(i,m,l), sbsoil_cu(i,m,l),
-c     :            divcu(m,l),
+!     :            divcu(m,l),
      :              sbdivcu(i,m,l),
-c     :            ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
+!     :            ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
      :              sbulags(i,m,l),sbulagj(i,m,l),
      &              sbulago(i,m,l),sbulagt(i,m,l),
-c     :            tail(i,m,l),sfeff(i,m),effcu(m,l),seffcu(m,l),
+!     :            tail(i,m,l),sfeff(i,m),effcu(m,l),seffcu(m,l),
      :              sbtail(i,m,l), sbsfeff(i,m,l),
      &              sbeffcu(i,m,l),sbseffcu(i,m,l),
-c     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
-c     :            soiltott(m,l),
+!     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
+!     :            soiltott(m,l),
      :              sbsoiltotts(i,m,l), sbsoiltottj(i,m,l),
      :              sbsoiltotto(i,m,l), sbsoiltott(i,m,l),
-c     :            crop_cut(m,l),cropcusoil(m,l),
+!     :            crop_cut(m,l),cropcusoil(m,l),
      :              sbcrop_cut(i,m,l), sbcropcusoil(i,m,l),
-c     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
+!     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
      :              sbestcrps(i,m,l), sbestcrpj(i,m,l),
      &              sbestcrpo(i,m,l), sbestcrpt(i,m,l),
-c     :            lagrets(m,l),lagretj(m,l),lagreto(m,l),lagrett(m,l),
+!     :            lagrets(m,l),lagretj(m,l),lagreto(m,l),lagrett(m,l),
      :              sblagrets(i,m,l),sblagretj(i,m,l),
      &              sblagreto(i,m,l),sblagrett(i,m,l),
-c     :            laglates(m,l),laglatej(m,l),
-c     :            laglateo(m,l),laglatet(m,l),
-c     :            totret(m,l),
+!     :            laglates(m,l),laglatej(m,l),
+!     :            laglateo(m,l),laglatet(m,l),
+!     :            totret(m,l),
      :              sblaglates(i,m,l),sblaglatej(i,m,l),
      &              sblaglateo(i,m,l),sblaglatet(i,m,l),
      &              sbtotret(i,m,l),
-c     :            deps(m,l),depj(m,l),
-c     :            depo(m,l),dept(m,l),depj(m,l),
+!     :            deps(m,l),depj(m,l),
+!     :            depo(m,l),dept(m,l),depj(m,l),
      :              sbdeps(i,m,l),sbdepj(i,m,l),
      &              sbdepo(i,m,l),sbdept(i,m,l),sbdepj(i,m,l),
-c     :            SHORTAGE
+!     :            SHORTAGE
      :              sbshortage(i,m,l)
                 case (4)
                   select case (iflood)
                     case (0)
                   WRITE(UNIT=IBD1UN)
-c     :            I,NYR1+M-1,L,AMN(L),
-c     :            t_area(i,m),method,
+!     :            I,NYR1+M-1,L,AMN(L),
+!     :            t_area(i,m),method,
      :              NBASIN+I+1,NYR1+M-1,L,AMN(L),
      :              sbtarea(i,m,l),sbmarea(i,m,l),'N.A.      ',
-c     :            ettot(i,m,l),effppt(i,m,l),
+!     :            ettot(i,m,l),effppt(i,m,l),
      :              sbettot(i,m,l),sbeffppt(i,m,l),
-c     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
+!     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              sbreqt(i,m,l),sbwbu(i,m,l),sbreqreq(i,m,l),
-c     :            ddhmonot(m,l),
+!     :            ddhmonot(m,l),
      :              sbdivsup(i,m,l),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
      :              sbceff(i,m,l), sbcloss(i,m,l),
      :              sbfdiv(i,m,l),sbtail(i,m,l),
-c     :            arech(m,l),sfeff(i,m),
+!     :            arech(m,l),sfeff(i,m),
      :              sbarech(i,m,l), sbsfeff(i,m,l),
-c     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
+!     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
      &              sbcrop_cut(i,m,l),sbsoil_cu(i,m,l),sbulagt(i,m,l),
-c     :            effcu(m,l),seffcu(m,l),
+!     :            effcu(m,l),seffcu(m,l),
      :              sbeffcu(i,m,l),sbseffcu(i,m,l),
-c     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
      :              sbgdiv(i,m,l),sbeffgw(i,m,l),
      &              sbgwcu(i,m,l),sbgwro(i,m,l),
-c     :            soiltott(m,l),
+!     :            soiltott(m,l),
      :              sbsoiltott(i,m,l),
-c     :            cutot,cropcusoil(m,l),custot(i,m,l),
+!     :            cutot,cropcusoil(m,l),custot(i,m,l),
      :              sbcutot(i,m,l),sbcropcusoil(i,m,l),sbcustot(i,m,l),
-c     :            tdp(m,l),SHORTAGE
+!     :            tdp(m,l),SHORTAGE
      :              sbtdp(i,m,l),sbshortage(i,m,l)
                     case default
                   WRITE(UNIT=IBD1UN)
-c     :            I,NYR1+M-1,L,AMN(L),
-c     :            t_area(i,m),method,
+!     :            I,NYR1+M-1,L,AMN(L),
+!     :            t_area(i,m),method,
      :              NBASIN+I+1,NYR1+M-1,L,AMN(L),
      :              sbtarea(i,m,l),sbmarea(i,m,l),'N.A.      ',
-c     :            ettot(i,m,l),effppt(i,m,l),
+!     :            ettot(i,m,l),effppt(i,m,l),
      :              sbettot(i,m,l),sbeffppt(i,m,l),
-c     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
+!     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              sbreqt(i,m,l),sbwbu(i,m,l),sbreqreq(i,m,l),
-c     :            ddhmonot(m,l),
+!     :            ddhmonot(m,l),
      :              sbdivsup(i,m,l),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              sbceff(i,m,l), sbcloss(i,m,l),
      :              sbfdiv(i,m,l),
-c     :            tail(i,m,l),arech(m,l),sfeff(i,m),
+!     :            tail(i,m,l),arech(m,l),sfeff(i,m),
      :              sbtail(i,m,l), sbarech(i,m,l), sbsfeff(i,m,l),
-c     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
+!     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
      &              sbcrop_cut(i,m,l),sbsoil_cu(i,m,l),sbulagt(i,m,l),
-c     :            effcu(m,l),seffcu(m,l),
+!     :            effcu(m,l),seffcu(m,l),
      :              sbeffcu(i,m,l),sbseffcu(i,m,l),
-c     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
      :              sbgdiv(i,m,l),sbeffgw(i,m,l),
      &              sbgwcu(i,m,l),sbgwro(i,m,l),
-c     :            soiltott(m,l),
+!     :            soiltott(m,l),
      :              sbsoiltott(i,m,l),
-c     :            cutot,cropcusoil(m,l),custot(i,m,l),
+!     :            cutot,cropcusoil(m,l),custot(i,m,l),
      :              sbcutot(i,m,l),sbcropcusoil(i,m,l),sbcustot(i,m,l),
-c     :            tdp(m,l),
+!     :            tdp(m,l),
      :              sbtdp(i,m,l),
-c     :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
+!     :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
      :              sbshortage(i,m,l),sbgsdiv(i,m,l),sbgfdiv(i,m,l),
-c     :            (grass(i,m,l,ifx),ifx=1,iflood2)
+!     :            (grass(i,m,l,ifx),ifx=1,iflood2)
      :              (sbgrass(i,m,l,ifx),ifx=1,iflood2)
                   end select !iflood
                 case default
@@ -9415,13 +9509,13 @@ c     :            (grass(i,m,l,ifx),ifx=1,iflood2)
         end do !i, sub basin
           do m=1,nyrs
             do l=1,12
-Cjhb=&==================================================================
-c             here are some values that could not be calculated until now
-c             first is conveyance efficiency, ceff.
-c               set it equal to the total farm deliveries minus the
-c               total tail water deliveries divided by the tital diversions
-c               note that this still works even (and especially) when the
-c               tailwater values are negative - as often happens in SPDSS
+!jhb=&==================================================================
+!             here are some values that could not be calculated until now
+!             first is conveyance efficiency, ceff.
+!               set it equal to the total farm deliveries minus the
+!               total tail water deliveries divided by the tital diversions
+!               note that this still works even (and especially) when the
+!               tailwater values are negative - as often happens in SPDSS
               tmp1=bfdiv(m,l)-btail(m,l)
               tmp2=bdivsup(m,l)
               bceff(m,l)=0.0
@@ -9429,15 +9523,15 @@ c               tailwater values are negative - as often happens in SPDSS
                 bceff(m,l)=tmp1/tmp2
               endif
 
-c             next is maximum application efficiency, sfeff.
-c               it is already calculated per structure as an area (within the structure) prorated value
-c               I have extended this to be an area prorated value over
-c               groups of structures.
-c               I sum the sfeff*area values for each structure in bsfeff,
-c               and now divide by the total sbarea
-c               note that this is over ALL years in the analysis; since
-c               this is a theoretical maximum, it did not make sense to
-c               let missing data affect its value.
+!             next is maximum application efficiency, sfeff.
+!               it is already calculated per structure as an area (within the structure) prorated value
+!               I have extended this to be an area prorated value over
+!               groups of structures.
+!               I sum the sfeff*area values for each structure in bsfeff,
+!               and now divide by the total sbarea
+!               note that this is over ALL years in the analysis; since
+!               this is a theoretical maximum, it did not make sense to
+!               let missing data affect its value.
               tmp1=bsfeff(m,l)
               tmp2=btarea(m,l)
               bsfeff(m,l)=0.0
@@ -9465,7 +9559,7 @@ c               let missing data affect its value.
               if(tmp2.gt.0.0)then
                 beffgw=tmp1/tmp2
               endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
               select case (isuply)
                 case (1)
                   WRITE(UNIT=IBD1UN)
@@ -9473,23 +9567,23 @@ Cjhb=&==================================================================
      :              btarea(m,l),bmarea(m,l),'N.A.      ',
      :              bettot(m,l),beffppt(m,l),
      :              breqt(m,l),bwbu(m,l),breqreq(m,l),
-c     :            ddhmonot(m,l),
+!     :            ddhmonot(m,l),
      :              bdivsup(m,l),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
      :              bceff(m,l),bcloss(m,l),
      :              bfdiv(m,l),btail(m,l),
-c     :            crop_cut(m,l),soil_cu(m,l),divcu(m,l),
+!     :            crop_cut(m,l),soil_cu(m,l),divcu(m,l),
      :              bcrop_cut(m,l),bsoil_cu(m,l),bdivcu(m,l),
-c     :            ulagt(m,l),
+!     :            ulagt(m,l),
      :              bulagt(m,l),
-c     :            sfeff(i,m),effcu(m,l),seffcu(m,l),
+!     :            sfeff(i,m),effcu(m,l),seffcu(m,l),
      :              bsfeff(m,l),beffcu(m,l),bseffcu(m,l),
-c     :            soiltott(m,l),
+!     :            soiltott(m,l),
      :              bsoiltott(m,l),
-c     :            crop_cut(m,l),cropcusoil(m,l),estcrpt(i,m,l),SHORTAGE
+!     :            crop_cut(m,l),cropcusoil(m,l),estcrpt(i,m,l),SHORTAGE
      :              bcrop_cut(m,l),bcropcusoil(m,l),
      &              bestcrpt(m,l), bshortage(m,l)
-Cjhb====================================================================
+!jhb====================================================================
                 case (2)
                   WRITE(UNIT=IBD1UN)
 !     :            I,NYR1+M-1,L,AMN(L),
@@ -9500,163 +9594,163 @@ Cjhb====================================================================
      :              bettot(m,l),beffppt(m,l),
 !     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              breqt(m,l),bwbu(m,l),breqreq(m,l),
-c     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
+!     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
      &              bseniorf(m,l), bjuniorf(m,l),
      &              botherf(m,l), bdivsup(m,l),
 !     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              bceff(m,l), bcloss(m,l),
      :              bfdiv(m,l),
-c     :            crop_cus(m,l),crop_cuj(m,l),
+!     :            crop_cus(m,l),crop_cuj(m,l),
      :              bcrop_cus(m,l),bcrop_cuj(m,l),
-c     :            crop_cuo(m,l),crop_cut(m,l),
+!     :            crop_cuo(m,l),crop_cut(m,l),
      :              bcrop_cuo(m,l),bcrop_cut(m,l),
-c     :            soil_cus(m,l),soil_cuj(m,l),
+!     :            soil_cus(m,l),soil_cuj(m,l),
      :              bsoil_cus(m,l),bsoil_cuj(m,l),
-c     :            soil_cuo(m,l),soil_cu(m,l),
+!     :            soil_cuo(m,l),soil_cu(m,l),
      :              bsoil_cuo(m,l),bsoil_cu(m,l),
-c     :            divcu(m,l),
+!     :            divcu(m,l),
      :              bdivcu(m,l),
-c     :           ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
+!     :           ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
      :              bulags(m,l),bulagj(m,l),bulago(m,l),bulagt(m,l),
-c     :            tail(i,m,l),sfeff(i,m),
+!     :            tail(i,m,l),sfeff(i,m),
      :              btail(m,l), bsfeff(m,l),
-c     :            effcu(m,l),seffcu(m,l),
+!     :            effcu(m,l),seffcu(m,l),
      :              beffcu(m,l),bseffcu(m,l),
-c     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
-c     :            soiltott(m,l),
+!     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
+!     :            soiltott(m,l),
      &              bsoiltotts(m,l),bsoiltottj(m,l),
      &              bsoiltotto(m,l),bsoiltott(m,l),
-c     :            crop_cut(m,l),cropcusoil(m,l),
+!     :            crop_cut(m,l),cropcusoil(m,l),
      :              bcrop_cut(m,l), bcropcusoil(m,l),
-c     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
+!     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
      :              bestcrps(m,l),bestcrpj(m,l),
      &              bestcrpo(m,l),bestcrpt(m,l),
-c     :            estcrpj(m,l),SHORTAGE
+!     :            estcrpj(m,l),SHORTAGE
      :              bestcrpj(m,l), bshortage(m,l)
-Cjhb====================================================================
+!jhb====================================================================
                 case (3)
                   WRITE(UNIT=IBD1UN)
-c     :            I,NYR1+M-1,L,AMN(L),
-c     :            t_area(i,m),method,
+!     :            I,NYR1+M-1,L,AMN(L),
+!     :            t_area(i,m),method,
      :              NBASIN+SBCOUNT+1+1,NYR1+M-1,L,AMN(L),
      :              btarea(m,l),bmarea(m,l),'N.A.      ',
-c     :            ettot(i,m,l),effppt(i,m,l),
+!     :            ettot(i,m,l),effppt(i,m,l),
      :              bettot(m,l),beffppt(m,l),
-c     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
+!     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              breqt(m,l),bwbu(m,l),breqreq(m,l),
-c     :            seniorf(m,l),juniorf(m,l),otherf(m,l),
-c     :            ddhmonot(m,l),
+!     :            seniorf(m,l),juniorf(m,l),otherf(m,l),
+!     :            ddhmonot(m,l),
      &              bseniorf(m,l), bjuniorf(m,l),
      &              botherf(m,l), bdivsup(m,l),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              bceff(m,l), bcloss(m,l),
      :              bfdiv(m,l),
-c     :            crop_cus(m,l),crop_cuj(m,l),
-c     :            crop_cuo(m,l),crop_cut(m,l),
+!     :            crop_cus(m,l),crop_cuj(m,l),
+!     :            crop_cuo(m,l),crop_cut(m,l),
      :              bcrop_cus(m,l),bcrop_cuj(m,l),
      :              bcrop_cuo(m,l),bcrop_cut(m,l),
-c     :            soil_cus(m,l),soil_cuj(m,l),
-c     :            soil_cuo(m,l),soil_cu(m,l),
+!     :            soil_cus(m,l),soil_cuj(m,l),
+!     :            soil_cuo(m,l),soil_cu(m,l),
      :              bsoil_cus(m,l),bsoil_cuj(m,l),
      :              bsoil_cuo(m,l),bsoil_cu(m,l),
-c     :            divcu(m,l),
+!     :            divcu(m,l),
      :              bdivcu(m,l),
-c     :            ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
+!     :            ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l),
      :              bulags(m,l),bulagj(m,l),bulago(m,l),bulagt(m,l),
-c     :            tail(i,m,l),sfeff(i,m),effcu(m,l),seffcu(m,l),
+!     :            tail(i,m,l),sfeff(i,m),effcu(m,l),seffcu(m,l),
      :              btail(m,l),bsfeff(m,l),beffcu(m,l),bseffcu(m,l),
-c     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
-c     :            soiltott(m,l),
+!     :            soiltotts(m,l),soiltottj(m,l),soiltotto(m,l),
+!     :            soiltott(m,l),
      &              bsoiltotts(m,l),bsoiltottj(m,l),
      &              bsoiltotto(m,l),bsoiltott(m,l),
-c     :            crop_cut(m,l),cropcusoil(m,l),
+!     :            crop_cut(m,l),cropcusoil(m,l),
      :              bcrop_cut(m,l), bcropcusoil(m,l),
-c     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
+!     :            estcrps(m,l),estcrpj(m,l),estcrpo(m,l),estcrpt(i,m,l),
      :              bestcrps(m,l),bestcrpj(m,l),
      &              bestcrpo(m,l),bestcrpt(m,l),
-c     :            lagrets(m,l),lagretj(m,l),lagreto(m,l),lagrett(m,l),
+!     :            lagrets(m,l),lagretj(m,l),lagreto(m,l),lagrett(m,l),
      :              blagrets(m,l),blagretj(m,l),
      &              blagreto(m,l),blagrett(m,l),
-c     :            laglates(m,l),laglatej(m,l),
-c     :            laglateo(m,l),laglatet(m,l),
-c     :            totret(m,l),
+!     :            laglates(m,l),laglatej(m,l),
+!     :            laglateo(m,l),laglatet(m,l),
+!     :            totret(m,l),
      :              blaglates(m,l),blaglatej(m,l),
      &              blaglateo(m,l),blaglatet(m,l),
      &              btotret(m,l),
-c     :            deps(m,l),depj(m,l),
-c     :            depo(m,l),dept(m,l),depj(m,l),
+!     :            deps(m,l),depj(m,l),
+!     :            depo(m,l),dept(m,l),depj(m,l),
      :              bdeps(m,l),bdepj(m,l),
      &              bdepo(m,l),bdept(m,l),bdepj(m,l),
-c     :            SHORTAGE
+!     :            SHORTAGE
      :              bshortage(m,l)
-Cjhb====================================================================
+!jhb====================================================================
                 case (4)
                   select case (iflood)
-Cjhb====================================================================
+!jhb====================================================================
                     case (0)
                   WRITE(UNIT=IBD1UN)
-c     :            I,NYR1+M-1,L,AMN(L),
-c     :            t_area(i,m),method,
+!     :            I,NYR1+M-1,L,AMN(L),
+!     :            t_area(i,m),method,
      :              NBASIN+SBCOUNT+1+1,NYR1+M-1,L,AMN(L),
      :              btarea(m,l),bmarea(m,l),'N.A.      ',
-c     :            ettot(i,m,l),effppt(i,m,l),
+!     :            ettot(i,m,l),effppt(i,m,l),
      :              bettot(m,l),beffppt(m,l),
-c     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
+!     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              breqt(m,l),bwbu(m,l),breqreq(m,l),
-c     :            ddhmonot(m,l),
+!     :            ddhmonot(m,l),
      :              bdivsup(m,l),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),tail(i,m,l),
      :              bceff(m,l), bcloss(m,l),
      :              bfdiv(m,l),btail(m,l),
-c     :            arech(m,l),sfeff(i,m),
+!     :            arech(m,l),sfeff(i,m),
      :              barech(m,l), bsfeff(m,l),
-c     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
+!     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
      :              bcrop_cut(m,l),bsoil_cu(m,l),bulagt(m,l),
-c     :            effcu(m,l),seffcu(m,l),
+!     :            effcu(m,l),seffcu(m,l),
      :              beffcu(m,l),bseffcu(m,l),
-c     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
      :              bgdiv(m,l),beffgw(m,l),
      &              bgwcu(m,l),bgwro(m,l),
-c     :            soiltott(m,l),
+!     :            soiltott(m,l),
      :              bsoiltott(m,l),
-c     :            cutot,cropcusoil(m,l),custot(i,m,l),
+!     :            cutot,cropcusoil(m,l),custot(i,m,l),
      :              bcutot(m,l),bcropcusoil(m,l),bcustot(m,l),
-c     :            tdp(m,l),SHORTAGE
+!     :            tdp(m,l),SHORTAGE
      :              btdp(m,l), bshortage(m,l)
-Cjhb====================================================================
+!jhb====================================================================
                     case default
                   WRITE(UNIT=IBD1UN)
-c     :            I,NYR1+M-1,L,AMN(L),
-c     :            t_area(i,m),method,
+!     :            I,NYR1+M-1,L,AMN(L),
+!     :            t_area(i,m),method,
      :              NBASIN+SBCOUNT+1+1,NYR1+M-1,L,AMN(L),
      :              btarea(m,l),bmarea(m,l),'N.A.      ',
-c     :            ettot(i,m,l),effppt(i,m,l),
+!     :            ettot(i,m,l),effppt(i,m,l),
      :              bettot(m,l),beffppt(m,l),
-c     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
+!     :            reqt(i,m,l),wbu(i,m,l),reqreqts(m,l),
      :              breqt(m,l),bwbu(m,l),breqreq(m,l),
-c     :            ddhmonot(m,l),
+!     :            ddhmonot(m,l),
      :              bdivsup(m,l),
-c     :            ceff(i,m),closs(m,l),fdiv(m,l),
+!     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              bceff(m,l), bcloss(m,l),
      :              bfdiv(m,l),
-c     :            tail(i,m,l),arech(m,l),sfeff(i,m),
+!     :            tail(i,m,l),arech(m,l),sfeff(i,m),
      :              btail(m,l), barech(m,l), bsfeff(m,l),
-c     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
+!     :            crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
      :              bcrop_cut(m,l),bsoil_cu(m,l),bulagt(m,l),
-c     :            effcu(m,l),seffcu(m,l),
+!     :            effcu(m,l),seffcu(m,l),
      :              beffcu(m,l),bseffcu(m,l),
-c     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
      :              bgdiv(m,l),beffgw(m,l),
      &              bgwcu(m,l),bgwro(m,l),
-c     :            soiltott(m,l),
+!     :            soiltott(m,l),
      :              bsoiltott(m,l),
-c     :            cutot,cropcusoil(m,l),custot(i,m,l),
+!     :            cutot,cropcusoil(m,l),custot(i,m,l),
      :              bcutot(m,l),bcropcusoil(m,l),bcustot(m,l),
-c     :            tdp(m,l),
+!     :            tdp(m,l),
      :              btdp(m,l),
-c     :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
+!     :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
      :              bshortage(m,l),bgsdiv(m,l),bgfdiv(m,l),
-c     :            (grass(i,m,l,ifx),ifx=1,iflood2)
+!     :            (grass(i,m,l,ifx),ifx=1,iflood2)
      :              (bgrass(m,l,ifx),ifx=1,iflood2)
                   end select !iflood
                 case default
@@ -9665,43 +9759,43 @@ c     :            (grass(i,m,l,ifx),ifx=1,iflood2)
           end do !m, year
       endif !LBD1OUT.and.(ipresim.ne.1)
       endif !SBOUTPUT
-Cjhb=&==================================================================
-c     close the binary output file.
-c       note: the binary output is written INSIDE the nbasin loop, just like the DWB file
-c             however - it is NOT reordered like the DWB file is.
-c             leave it in the same order - will take care of ordering in the GUI
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!     close the binary output file.
+!       note: the binary output is written INSIDE the nbasin loop, just like the DWB file
+!             however - it is NOT reordered like the DWB file is.
+!             leave it in the same order - will take care of ordering in the GUI
+!jhb=&==================================================================
       close(UNIT=IBD1UN)
-c      close(33)
-Cjhb=&==================================================================
-Cjhb  note: at this point itime MUST = 2 since its only other value is 1 and
-Cjhb  that was handled in the previous code.  the following if statement then
-Cjhb  has a redundant check on itime, but that's ok ... does not hurt anything
-Cjhb=&==================================================================
-Cjhb  the following code checks to see if this is first or second call of
-Cjhb   wsupsum from statecu.for for soil moisture initialization
-Cjhb   ipresim=0 - first and ONLY call of WSUPSUM from statecu.for
-Cjhb   ipresim=1 - first of two calls of WSUPSUM from statecu.for
-Cjhb   ipresim=2 - second of two calls of WSUPSUM from statecu.for
-Cjhb  if ipresim=1 then exit wsupsum now, else go on to output the water budget...
-Cjhb=&==================================================================
-cc grb 04-20-00 if in presimulation mode, return, added next four statements
-Cjhb=&==================================================================
+!      close(33)
+!jhb=&==================================================================
+!jhb  note: at this point itime MUST = 2 since its only other value is 1 and
+!jhb  that was handled in the previous code.  the following if statement then
+!jhb  has a redundant check on itime, but that's ok ... does not hurt anything
+!jhb=&==================================================================
+!jhb  the following code checks to see if this is first or second call of
+!jhb   wsupsum from statecu.for for soil moisture initialization
+!jhb   ipresim=0 - first and ONLY call of WSUPSUM from statecu.for
+!jhb   ipresim=1 - first of two calls of WSUPSUM from statecu.for
+!jhb   ipresim=2 - second of two calls of WSUPSUM from statecu.for
+!jhb  if ipresim=1 then exit wsupsum now, else go on to output the water budget...
+!jhb=&==================================================================
+!c grb 04-20-00 if in presimulation mode, return, added next four statements
+!jhb=&==================================================================
       if (itime.eq.2. and.ipresim.eq.1) then
         close(256)
         return
       endif
-Cjhb=&==================================================================
-c     grb next lines down to 461 added to reorganize dwb file     4-20-00
-c     grb 04-20-00 reorder dwb file with next approx 40 lines
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!     grb next lines down to 461 added to reorganize dwb file     4-20-00
+!     grb 04-20-00 reorder dwb file with next approx 40 lines
+!jhb=&==================================================================
       close(256)
-Cjhb=&==================================================================
-Cjhb  reorganize the data for the final dwb file.
-Cjhb  read from the temp1 and temp2 files and output to the dwb file (thefile1)
-Cjhb=&==================================================================
-c      if(iagg .eq. 1 .or. imiss2 .eq. 1) then
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  reorganize the data for the final dwb file.
+!jhb  read from the temp1 and temp2 files and output to the dwb file (thefile1)
+!jhb=&==================================================================
+!      if(iagg .eq. 1 .or. imiss2 .eq. 1) then
+!jhb=&==================================================================
       OPEN (UNIT=256,FILE=thefile1,STATUS='Unknown',IOSTAT=IERR)
       open (unit=257, file="temp1")
       read(257,'(a520)',end=4664 ) tempwd
@@ -9721,72 +9815,72 @@ Cjhb=&==================================================================
           goto 462
         endif
         backspace(257)
-Cjhb=&==================================================================
+!jhb=&==================================================================
 464     read(258,'(a523)',end=463) tempwd
         if (tempwd(12:23).eq.twdid(1:12)) then
           m1=258
           goto 462 
         endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
 463     write(0,*)
      &  "Error - structure not found in temp dwb files",twdid
         write(999,*)
      &  "Error - structure not found in temp dwb files",twdid
         stop
-Cjhb=&==================================================================
-c       transfer line with ID
+!jhb=&==================================================================
+!       transfer line with ID
 462     IF (ISUPLY.EQ.1) write(256,'(a179)') tempwd(1:179) 
         IF (ISUPLY.EQ.2) write(256,'(a359)') tempwd(1:359) 
         IF (ISUPLY.EQ.3) write(256,'(a522)') tempwd(1:522) 
         IF (ISUPLY.EQ.4) write(256,'(a372)') tempwd(1:372)
-c       ----------------------------------------------------------------
-c       jhb | did this to get rid of all those unnecessary trailing spaces...
-c       jhb | but some fortran compilers treat * formats differently (e.g. wrap) ... so take it out
-c       ----------------------------------------------------------------
+!       ----------------------------------------------------------------
+!       jhb | did this to get rid of all those unnecessary trailing spaces...
+!       jhb | but some fortran compilers treat * formats differently (e.g. wrap) ... so take it out
+!       ----------------------------------------------------------------
 !462     IF (ISUPLY.EQ.1) write(256,*) trim(tempwd(1:179))
 !        IF (ISUPLY.EQ.2) write(256,*) trim(tempwd(1:359))
 !        IF (ISUPLY.EQ.3) write(256,*) trim(tempwd(1:522))
 !        IF (ISUPLY.EQ.4) write(256,*) trim(tempwd(1:372))
-Cjhb=&==================================================================
-c       transfer lines following ID down to next id line
+!jhb=&==================================================================
+!       transfer lines following ID down to next id line
 465     read(m1,'(a523)',end=461) tempwd
         if (tempwd(5:7).eq."ID:") then 
           backspace(m1)
           goto 461
         endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
         IF (ISUPLY.EQ.1) write(256,'(a179)') tempwd(1:179)
         IF (ISUPLY.EQ.2) write(256,'(a359)') tempwd(1:359) 
         IF (ISUPLY.EQ.3) write(256,'(a522)') tempwd(1:522) 
         IF (ISUPLY.EQ.4) write(256,'(a372)') tempwd(1:372) 
-c       ----------------------------------------------------------------
-c       jhb | did this to get rid of all those unnecessary trailing spaces...
-c       jhb | but some fortran compilers treat * formats differently (e.g. wrap at 80) ... so take it out
-c       ----------------------------------------------------------------
+!       ----------------------------------------------------------------
+!       jhb | did this to get rid of all those unnecessary trailing spaces...
+!       jhb | but some fortran compilers treat * formats differently (e.g. wrap at 80) ... so take it out
+!       ----------------------------------------------------------------
 !        IF (ISUPLY.EQ.1) write(256,*) trim(tempwd(1:179))
 !        IF (ISUPLY.EQ.2) write(256,*) trim(tempwd(1:359))
 !        IF (ISUPLY.EQ.3) write(256,*) trim(tempwd(1:522))
 !        IF (ISUPLY.EQ.4) write(256,*) trim(tempwd(1:372))
         goto 465
 461   continue
-Cjhb=&==================================================================
-c466     CLOSE(258,STATUS='DELETE')
-c        CLOSE(257,STATUS='DELETE')
-c      endif
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!466     CLOSE(258,STATUS='DELETE')
+!        CLOSE(257,STATUS='DELETE')
+!      endif
+!jhb=&==================================================================
 
 
-Cjhb=&==================================================================
-Cjhb  the remainder of this file is to create the SWB file -
-Cjhb  the scenario water budget report - for the whole basin - no individual structures
-Cjhb=&==================================================================
-ccccccccccccccccccccccccccccccccccccccccccccccccc
-c  write out scenario water budget
-ccccccccccccccccccccccccccccccccccccccccccccccccc
-c  grb 5-8-00  general modification made is to add calculated or prorated method
-c   to dwb and swb output in isuply =2 or isuply=4 options  changed write statements
-c   and corresponding format statements
-ccccccccccccccccccccccccccccccccccccccccccccccccc
+!jhb=&==================================================================
+!jhb  the remainder of this file is to create the SWB file -
+!jhb  the scenario water budget report - for the whole basin - no individual structures
+!jhb=&==================================================================
+!cccccccccccccccccccccccccccccccccccccccccccccccc
+!  write out scenario water budget
+!cccccccccccccccccccccccccccccccccccccccccccccccc
+!  grb 5-8-00  general modification made is to add calculated or prorated method
+!   to dwb and swb output in isuply =2 or isuply=4 options  changed write statements
+!   and corresponding format statements
+!cccccccccccccccccccccccccccccccccccccccccccccccc
       do m=1,nyrs
         if(acret(m) .gt. 0.0) then
           percenta(m)=numat(m)/acret(m)*100.0
@@ -9813,9 +9907,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccc
           effgw(nyrs2,l)=0
         endif
       enddo
-c
-c --write out header information depending on option
-c
+!
+! --write out header information depending on option
+!
         if(isuply .eq. 1)  then
           write(800,1708) tspcapz
           write(800,1781) ttotmo
@@ -9941,9 +10035,9 @@ c
         else
           teffgw(nyrs1,13) = 0
         endif
-c
-c write annual totals for all structures
-c 
+!
+! write annual totals for all structures
+! 
       if(isuply .eq. 1) then
         do m = 1,nyrs
         if((ulagt(m,14).lt.-998.0).or.(closs(m,14).lt.-998.0)) then
@@ -9954,16 +10048,16 @@ c
        write(800,1712) percenta(m),method2,nyr1+m-1,ettot(nbasin+1,m,14)
      :  ,effppt(nbasin+1,m,14),reqt(nbasin+1,m,14),wbu(nbasin+1,m,14),
      :   reqreqts(m,14),divsup(nbasin+1,m,14),
-c     :    crop_cut(m,14),soil_cu(m,14),ulagt(m,14),divcu(m,14),
+!     :    crop_cut(m,14),soil_cu(m,14),ulagt(m,14),divcu(m,14),
      :    crop_cut(m,14),soil_cu(m,14),nonconsumed,divcu(m,14),
      :    seffcu(m,14),soiltott(m,14),crop_cut(m,14),
      :    cropcusoil(m,14),
      :    tcrpt(m,14)
         enddo
         write(800,1751) 
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
         if((ulagt(nyrs2,13).lt.-998.0).or.
      &     (closs(nyrs2,13).lt.-998.0)) then
           nonconsumed=-999.0
@@ -9974,7 +10068,7 @@ c
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    divsup(nbasin+1,nyrs2,13),
-c     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
+!     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
      :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),nonconsumed,
      :    divcu(nyrs2,13),seffcu(nyrs2,13),soiltott(nyrs,14),
      :    crop_cut(nyrs2,13),cropcusoil(nyrs2,13),tcrpt(nyrs2,13)
@@ -9982,9 +10076,9 @@ c     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
         do k1=1,3
            write(800,1751) 
         enddo
-c
-c  write monthly average for all years for all structures
-c
+!
+!  write monthly average for all years for all structures
+!
         write(800,1718) nyr1, nyr2
         do l=1,12
          if((ulagt(nyrs2,l).lt.-998.0).or.
@@ -9997,16 +10091,16 @@ c
      :    effppt(nbasin+1,nyrs2,l),reqt(nbasin+1,nyrs2,l),
      :    wbu(nbasin+1,nyrs2,l),reqreqts(nyrs2,l),
      :    divsup(nbasin+1,nyrs2,l),
-c     :    crop_cut(nyrs2,l),soil_cu(nyrs2,l),ulagt(nyrs2,l),
+!     :    crop_cut(nyrs2,l),soil_cu(nyrs2,l),ulagt(nyrs2,l),
      :    crop_cut(nyrs2,l),soil_cu(nyrs2,l),nonconsumed,
      :    divcu(nyrs2,l),seffcu(nyrs2,l),soiltott(nyrs2,l),
      :    crop_cut(nyrs2,l),cropcusoil(nyrs2,l),tcrpt(nyrs2,l)
         enddo
         write(800,1751) 
 
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
         if((ulagt(nyrs2,13).lt.-998.0).or.
      &     (closs(nyrs2,13).lt.-998.0)) then
           nonconsumed=-999.0
@@ -10017,15 +10111,15 @@ c
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    divsup(nbasin+1,nyrs2,13),
-c     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
+!     :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),ulagt(nyrs2,13),
      :    crop_cut(nyrs2,13),soil_cu(nyrs2,13),nonconsumed,
      :    divcu(nyrs2,13),seffcu(nyrs2,13),soiltott(nyrs,14),
      :    crop_cut(nyrs2,13),cropcusoil(nyrs2,13),tcrpt(nyrs2,13)
         write(800,1751) 
         write(800,1751) 
-c
-c write out monthly values for each year for all structures combined
-c
+!
+! write out monthly values for each year for all structures combined
+!
           if(nu_dim+1 .gt. 10) nu_dim=9
           id1=15-nu_dim-1
           do m=1,nyrs
@@ -10043,7 +10137,7 @@ c
              endif
             write(800,1711) method2,amn(l),tet(m,l),teffr(m,l),
      :        treqt(m,l),twbu(m,l),treq(m,l),
-c     :        tdiv(m,l),tcut(m,l),tscu(m,l),tulagt(m,l),
+!     :        tdiv(m,l),tcut(m,l),tscu(m,l),tulagt(m,l),
      :        tdiv(m,l),tcut(m,l),tscu(m,l),nonconsumed,
      :        tdivcu(m,l),tseffcu(m,l),ttott(m,l),
      :        tcut(m,l),tcusoil(m,l),tcrpt(m,l)
@@ -10052,9 +10146,9 @@ c     :        tdiv(m,l),tcut(m,l),tscu(m,l),tulagt(m,l),
       endif
 
       if(isuply .eq. 2) then
-c
-c write annual totals for all structures combined
-c
+!
+! write annual totals for all structures combined
+!
         do m=1,nyrs
         if((ulagt(m,14).lt.-998.0).or.(closs(m,14).lt.-998.0)) then
           nonconsumed=-999.0
@@ -10068,7 +10162,7 @@ c
      :    seniorf(m,14),juniorf(m,14),otherf(m,14),divsup(nbasin+1,m,14)
      :,crop_cus(m,14),crop_cuj(m,14),crop_cuo(m,14),crop_cut(m,14),
      :    soil_cus(m,14),soil_cuj(m,14),soil_cuo(m,14),soil_cu(m,14),
-c     :    ulags(m,14),ulagj(m,14),ulago(m,14),ulagt(m,14),divcu(m,14),
+!     :    ulags(m,14),ulagj(m,14),ulago(m,14),ulagt(m,14),divcu(m,14),
      :    ulags(m,14),ulagj(m,14),ulago(m,14),nonconsumed,divcu(m,14),
      :    seffcu(m,14),soiltotts(m,14),soiltottj(m,14),
      :    soiltotto(m,14),soiltott(m,14),crop_cut(m,14),
@@ -10076,9 +10170,9 @@ c     :    ulags(m,14),ulagj(m,14),ulago(m,14),ulagt(m,14),divcu(m,14),
      :    tcrpt(m,14),estcrpj(m,14)
         enddo
         write(800,1851) 
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
         if((ulagt(nyrs2,13).lt.-998.0).or.
      &     (closs(nyrs2,13).lt.-998.0)) then
           nonconsumed=-999.0
@@ -10094,7 +10188,7 @@ c
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
      :    ulags(nyrs2,13),ulagj(nyrs2,13),ulago(nyrs2,13),
-c     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
+!     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
      :    nonconsumed,divcu(nyrs2,13),seffcu(nyrs2,13),
      :    soiltotts(nyrs,14),soiltottj(nyrs,14),soiltotto(nyrs,14),
      :    soiltott(nyrs,14),crop_cut(nyrs2,13),cropcusoil(nyrs2,13),
@@ -10105,9 +10199,9 @@ c     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
          do k1=1,3
             write(800,1851) 
          enddo
-c
-c  write monthly average for all years for all structures
-c
+!
+!  write monthly average for all years for all structures
+!
          write(800,1818) nyr1, nyr2
          do l=1,12
          if((ulagt(nyrs2,l).lt.-998.0).or.
@@ -10124,7 +10218,7 @@ c
      :    crop_cuo(nyrs2,l),crop_cut(nyrs2,l),soil_cus(nyrs2,l),
      :    soil_cuj(nyrs2,l),soil_cuo(nyrs2,l),soil_cu(nyrs2,l),
      :    ulags(nyrs2,l),ulagj(nyrs2,l),ulago(nyrs2,l),
-c     :    ulagt(nyrs2,l),divcu(nyrs2,l),seffcu(nyrs2,l),
+!     :    ulagt(nyrs2,l),divcu(nyrs2,l),seffcu(nyrs2,l),
      :    nonconsumed,divcu(nyrs2,l),seffcu(nyrs2,l),
      :    soiltotts(nyrs2,l),soiltottj(nyrs2,l),soiltotto(nyrs2,l),
      :    soiltott(nyrs2,l),crop_cut(nyrs2,l),cropcusoil(nyrs2,l),
@@ -10132,9 +10226,9 @@ c     :    ulagt(nyrs2,l),divcu(nyrs2,l),seffcu(nyrs2,l),
      :    estcrpj(nyrs2,l),estcrpo(nyrs2,l),tcrpt(nyrs2,l),
      :    estcrpj(nyrs2,l)
         enddo
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
         if((ulagt(nyrs2,13).lt.-998.0).or.
      &     (closs(nyrs2,13).lt.-998.0)) then
           nonconsumed=-999.0
@@ -10150,7 +10244,7 @@ c
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
      :    ulags(nyrs2,13),ulagj(nyrs2,13),ulago(nyrs2,13),
-c     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
+!     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
      :    nonconsumed,divcu(nyrs2,13),seffcu(nyrs2,13),
      :    soiltotts(nyrs,14),soiltottj(nyrs,14),soiltotto(nyrs,14),
      :    soiltott(nyrs,14),crop_cut(nyrs2,13),cropcusoil(nyrs2,13),
@@ -10159,9 +10253,9 @@ c     :    ulagt(nyrs2,13),divcu(nyrs2,13),seffcu(nyrs2,13),
      :    estcrpj(nyrs2,13)
           write(800,1851) 
           write(800,1851) 
-c
-c write out monthly values for each year for all structures combined
-c
+!
+! write out monthly values for each year for all structures combined
+!
           if(nu_dim+1 .gt. 10) nu_dim=9
           id1=15-nu_dim-1
           do m=1,nyrs
@@ -10194,7 +10288,7 @@ c
      :          ,tdiv(m,l),tcus(m,l),tcuj(m,l)
      :          ,tcuo(m,l),tcut(m,l),tscus(m,l)
      :          ,tscuj(m,l),tscuo(m,l),tscu(m,l)
-c     :          ,tulags(m,l),tulagj(m,l),tulago(m,l),tulagt(m,l)
+!     :          ,tulags(m,l),tulagj(m,l),tulago(m,l),tulagt(m,l)
      :          ,tulags(m,l),tulagj(m,l),tulago(m,l),nonconsumed
      :          ,tdivcu(m,l),tseffcu(m,l),ttotts(m,l),ttottj(m,l)
      :          ,ttotto(m,l),ttott(m,l),tcut(m,l)
@@ -10204,9 +10298,9 @@ c     :          ,tulags(m,l),tulagj(m,l),tulago(m,l),tulagt(m,l)
           enddo
       endif
       if(isuply .eq. 3) then
-c
-c write annual totals for all structures combined
-c
+!
+! write annual totals for all structures combined
+!
         do m=1,nyrs
         write(800,1935) percenta(m),method2,nyr1+m-1,
      :	  ettot(nbasin+1,m,14),
@@ -10225,9 +10319,9 @@ c
      :    ,depj(m,14),depo(m,14),dept(m,14),depj(m,14)
        enddo
        write(800,1951) 
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
             write(800,1913) method2,ettot(nbasin+1,nyrs2,13),
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
@@ -10247,9 +10341,9 @@ c
      :    laglateo(nyrs2,13),laglatet(nyrs2,13),totret(nyrs2,13),
      :    deps(nyrs2,13),depj(nyrs2,13),depo(nyrs2,13),dept(nyrs2,13),
      :    depj(nyrs2,13)
-c
-c  write monthly average for all years for all structures
-c
+!
+!  write monthly average for all years for all structures
+!
           do k1=1,3
               write(800,1951) 
           enddo 
@@ -10275,9 +10369,9 @@ c
      :    depj(nyrs2,l)
         enddo
         write(800,1951) 
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
             write(800,1914) method2, ettot(nbasin+1,nyrs2,13),
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
@@ -10299,9 +10393,9 @@ c
      :    depj(nyrs2,13)
           write(800,1951) 
           write(800,1951) 
-c
-c write out monthly values for each year for all structures combined
-c
+!
+! write out monthly values for each year for all structures combined
+!
           if(nu_dim+1 .gt. 10) nu_dim=9
           id1=15-nu_dim-1
           do m=1,nyrs
@@ -10372,9 +10466,9 @@ c
           endif
         enddo
         write(800,1651) 
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
           cutot=crop_cut(nyrs2,13)+gwcu(nyrs2,13)
           cust=cutot+cropcusoil(nyrs2,13)
           if( divsup(nbasin+1,nyrs2,13) .gt. 0) then
@@ -10408,9 +10502,9 @@ c
            write(800,1651) 
         enddo
 
-c
-c  write monthly average for all years for all structures
-c
+!
+!  write monthly average for all years for all structures
+!
         write(800,1618) nyr1, nyr2
         do l=1,12
         cutot=crop_cut(nyrs2,l)+gwcu(nyrs2,l)
@@ -10444,9 +10538,9 @@ c
         endif
         enddo
       write(800,1651)
-c
-c write average for all years for all structures
-c
+!
+! write average for all years for all structures
+!
           cutot=crop_cut(nyrs2,13)+gwcu(nyrs2,13)
           cust=cutot+cropcusoil(nyrs2,13)
           if(divsup(nbasin+1,m,14) .gt. 0) then
@@ -10479,9 +10573,9 @@ c
 
           write(800,1651)
           write(800,1651)
-c
-c write out monthly values for each year for all structures combined
-c
+!
+! write out monthly values for each year for all structures combined
+!
 
           if(nu_dim+1 .gt. 10) nu_dim=9
           id1=15-nu_dim-1
@@ -10520,8 +10614,8 @@ c
          enddo        
       endif
 
-c  format statements
-c  600 series for when groundwater is considered
+!  format statements
+!  600 series for when groundwater is considered
 600   Format (256('-'))
 601   Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
      :3x,'EOM',3x,'|    IWR    |',
@@ -10555,8 +10649,8 @@ c  600 series for when groundwater is considered
      :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
      :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
      :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |')
-c jhb 09-06-07 add variable length column headers for different values of iflood (1 and 2 for now)
-c jhb 09-06-07 iflood = 1
+! jhb 09-06-07 add variable length column headers for different values of iflood (1 and 2 for now)
+! jhb 09-06-07 iflood = 1
 2600  Format (310('-'))
 2601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
      :3x,'EOM',3x,'|    IWR    |',
@@ -10596,7 +10690,7 @@ c jhb 09-06-07 iflood = 1
      :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
      :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
      :' Acreage| Acreage|        |        |        |  sion  |')
-c jhb 09-06-07 iflood = 2
+! jhb 09-06-07 iflood = 2
 3600  Format (328('-'))
 3601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
      :3x,'EOM',3x,'|    IWR    |',
@@ -10642,7 +10736,7 @@ c jhb 09-06-07 iflood = 2
      :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
      :' Acreage| Acreage|        |        |        |',
      :'        |        |  sion  |')
-c jhb 09-06-07 iflood = 3
+! jhb 09-06-07 iflood = 3
 4600  Format (346('-'))
 4601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
      :3x,'EOM',3x,'|    IWR    |',
@@ -10688,7 +10782,7 @@ c jhb 09-06-07 iflood = 3
      :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
      :' Acreage| Acreage|        |        |        |',
      :'        |        |        |        |  sion  |')
-c jhb 09-06-07 iflood = 4 or more
+! jhb 09-06-07 iflood = 4 or more
 5600  Format (364('-'))
 5601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
      :3x,'EOM',3x,'|    IWR    |',
@@ -10735,18 +10829,18 @@ c jhb 09-06-07 iflood = 4 or more
      :' Acreage| Acreage|        |        |        |',
      :'        |        |        |        |        |        |  sion  |')
 
-c grb 05-11-00 remove separate print without soil moisture
-c607   Format (1x,i4,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
-c     :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
-c     :f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
-c     :f7.0,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
+! grb 05-11-00 remove separate print without soil moisture
+!607   Format (1x,i4,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
+!     :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
+!     :f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
+!     :f7.0,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
 608   Format (T5, 'Soil Moisture Capacity:',11x,f11.2,' af',203(" "))
-c grb 05-11-00 remove separate print without soil moisture
+! grb 05-11-00 remove separate print without soil moisture
 609   Format (4x,'Maximum Irrigation Efficiency:',9x,F6.2,206(" "))
-c609   Format (2x,'Ave',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,
-c     :f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,
-c     :f7.2,f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
-c     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
+!609   Format (2x,'Ave',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,
+!     :f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,
+!     :f7.2,f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
+!     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
 610   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
      :f9.0,f11.0,
@@ -10769,15 +10863,15 @@ c     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
      :f7.2,f9.0,f11.0,
      :f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
 615   Format('    % of structure acreage considered:   ',f8.2,206(" "))
-c grb 05-11-00 remove separate print without soil moisture
-c616   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
-c     :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
-c     :f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
-c     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f11.0)
-c617   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
-c     :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
-c     :f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
-c     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f11.0)
+! grb 05-11-00 remove separate print without soil moisture
+!616   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
+!     :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
+!     :f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
+!     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f11.0)
+!617   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
+!     :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
+!     :f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,
+!     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f11.0)
 618   Format('Monthly Averages ', i4,' - ',i4,227(" "))
 619   Format (T5, 'ID:    ',a24,220(" "))
 621   Format('Yearly Totals   ', i4,' - ',i4,228(" "))
@@ -10800,12 +10894,12 @@ c     :f7.2,f11.0,f9.0,7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f11.0)
 634   Format (2x,'Ave',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,
      :f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,f9.0,f11.0,f9.0,f11.0,
      :f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
-c636   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-c     :11x,'|',5x,'|',7x,'|',
-c     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-c     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',2x,
-c     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',
-c     :' gw spr   gw flood','totshort IWRpastur')
+!636   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',2x,
+!     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',
+!     :' gw spr   gw flood','totshort IWRpastur')
 644   format ('Crops',1x,15(1x,a10),84(" "))
 645   format ('Acres',1x,15(1x,a10),84(" "))
 646   Format(4x,'Note, Drain/Tailwater Supply Available to this Ditch',
@@ -10832,9 +10926,9 @@ c     :' gw spr   gw flood','totshort IWRpastur')
      :'---eb------eb------eb------eb------eb------exb----------eb-----'/
      :'#')
 681   Format (t5, 'Starting Soil Moisture:',12x,f10.2,' af',203(" "))
-c
-c - 700 series write format statements for isuply=1 (126 characters per line)
-c
+!
+! - 700 series write format statements for isuply=1 (126 characters per line)
+!
 
 700   Format (179('-'))
 701   Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
@@ -10858,10 +10952,10 @@ c
 706   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
      :11x,'|',11x,'|',9x,'| Consumed  |CU and SM|Effic (%)|',9x,'|',11x,
      :'|',9x,'|',8x,'|')
-c grb 05-11-00 remove separate print without soil moisture
-c707   Format (1x,i4,2x,a10,1x,f11.0,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,1x,
-c     :f11.0,1x,f11.0,1x,7x,'NA',1x,
-c     : f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)         
+! grb 05-11-00 remove separate print without soil moisture
+!707   Format (1x,i4,2x,a10,1x,f11.0,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,1x,
+!     :f11.0,1x,f11.0,1x,7x,'NA',1x,
+!     : f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)         
 708   Format (T5, 'Soil Moisture Capacity:',11x,f11.2,' af',127(" "))
 709   Format (4x,'Maximum Irrigation Efficiency:',9x,F6.2,130(" "))
 710   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
@@ -10881,19 +10975,19 @@ c     : f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)
      :f11.0,1x,f11.0,1x,f11.0,1x,f9.0,1x,
      :f11.0,1x,f9.0,1x,f9.0,1x,f9.0,1x,f11.0,1x,f9.0,1x,f9.0)     
 715   Format('    % of structure acreage considered:   ',f8.2,130(" "))
-c grb 05-11-00 remove separate print without soil moisture
-c716   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
-c     :1x,f11.0,1x,f11.0,1x,7x,'NA',1x,
-c     : f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)   
-c717   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
-c     :1x,f11.0,1x,f11.0,1x,7x,'NA',1x
-c     :,f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)
+! grb 05-11-00 remove separate print without soil moisture
+!716   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
+!     :1x,f11.0,1x,f11.0,1x,7x,'NA',1x,
+!     : f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)   
+!717   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
+!     :1x,f11.0,1x,f11.0,1x,7x,'NA',1x
+!     :,f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)
 718   Format('Monthly Averages ', i4,' - ',i4,151(" "))
 719   Format (T5, 'ID:    ',a24,144(" "))
-c grb 05-11-00 remove separate print without soil moisture
-c720   Format (2x,'Ave',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,1x,
-c     :f11.0,1x,f11.0,1x,f11.0,1x,7x,'NA',1x,
-c     :f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)     
+! grb 05-11-00 remove separate print without soil moisture
+!720   Format (2x,'Ave',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,1x,
+!     :f11.0,1x,f11.0,1x,f11.0,1x,7x,'NA',1x,
+!     :f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)     
 721   Format('Yearly Totals   ', i4,' - ',i4,152(" "))
 722   Format(4x,'Note, Drain/Tailwater Supply Available to this Ditch',
      :122(" "))
@@ -10902,9 +10996,9 @@ c     :f11.0,1x,f9.0,1x,f9.0,1x,7x,'NA',1x,f11.0,1x,7x,'NA',1x,f9.0)
 751   Format (179(" "))
 752   Format (i4,4x,a84,87(" "))
 781   Format (t5, 'Starting Soil Moisture:',12x,f10.2,' af',127(" "))
-c
-c - 800 series write format statements for isuply=2 (306 characters per line)
-c
+!
+! - 800 series write format statements for isuply=2 (306 characters per line)
+!
 800   format(359("-"))
 801   Format ('|','Year/|          | Potential | Effect| Irrigation|',
      :3x,'EOM',3x,'|    IWR    |',75x,'River Diversion Accounting',
@@ -11004,16 +11098,16 @@ c
 870   Format (T5,110('-'),234(" "))
 883   Format (t5, 'Starting Soil Moisture:  Senior = ', f8.2,'   Junior
      := ', f8.2, '   Other = ',f8.2,264(" "))
-c
-c - 900 series write format statements for isuply=3 (468 characters per line)
-c
+!
+! - 900 series write format statements for isuply=3 (468 characters per line)
+!
 
 900   format(522("-"))
 901   Format ('|','Year/|          | Potential | Effect| Irrigation|',3x
      :,'EOM',3x,'|    IWR    |',  75x,'River Diversion Accounting',75x,
      :  '|Delivered EOM Soil Moisture Content|',23x,'Estimated Crop C
      :U',22x,'|',45x,'Months Return Flows',
-c grb 5-12-00 revise format to reflect sign of depletions and accretions
+! grb 5-12-00 revise format to reflect sign of depletions and accretions
      :  44x,'|',8x,' River Depletions(+)/Accretions(-)',9x,'|',1x
      :     ,'Replacement','|') 
 902   Format('|',5x,'|          |   Crop    |',7x,'|',3x,'Water',3x,
@@ -11052,7 +11146,7 @@ c grb 5-12-00 revise format to reflect sign of depletions and accretions
      :3x,'|',2x,'Senior',3x,'|',2x,'Junior',3x,'|',3x,'Other',3x,'|',
      :3x,'Total',3x,'|',12x,'|'3x,'Senior',3x,'|',3x,'Junior',3x,'|'
      :,4x,'Other',3x,'|',12x,'|',12x,'|')
-c grb 5-11-00 corrected following overflow line
+! grb 5-11-00 corrected following overflow line
 906    Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,
      :'|',11x,'|',
      :11x,'|',11x,'|'
@@ -11212,11 +11306,11 @@ c grb 5-11-00 corrected following overflow line
      :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
      :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
      :' Acreage| Acreage|')
-c grb 5-11-00 following format not used so commented out
-c1607  Format (f6.1,'%',2x,a10,2x,i4,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
-c     :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,
-c     :f8.0,5x,'NA',f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,
-c     :7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
+! grb 5-11-00 following format not used so commented out
+!1607  Format (f6.1,'%',2x,a10,2x,i4,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
+!     :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,
+!     :f8.0,5x,'NA',f9.0,8x,'NA',1x,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,
+!     :7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
 1608  Format (T5, 'Soil Moisture Capacity:',11x,f11.2,' af',211(" "))
 1610  Format (9x,a10,2x,a3,3x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,f9.0
@@ -11254,11 +11348,11 @@ c     :7x,'NA',1x,10x,'NA',1x,7x,'NA',1x,f9.0,f10.0,1x)
      :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,
      :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
      :,f9.0,f10.0,f9.0,f9.0,1x)
-c1636  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,
-c     :'|',11x,'|',11x,'|',5x,'|',7x,'|',
-c     :10x,'|',7x,'|',6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-c     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',2x,
-c     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',' gw spr   gw flood')
+!1636  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,
+!     :'|',11x,'|',11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|',6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',2x,
+!     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',' gw spr   gw flood')
 
 1618  Format('Project Monthly Averages ', i4,' - ',i4,227(" "))
 1621  Format('Yearly Totals for Scenario   ', i4,' - ',i4,223(" "))
@@ -11578,7 +11672,7 @@ c     :'Diversion',1x,'|',9x,'|',8x,'| Consumed|',' gw spr   gw flood')
          close(256)
       ELSE
          close(256)
-c         close(256,status='delete')
+!         close(256,status='delete')
       ENDIF
       open(unit=257,file="temp1",status='unknown')
       open(unit=258,file="temp2",status='unknown')
