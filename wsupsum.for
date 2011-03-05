@@ -35,6 +35,7 @@
 !                   added detailed water budget output for one structure
 ! jhb 2007/09/25    temporarily remove warning message for extra structures in the DRA (drain) file
 ! jhb 2011/01/19    changed the ISUPLY=2 DWB output back to farm deliv (seniorf(), etc.).  the new values (changed in Dec 08) were not working
+! jhb 2011/03/04    added new component to gw pumping - excess pumping to soil moisture
 !
 !   Calling program : statecu.f
 !   Called programs : none
@@ -198,7 +199,8 @@
       REAL :: ssdiv(DIM_NY,14),sfdiv(DIM_NY,14)
       REAL :: gwdiv(DIM_NY,14)
       REAL :: gsdiv(DIM_NY,14),gfdiv(DIM_NY,14)
-! jhb 03-04-11 add variables for gw to sm calculations      
+! jhb 03-04-11 add variables for gw to sm calculations
+      REAL :: mprate_x
       REAL :: gw2sm, smre_eff
       REAL :: gwholdt1, gwholds1, gwholdj1, gwholdo1
       REAL :: gwdivsm(DIM_NY,14)
