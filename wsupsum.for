@@ -4995,7 +4995,7 @@
                   gsdiv(m,l)=0.
 !jhb              ------------------------------------------------------
                   if((swgwflac(i,m)+swgwspac(i,m)).eq.0.)then
-                    smre_eff=fleff(i,m)+speff(i,m))/2.0
+                    smre_eff=(fleff(i,m)+speff(i,m))/2.0
                   else
                     smre_eff=(swgwflac(i,m)*fleff(i,m)+
      &                        swgwspac(i,m)*speff(i,m))/
