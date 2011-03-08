@@ -1,161 +1,161 @@
-C***************************************************************************
-C
-C   Include File    : gcommon.inc
-C   Author          : HB Manguerra
-C   Date            : December 1994
-C   Purpose         : This includes declarations of all global variables
-C                     used by crdss-cu.
-C   Calling program : All subroutines except acount.f, budget.f,
-C                     dayhrs.f, evap.f, growth.f, interkc.f, irgate.f,
-C   Assumptions     : 
-C   Limitations     :
-C emw 2006/12     Version 12.1  - 
-C emw 2006/07     Version 12.0  - 
-c emw 2004/12     Version 11.3  - allows missing data to be prorated
-c rrb 2003/05/12; Version 10.4 2003/05/12
-c rrb 2003/06/20; Allow multiple subirrigation crops (grass)
-c rrb 2003/06/20; Add multiple subirrigation crops parameter (dim_sub)
-c rrb 2003/06/20; Add multiple subirrigation crop ID (subname)
-c rrb 2004/01/26; Version 10.5 2004/01/26
-c                 Revise Wsupsum to correct output problems related to 
-c		  fraction of Gw and sprinkler land and Soil moisture
-c		  treatment when acres change
-c ew 03/12/2004; Version 10.7 03/12/2005
-c ew 03/12/2004; Consider drain/tailwater supply
-c ew 08/04     ; Version 10.8
-c ew 12/04     ; Version 11.0 - new format for input files, ASCE modified method,
-c                altitude adjustment capabilites
-c jb 07/07     ; Version 12.14
-c jb 08/07     ; Version 12.15
-c                more /0 tests for acreage inputs
-c                include recharge (areach(), gmode 3) in unused water category output
-c                change WARNING message criteria for acreage discrepancy (CDS vs IPY)
-c                  to 2%.
-c                change DIM_NY (year dimension) to 130 from 100
-c jb 08/07     ; Version 12.16
-c                change WARNING message criteria for acreage discrepancy (CDS vs IPY)
-c                  to 2% AND > 1.0 .
-c                change WARNING message criteria for crop acreage % discrepancy
-c                  to 2%
-c                change WARNING message format for acreage discrepancy - single record vs. wrapped @ 80 characters
-C jb 09/07     ; Version 12.17
-c                enhance DWB, SWB report column headers when ISUPLY=4 and IFLOOD>0
-c                note: handles up to IFLOOD=4 - four subirrigated crops, crops > 4 will not have column headers
-C jb 11/07     ; Version 12.18
-c                expanded allowable IDRAIN parameter values - added new value of 2 which allows negative drain/tailwater values to be used
-c                if IDRAIN=1, drain file is read and negative values are changed to 0
-c                if IDRAIN=2, drain file is read and negative values are left alone
-c                  the latter is used in SPDSS for carrier ditches to cancel river diversions after losses - part of the gw model interaction requirements
-C jb 11/07     ; Version 12.19
-c                modified cds reading code - read and use acreage values (not % values) when possible
-c                negative deliveries can not cause negative CU
-c                systemwide table at bottom of WSL and IWR reports now allows areas > 999,999 acres
-c                converts max pumping rate in ipy (AF/month) from being based on 30.4 days/month to actual days/month
-C jb 02/08     ; Version 12.20
-c                modified/updated winter precip soil moisture algorithm and all related routines
-c                add deficit irrigation (gw pumping only) capability - new record in CCU file
-C jb 02/08     ; Version 12.21
-c                added subbasin totals to the binary output file (bd1)
-C jb 09/08     ; Version 12.30
-c                adjusted subbasin totals for binary output file (bd1) - new sub basin (district) ID format "DIST01", etc.
-c                adjusted negative drain file value logic
-c                added fill on fly options
-c                adjusted ... fractions vs percentages
-c jhb 09/08      version 13.0! major new release
-c                major redesign of log file
-c                added several new data filling options (diversion and climate data) using new imiss values
-c                adjusted shortage based filling logic to be more robust
-c                tweaked typout values to designate whether to put district and basin totals in BD1 file
-c jhb 12/08      increased error log array (DIM_NLWS) size from 500 to 800
-c jhb 06/09      version 13.01
-c                modified binary output (bd1) to change units descriptor string from "AF" to "ACFT" so TSTOOL can utilize it properly
-c                modified binary output (bd1) to change units descriptor string from "ACRES" to "ACRE" so TSTOOL can utilize it properly
-c                modified binary output (bd1) to change units descriptor string from "Percent" to "PERCENT"
-c jhb 07/10      version 13.02
-c                increased DIM_NA to 1200
-c jhb 11/10      version 13.03
-c                re-enabled season.csv output
-c jhb 01/11      version 13.04
-c                fixed diversion by priority monthly output (for ISUPLY=2 case) in wsupsum.for - changed back to outputting seniorf(), juniorf() and otherf()
-c jhb 02/11      version 13.05
-c                fixed logic error in priority based soil moisture code calculations
-c jhb/emw 02/11  version 13.06
-c                revise distribution of pvh pumping to assign it to sprinkler first, flood second
-c                reprorate sr, jr, other when isuply=2,3 and when filling missing diversions (ifill)
-c                  (calls slimit again when itime=2) 
-c                
-c                
-C***************************************************************************
-C   Notes           : Current Dimensions of the program.
-C                     number of subareas (or structures)    = 1200
-C                     number of parcels per structure       = 50
-C                     number of years                       = 130 
-C                     number of crop types                  = 70
-C                     number of weather stations            = 300
-C                     number of county hucs                 = 200
-C                     number of sub basins (districts)      = 100
-C***************************************************************************
-C                     number of log file warnings               = 100
-C                     max number of log file warning structures = 800
-C                        (per warning)
-C***************************************************************************
+!***************************************************************************
+!
+!   Include File    : gcommon.inc
+!   Author          : HB Manguerra
+!   Date            : December 1994
+!   Purpose         : This includes declarations of all global variables
+!                     used by crdss-cu.
+!   Calling program : All subroutines except acount.f, budget.f,
+!                     dayhrs.f, evap.f, growth.f, interkc.f, irgate.f,
+!   Assumptions     : 
+!   Limitations     :
+! emw 2006/12     Version 12.1  - 
+! emw 2006/07     Version 12.0  - 
+! emw 2004/12     Version 11.3  - allows missing data to be prorated
+! rrb 2003/05/12; Version 10.4 2003/05/12
+! rrb 2003/06/20; Allow multiple subirrigation crops (grass)
+! rrb 2003/06/20; Add multiple subirrigation crops parameter (dim_sub)
+! rrb 2003/06/20; Add multiple subirrigation crop ID (subname)
+! rrb 2004/01/26; Version 10.5 2004/01/26
+!                 Revise Wsupsum to correct output problems related to 
+!		  fraction of Gw and sprinkler land and Soil moisture
+!		  treatment when acres change
+! ew 03/12/2004; Version 10.7 03/12/2005
+! ew 03/12/2004; Consider drain/tailwater supply
+! ew 08/04     ; Version 10.8
+! ew 12/04     ; Version 11.0 - new format for input files, ASCE modified method,
+!                altitude adjustment capabilites
+! jb 07/07     ; Version 12.14
+! jb 08/07     ; Version 12.15
+!                more /0 tests for acreage inputs
+!                include recharge (areach(), gmode 3) in unused water category output
+!                change WARNING message criteria for acreage discrepancy (CDS vs IPY)
+!                  to 2%.
+!                change DIM_NY (year dimension) to 130 from 100
+! jb 08/07     ; Version 12.16
+!                change WARNING message criteria for acreage discrepancy (CDS vs IPY)
+!                  to 2% AND > 1.0 .
+!                change WARNING message criteria for crop acreage % discrepancy
+!                  to 2%
+!                change WARNING message format for acreage discrepancy - single record vs. wrapped @ 80 characters
+! jb 09/07     ; Version 12.17
+!                enhance DWB, SWB report column headers when ISUPLY=4 and IFLOOD>0
+!                note: handles up to IFLOOD=4 - four subirrigated crops, crops > 4 will not have column headers
+! jb 11/07     ; Version 12.18
+!                expanded allowable IDRAIN parameter values - added new value of 2 which allows negative drain/tailwater values to be used
+!                if IDRAIN=1, drain file is read and negative values are changed to 0
+!                if IDRAIN=2, drain file is read and negative values are left alone
+!                  the latter is used in SPDSS for carrier ditches to cancel river diversions after losses - part of the gw model interaction requirements
+! jb 11/07     ; Version 12.19
+!                modified cds reading code - read and use acreage values (not % values) when possible
+!                negative deliveries can not cause negative CU
+!                systemwide table at bottom of WSL and IWR reports now allows areas > 999,999 acres
+!                converts max pumping rate in ipy (AF/month) from being based on 30.4 days/month to actual days/month
+! jb 02/08     ; Version 12.20
+!                modified/updated winter precip soil moisture algorithm and all related routines
+!                add deficit irrigation (gw pumping only) capability - new record in CCU file
+! jb 02/08     ; Version 12.21
+!                added subbasin totals to the binary output file (bd1)
+! jb 09/08     ; Version 12.30
+!                adjusted subbasin totals for binary output file (bd1) - new sub basin (district) ID format "DIST01", etc.
+!                adjusted negative drain file value logic
+!                added fill on fly options
+!                adjusted ... fractions vs percentages
+! jhb 09/08      version 13.0! major new release
+!                major redesign of log file
+!                added several new data filling options (diversion and climate data) using new imiss values
+!                adjusted shortage based filling logic to be more robust
+!                tweaked typout values to designate whether to put district and basin totals in BD1 file
+! jhb 12/08      increased error log array (DIM_NLWS) size from 500 to 800
+! jhb 06/09      version 13.01
+!                modified binary output (bd1) to change units descriptor string from "AF" to "ACFT" so TSTOOL can utilize it properly
+!                modified binary output (bd1) to change units descriptor string from "ACRES" to "ACRE" so TSTOOL can utilize it properly
+!                modified binary output (bd1) to change units descriptor string from "Percent" to "PERCENT"
+! jhb 07/10      version 13.02
+!                increased DIM_NA to 1200
+! jhb 11/10      version 13.03
+!                re-enabled season.csv output
+! jhb 01/11      version 13.04
+!                fixed diversion by priority monthly output (for ISUPLY=2 case) in wsupsum.for - changed back to outputting seniorf(), juniorf() and otherf()
+! jhb 02/11      version 13.05
+!                fixed logic error in priority based soil moisture code calculations
+! jhb/emw 02/11  version 13.06
+!                revise distribution of pvh pumping to assign it to sprinkler first, flood second
+!                reprorate sr, jr, other when isuply=2,3 and when filling missing diversions (ifill)
+!                  (calls slimit again when itime=2) 
+!                
+!                
+!***************************************************************************
+!   Notes           : Current Dimensions of the program.
+!                     number of subareas (or structures)    = 1200
+!                     number of parcels per structure       = 50
+!                     number of years                       = 130 
+!                     number of crop types                  = 70
+!                     number of weather stations            = 300
+!                     number of county hucs                 = 200
+!                     number of sub basins (districts)      = 100
+!***************************************************************************
+!                     number of log file warnings               = 100
+!                     max number of log file warning structures = 800
+!                        (per warning)
+!***************************************************************************
 
-C-----Dimension (Corresponding dimension parameters in other include files
-C-----should be changed)
+!-----Dimension (Corresponding dimension parameters in other include files
+!-----should be changed)
       INTEGER  DIM_NA, DIM_NP, DIM_NY, DIM_NC, DIM_NW, DIM_CH
       INTEGER  DIM_SUB, DIM_NSB, DIM_NLW, DIM_NLWS
       CHARACTER*16 RDATE
       REAL VERS
-c grb new version number 
+! grb new version number 
       PARAMETER (VERS = 13.06)
       PARAMETER (RDATE = '02/17/11 11:11AM')
-c     jhb 07/10
-c     PARAMETER (DIM_NA = 800)
+!     jhb 07/10
+!     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
       PARAMETER (DIM_NP = 50)
       PARAMETER (DIM_NY = 130)
       PARAMETER (DIM_NC = 70)
       PARAMETER (DIM_NW = 300)
       PARAMETER (DIM_CH = 200)
-c _____________________________________________________
-c rrb 2003/06/20; Allow multiple subirrigation crops
+! _____________________________________________________
+! rrb 2003/06/20; Allow multiple subirrigation crops
       parameter (dim_sub = 5)
-c _____________________________________________________
-c rrb 2003/06/20; Allow multiple subirrigation crops
+! _____________________________________________________
+! rrb 2003/06/20; Allow multiple subirrigation crops
       integer subirr
-c _____________________________________________________
-c rrb 2003/06/20; Allow multiple subirrigation crops
+! _____________________________________________________
+! rrb 2003/06/20; Allow multiple subirrigation crops
       character*5  subname(dim_sub)
-c _____________________________________________________
-c grb 05-20-00 add variable to determine years of missing diversion data or aggregates
+! _____________________________________________________
+! grb 05-20-00 add variable to determine years of missing diversion data or aggregates
       INTEGER missflag(dim_na,dim_ny),missflg1(dim_na)
-c _____________________________________________________
-c jhb 03-00-08 add variables to determine years of missing iwr and diversion data (if not filled)
+! _____________________________________________________
+! jhb 03-00-08 add variables to determine years of missing iwr and diversion data (if not filled)
       INTEGER missiwr(dim_na,dim_ny),missdiv(dim_na,dim_ny)
-c _____________________________________________________
-c grb 05-20-00 added switch in crop characteristics file for modified vs. original blaney (kt=1)	   
+! _____________________________________________________
+! grb 05-20-00 added switch in crop characteristics file for modified vs. original blaney (kt=1)	   
       integer ktsw(dim_nc)
-c _____________________________________________________
-C jhb 02/20/08 added sub totals - sub basins (sb)
-C jhb          for now make it the first two chars of structure ID (district),
-C jhb          but it could be any subgrouping
+! _____________________________________________________
+! jhb 02/20/08 added sub totals - sub basins (sb)
+! jhb          for now make it the first two chars of structure ID (district),
+! jhb          but it could be any subgrouping
       PARAMETER (DIM_NSB = 100)
-c _____________________________________________________
+! _____________________________________________________
       PARAMETER (DIM_NLW = 100)
       PARAMETER (DIM_NLWS = 800)
-c _____________________________________________________
+! _____________________________________________________
 
-C-----Global Variable Declaration
+!-----Global Variable Declaration
       LOGICAL DAYONE
       LOGICAL WARNINGS
       
       CHARACTER*1 QUOTE
       CHARACTER*3 AMN(12)
-Cjhb=&==================================================================
-Cjhb  replaced with named constants to use in select case construct
-Cjhb=&==================================================================
-C     CHARACTER*9 FILEID(33)
-Cjhb=&==================================================================
+!jhb=&==================================================================
+!jhb  replaced with named constants to use in select case construct
+!jhb=&==================================================================
+!     CHARACTER*9 FILEID(33)
+!jhb=&==================================================================
       CHARACTER*120 TITLE(6)
       CHARACTER (LEN = 8) CURDATE
       CHARACTER (LEN = 10) CURTIME
@@ -169,15 +169,15 @@ Cjhb=&==================================================================
       CHARACTER*15 SOIL(DIM_NC), SNAME(14)
       CHARACTER*24 NAMEASP(DIM_NA)
       CHARACTER*200 dfile
-c rb- add input filenames
+! rb- add input filenames
       character*200 rcufile,ccufile,kbcfile,tmpfile,pptfile
       character*200 ddhfile,othfile,logfile,cdsfile,fdfile,cchfile
       character*200 kpmfile,strfile,ddsfile,kmhfile
       character*200 ddrfile,penfile,tmxfile,tmnfile
       character*200 pdyfile,solfile,vapfile,wndfile,dlyfile
       character*200 ipyfile,pvhfile,dlafile,clifile
-c grb 06-29-00 add admfile and dddfile
-c jhb 07-12-00 add gisfile (known, but unused in statecu)
+! grb 06-29-00 add admfile and dddfile
+! jhb 07-12-00 add gisfile (known, but unused in statecu)
       character*200 admfile,dddfile,addfile,dcufile,gisfile
       character*12 wsid(DIM_NW),ttid(DIM_NW),S4CATID
       integer dbyear,deyear,ddcsw,iwheat
@@ -186,13 +186,13 @@ c jhb 07-12-00 add gisfile (known, but unused in statecu)
       integer imissflg
       REAL TRIGHTS(DIM_NA)
       REAL def_irr, def_irr_frac(DIM_NA,DIM_NY)
-c grb 06-29-00 add variables for admin calculation
+! grb 06-29-00 add variables for admin calculation
       real persen(dim_na,dim_ny,12),peroth(dim_na,dim_ny,12)
       INTEGER ipresim,iprtysm,iagg,imiss2
       LOGICAL :: FILLONFLY
       INTEGER :: divonfly, climonfly
       real endsoils(dim_na),endsoilj(dim_na),endsoilo(dim_na)
-c jhb log file variables
+! jhb log file variables
       integer :: scu_debug
       character*150 :: lgwrmsg1(0:dim_nlw)
       character*150 :: lgwrmsg2(0:dim_nlw)
@@ -200,9 +200,9 @@ c jhb log file variables
       integer ::  lgwrcnt(0:dim_nlw),lgwrscnt(0:dim_nlw)
       character*50 ::  lgwrsid(0:dim_nlw,0:dim_nlws)
       integer ::  lgwrswcnt(0:dim_nlw,0:dim_nlws)
-c rb- add fn_len so that it can be used in all subroutines
+! rb- add fn_len so that it can be used in all subroutines
       integer fn_len,fmode
-c rb- added added year dimension to nparce
+! rb- added added year dimension to nparce
       INTEGER NBASIN,CKEY(DIM_NC),BKEY(DIM_NA,DIM_NP,DIM_NY)
       INTEGER NPARCE(DIM_NA,dim_ny),NHUC
       INTEGER MIDDLE(12), IQUOTE, OHUC(DIM_CH),TTHUC(DIM_CH)
@@ -227,9 +227,9 @@ c rb- added added year dimension to nparce
       REAL WLAT(DIM_NW),WELEV(DIM_NW)
       REAL TRAIN(DIM_NY,366)
       REAL wws(DIM_NA,DIM_NW), WRS(DIM_NA,DIM_NW)
-Cjhb=&==================================================================
+!jhb=&==================================================================
       REAL ota(DIM_NA,DIM_NW), opa(DIM_NA,DIM_NW)
-Cjhb=&==================================================================
+!jhb=&==================================================================
       REAL owws(DIM_NA,DIM_NW), OWRS(DIM_NA,DIM_NW)
       REAL ttwws(DIM_NW), TTWRS(DIM_NW),psenmo,pjunmo,pothmo
       REAL T_AREA(DIM_NA,DIM_NY),M_AREA(DIM_NA,DIM_NY,12)
@@ -245,16 +245,16 @@ Cjhb=&==================================================================
       REAL T28(DIM_NA,DIM_NY,2),T32(DIM_NA,DIM_NY,2),PERDP(DIM_NA)
       REAL AREA(DIM_NA,DIM_NP,DIM_NY), PJAREA(DIM_NY) 
 
-c ew dimensioned arrays to go with new common block G12 to carry variables
-c    that used to be written to tmp files
+! ew dimensioned arrays to go with new common block G12 to carry variables
+!    that used to be written to tmp files
       REAL REQT(DIM_NA,DIM_NY,14),DEPLET(DIM_NA,DIM_NY,12)
       REAL ESTCRPT(DIM_NA,DIM_NY,14)
       REAL SMEF
       
-c ew 03/12/2004; Consider drain/tailwater supply
+! ew 03/12/2004; Consider drain/tailwater supply
       INTEGER IDRAIN, EYETIME
       CHARACTER*200 DRAFILE
-c jhb declare/dimension sub-basin (sb) common block variables
+! jhb declare/dimension sub-basin (sb) common block variables
       integer :: sbcount, sbsb(dim_na)
       logical :: sboutput, sb_flag, sb0_flag, b_flag
       character*6 :: sbid(0:dim_nsb)
@@ -319,7 +319,7 @@ c jhb declare/dimension sub-basin (sb) common block variables
       real :: sbdept(0:dim_nsb,dim_ny,12)
       real :: sbshortage(0:dim_nsb,dim_ny,12)
       real :: sbgrass(0:dim_nsb,dim_ny,12,10)
-c jhb declare/dimension basin (b) common block variables
+! jhb declare/dimension basin (b) common block variables
       character*2 :: bid
       character*24 :: bname
       real :: btarea(dim_ny,12), bmarea(dim_ny,12)
@@ -373,9 +373,9 @@ c jhb declare/dimension basin (b) common block variables
       real :: bshortage(dim_ny,12)
       real :: bgrass(dim_ny,12,10)
 
-c rb- added fn_len to common
+! rb- added fn_len to common
       COMMON /G0/ DAYONE,fn_len,rspck,fmode
-c grb add dddopt and admopt variables  06-29-00
+! grb add dddopt and admopt variables  06-29-00
       common /g1/ persen,peroth
       COMMON /G1b/ admopt,dddopt,idaily,iclim,iwheat, eyetime
       COMMON /G1a/ FLAG1, FLAG2, FLAG3, ISUPLY, GWFLAG,ddcsw, iflood
@@ -399,7 +399,7 @@ c grb add dddopt and admopt variables  06-29-00
       COMMON /GG1a/ MONTH
       COMMON /GG1b/ MIDDLE
       COMMON /GG1c/ IQUOTE
-c grb 06-29-00 add admfile and dddfile
+! grb 06-29-00 add admfile and dddfile
       COMMON /GG2a/ DBYEAR,DEYEAR,IFIR
       COMMON /GG2b/ ddstrctt,ddindex,iddrec
       COMMON /GG2c/ ddstruct,imissflg,TRIGHTS
@@ -410,34 +410,34 @@ c grb 06-29-00 add admfile and dddfile
       common /gg2h/ wsid,divsup,ddrfile,penfile,vapfile
       common /gg2i/ tmxfile,tmnfile,pdyfile,solfile,wndfile
       common /gg2j/ dlyfile,ipyfile,pvhfile,clifile,dlafile
-c  grb add soil mositure priority and presimulation variables as well as ending soil moisture values
+!  grb add soil mositure priority and presimulation variables as well as ending soil moisture values
       common /gg2k/ ipresim,iprtysm,iagg,ipdy,imiss2
       common /gg2l/ endsoils,endsoilj,endsoilo
-c grb 05-20-00 add variable missflag and ktsw to common
+! grb 05-20-00 add variable missflag and ktsw to common
       common /gg2m/ missflag,missflg1,ktsw,missiwr,missdiv
-c ew 03/12/2004 add variables to Consider drain/tailwater supply
+! ew 03/12/2004 add variables to Consider drain/tailwater supply
       common /gg2n/ idrain,drafile
-c
-c ew added common block g12 for variables that used to be written to tmp files
-c     variables are the same for Blanney Criddle and Penman-Montieth since methods
-c     are not used simultaneously
-c
+!
+! ew added common block g12 for variables that used to be written to tmp files
+!     variables are the same for Blanney Criddle and Penman-Montieth since methods
+!     are not used simultaneously
+!
       COMMON /G12/REQT,DEPLET,ESTCRPT,ETTOT,EFFPPT,GWP
-c
-c ew added common block for supply limit variables, diversions and water rights
-c
+!
+! ew added common block for supply limit variables, diversions and water rights
+!
       COMMON /G14/AWCR,ADMINENT,APER,DPER,RETN,SCAPATOT,EFF,
      !      NAMEASP,PSENMO,PJUNMO,POTHMO,SENASP,JUNASP
-C
-C ew added common block to separate "other" use variables from variables used
-c    in blaney criddle estimated
-c    
+!
+! ew added common block to separate "other" use variables from variables used
+!    in blaney criddle estimated
+!    
       COMMON /G15/ NHUC,OCOUNT,OHUC,TTHUC,TTCOUNT,ONYR1,ONYR2,
      !             ONYRS,N_WTS,TTID,TTWWS,TTWRS,OWWS,OWRS,TMPT,TMPR
-cjhb
-cjhb  added common block for deficit irrigation parameters
+!jhb
+!jhb  added common block for deficit irrigation parameters
       COMMON /G16/ def_irr, def_irr_frac
-cjhb  added common block for all the sub-basin or district totals
+!jhb  added common block for all the sub-basin or district totals
       COMMON /SUBBASIN/ sbcount, sbstrcnt, sbsb, sbtarea, sbmarea,
      &            sbettot, sbeffppt, sbreqt,
      &            sbwbu, sbwbused, sbreqreq,
@@ -506,8 +506,8 @@ cjhb  added common block for all the sub-basin or district totals
       COMMON /TAB11/ AREA
       COMMON /TAB11a/ PJAREA
       COMMON /TAB15/ INCH, SOUT
-c
-c rrb 2003/06/20; Allow multiple subirrigation crops
+!
+! rrb 2003/06/20; Allow multiple subirrigation crops
       common /subirr/ subname
       REAL FT_M
       PARAMETER (FT_M = 0.304878)

@@ -603,7 +603,7 @@
           select case (scu_debug)
           case (0)
           case (1)
-            write(999,2011)itmp1,twdid
+            write(999,2011)itmp1,tspid
           case default
           end select
         endif
@@ -4992,11 +4992,15 @@
 !jhb              ------------------------------------------------------
 !                  gfdiv(m,l)=mprate(i,m,l)
 !                  gfdiv(m,l)=max(gfdiv(m,l),0.)
-                  gsdiv(m,l)=0
+                  gsdiv(m,l)=0.
 !jhb              ------------------------------------------------------
-                  smre_eff=(swgwflac(i,m)*fleff(i,m)+
-     &                      swgwspac(i,m)*speff(i,m))/
-     &                     (swgwflac(i,m)+swgwspac(i,m))
+                  if((swgwflac(i,m)+swgwspac(i,m)).eq.0.)then
+                    smre_eff=fleff(i,m)+speff(i,m))/2.0
+                  else
+                    smre_eff=(swgwflac(i,m)*fleff(i,m)+
+     &                        swgwspac(i,m)*speff(i,m))/
+     &                       (swgwflac(i,m)+swgwspac(i,m))
+                  endif
                   gw2sm=min(mprate(i,m,l),smspc/smre_eff)
                   gfdiv(m,l) = max(mprate(i,m,l)-gw2sm,0.0)
                   gwholds1=gw2sm*smre_eff
