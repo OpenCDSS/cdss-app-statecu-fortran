@@ -5657,7 +5657,7 @@
      &            reqreq(m,l)*0.0-sscu-sshold,                          !total shortage on sw sp
      &            reqreq(m,l)*0.0-gfcu-gfhold-gwcuf,                    !total shortage on gw fl
      &            reqreq(m,l)*0.0-gscu-gshold-gwcus,                    !total shortage on gw sp
-     &            reqreq(m,l)-holdt-holdcrop-gwcu(m,l),                 !total shortage
+     &            reqreq(m,l)-holdt-holdcrop-gwcuf-gwcus,               !total shortage
      &            holds1+gwcusm,holdj1,holdo1,holdt1+gwcusm             !total to s.m.
                 else
 !                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.1,4F8.1,32X,5F8.1,9F8.1,16X,3F8.1,16X,3F8.1,16X,3F8.1,5F8.1,5F8.1)')
@@ -5721,7 +5721,7 @@
      &            reqreq(m,l)*swspac(i,m)/t_area(i,m)-sscu-sshold,      !total shortage on sw sp
      &          reqreq(m,l)*swgwflac(i,m)/t_area(i,m)-gfcu-gfhold-gwcuf,!total shortage on gw fl
      &          reqreq(m,l)*swgwspac(i,m)/t_area(i,m)-gscu-gshold-gwcus,!total shortage on gw sp
-     &            reqreq(m,l)-holdt-holdcrop-gwcu(m,l),                 !total shortage
+     &            reqreq(m,l)-holdt-holdcrop-gwcuf-gwcus,               !total shortage
      &            holds1+gwcusm,holdj1,holdo1,holdt1+gwcusm             !total to s.m.
                 endif
                 endif
