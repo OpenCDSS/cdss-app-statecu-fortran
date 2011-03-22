@@ -5072,9 +5072,13 @@
                   gfdiv(m,l) = max(min(mprate(i,m,l)-gsdiv(m,l),
      &                             gfreq(m,l)/fleff(i,m)),0.0)
                   mprate_x=max(mprate(i,m,l)-gsdiv(m,l)-gfdiv(m,l),0.0)
-                  smre_eff=(swgwflac(i,m)*fleff(i,m)+
+                  if((swgwflac(i,m)+swgwspac(i,m)).eq.0.)then
+                    smre_eff=(fleff(i,m)+speff(i,m))/2.0
+                  else
+                    smre_eff=(swgwflac(i,m)*fleff(i,m)+
      &                      swgwspac(i,m)*speff(i,m))/
      &                     (swgwflac(i,m)+swgwspac(i,m))
+                  endif
                   gw2sm=min(mprate_x,smspc/smre_eff)
                   gfdiv(m,l) = gfdiv(m,l)+
      &                         max(mprate_x-gw2sm,0.0)
@@ -5260,8 +5264,8 @@
                 gwcuf=min(gwtempf,gfreq(m,l))
                 gwtemps=gsdiv(m,l)*speff(i,m)
                 gwcus=min(gwtemps,gsreq(m,l))
-!jhb          ----------------------------------------------------------
-!jhb          added the gw to sm component to the balance 
+!jhb            --------------------------------------------------------
+!jhb            added the gw to sm component to the balance
                 gwcusm=gwdivsm(m,l)*smre_eff
 !                gwcu(m,l)=gwcuf+gwcus
                 gwcu(m,l)=gwcuf+gwcus+gwcusm
