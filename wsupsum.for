@@ -3415,7 +3415,7 @@
               end select ! (ipresim)
 !jhb=&==================================================================
               soiltot = soiltotj + soiltots +soiltoto
-!             remember initial soil capacities 
+!             remember initial soil volumes
               senmo=soiltots
               junmo=soiltotj
               othmo=soiltoto
@@ -8192,6 +8192,7 @@
 !         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    |  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |Shortage|   IWR  | Acreage|   IWR  | Acreage| Diver- |                                            
 !         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|        |        |        |        |        |  sion  |                                            
 !         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
+!         "Yearly Totals" variables
 !        nyr1+m-1  method  ettot(i,m,13)        reqt(i,m,13)         reqreqts(m,13)         ceff(i,m)       fdiv(m,13)       sfeff(i,m)      soil_cu(m,13)         effcu(m,13)  gdiv(m,13)      gwcu(m,13) gwro(m,13)             cutot                 cust   tdp(m,13) gsdiv(m,13)         short         grass(i,m,13,2)  grass(i,m,13,4)
 !                                   effppt(i,m,13)         wbu(i,m,12)          divsup(i,m,13)    closs(m,13)        arech(m,13)   crop_cut(m,13)       ulagt(m,13)                     effgw(m,13)                soiltott(m,12)       cropcusoil(m,13)                          gfdiv(m,13)     grass(i,m,13,1)   grass(i,m,13,3)    tail(i,m,13)
 !         updated DWB 
@@ -8203,9 +8204,12 @@
 !         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |  Crop  |Soil Moist|  Non-  |Water Appl| Diversion |Applic|   Crop   |Soil Moist|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|   IWR  | Acreage| Diver- |                                            
 !         |     |          |           |       |           |         |           |           |     |       |          |       |      |   CU   |    CU    |Consumed|Effic (%) |           |Effic |    CU    |    CU    |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|Moisture|        |        |        |        |        |  sion  |                                            
 !         -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
-!        nyr1+m-1  method  ettot(i,m,13)        reqt(i,m,13)         reqreqts(m,13)         ceff(i,m)       fdiv(m,13)       sfeff(i,m)      soil_cu(m,13)         effcu(m,13)  gdiv(m,13)      gwcu(m,13)            gwro(m,13)             cutot                 cust   tdp(m,13) gsdiv(m,13)         ???????  short         grass(i,m,13,2)  grass(i,m,13,4)
+!         "Yearly Totals" variables
+!        nyr1+m-1  method  ettot(i,m,13)        reqt(i,m,13)         reqreqts(m,13)         ceff(i,m)       fdiv(m,13)       sfeff(i,m)      soil_cu(m,13)         effcu(m,13)  gdiv(m,13)      ?gwcu(m,13)?          gwro(m,13)             cutot                 cust   tdp(m,13) gsdiv(m,13)         ???????  short         grass(i,m,13,2)  grass(i,m,13,4)
 !                                   effppt(i,m,13)         wbu(i,m,12)          divsup(i,m,13)    closs(m,13)        arech(m,13)   crop_cut(m,13)       ulagt(m,13)                     effgw(m,13)         ??????????        soiltott(m,12)       cropcusoil(m,13)                          gfdiv(m,13)              grass(i,m,13,1)   grass(i,m,13,3)    tail(i,m,13)
-
+!         proposed variables
+!                                                                                                                                                                                               gwcu-gwcusm                                                                                            gwdivsm()
+!                                                                                                                                                                                                             gwcusm
           write(256,632) nyr1+m-1,method,ettot(i,m,13),effppt(i,m,13),
      :    reqt(i,m,13),wbu(i,m,12),reqreqts(m,13),
      :    divsup(i,m,13),ceff(i,m),closs(m,13),fdiv(m,13),arech(m,13),
