@@ -120,7 +120,7 @@
       REAL :: spcapz=0.,reqreq(DIM_NY,14),tspcapz=0.
       REAL :: effcu(DIM_NY,14),comeff(12)=0.,seffcu(DIM_NY,14)
       REAL :: sumeff=0.,sumseff=0.,sumeffcnt=0.,sumseffcnt=0.
-      REAL :: sumgwcu=0.
+      REAL :: sumgwcu=0.,sumgwcusm=0.
 	
 !-----Summary
       REAL :: percent(DIM_NY)=0.,holdcropo=0.
@@ -166,7 +166,8 @@
       REAL :: seniorf(DIM_NY,14),juniorf(DIM_NY,14)
       REAL :: otherf(DIM_NY,14)
       REAL :: gdiv(DIM_NY,14),gwcu(DIM_NY,14),gwro(DIM_NY,14)
-      REAL :: gwcuf,gwcus,gwcusm,gwrof,gwros
+      REAL :: gwcusm(DIM_NY,14)
+      REAL :: gwcuf,gwcus,gwrof,gwros
       REAL :: tdp(DIM_NY,14),closs(DIM_NY,14),fdiv(DIM_NY,14)
       REAL :: tmp1=0.,tmp2=0.
 !     farm deliveries from surface sources
@@ -279,6 +280,7 @@
       REAL :: tsenf(DIM_NY,14),tjunf(DIM_NY,14)
       REAL :: tothf(DIM_NY,14),tgdiv(DIM_NY,14)
       REAL :: tgwcu(DIM_NY,14),tgwro(DIM_NY,14)
+      REAL :: tgwcusm(DIM_NY,14)
       REAL :: ttdp(DIM_NY,14),tcloss(DIM_NY,14)
       REAL :: tfdiv(DIM_NY,14),tgwdiv(DIM_NY,14)
       REAL :: tgsdiv(DIM_NY,14),tgfdiv(DIM_NY,14)
@@ -408,6 +410,7 @@
           otherf(j,k)=0.
           gdiv(j,k)=0.
           gwcu(j,k)=0.
+          gwcusm(j,k)=0.
           gwro(j,k)=0.
           tdp(j,k)=0.
           closs(j,k)=0.
@@ -466,6 +469,7 @@
           tothf(j,k)=0.
           tgdiv(j,k)=0.
           tgwcu(j,k)=0.
+          tgwcusm(j,k)=0.
           tgwro(j,k)=0.
           ttdp(j,k)=0.
           tcloss(j,k)=0.
@@ -2728,7 +2732,7 @@
 !     the internal StateCU variables:
 !     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|---------------------------------------|---------------------------------------|-------------------------------|
 !     nyr1| l |swflac |swspac | swgwfl| swgwsp| t_area| ettot | ettot | ettot | ettot | ettot |effppt |effppt |effppt |effppt |effppt | reqt  | reqt  | reqt  | reqt  | reqt  |wbused |wbused |wbused |wbused |wbused |reqreq |reqreq |reqreq |reqreq |reqreq | holdps| holdpj| holdpo| divsup| holdps| holdpj| holdpo| divsup|  tail |sfshare|ssshare|gfshare|gsshare| arech | fdiv  | holdfs| holdfj| holdfo|  tail |  fdiv | sfcu  | sscu  | gfcu  | gscu  | holdt | holds | holdj | holdo | holdt | holds1| holds1| holdo1| holdt1| pojsm | poosm |poosmbj|  sum  | ulags | ulagj | ulago | ulagt | sfhold| sshold| gfhold| gshold|holdcrp|  hold |  hold |  hold |holdcrp| gfdiv | gsdiv |gwdivsm| gdiv  | mprate| gwcuf | gwcus | gwcusm|  gwcu | gwrof | gwros | gwrosm|  gwro | sfcu+ | sscu+ | gfcu+ | gscu+ | holdt+|reqreq*|reqreq*|reqreq*|reqreq*|reqreq-|       |       |       |       |
-!     +m-1|   |(i,m)  |(i,m)  |ac(i,m)|ac(i,m)| (i,m) |*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% | (m,l) |       |       |       |(i,m,l)| *ceff | *ceff | *ceff | *ceff |(i,m,l)|       |       |       |       | (m,l) | (m,l) |       |       |       |(i,m,l)| (m,l) |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |-canal |-canal |-canal |       |       |       |       |       |       |  crps |  crpj |  crpo |       |       |       |       |       |       |       |       |       | (m,l) |       |       |       | (m,l) | sfhold| sshold| gfhold| gshold|holdcrop sf% - | ss% - | gf% - | gs% - |       |       |       |       |       |
+!     +m-1|   |(i,m)  |(i,m)  |ac(i,m)|ac(i,m)| (i,m) |*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% |(i,m,l)|*swfl% |*swsp% |*gwfl% |*gwsp% | (m,l) |       |       |       |(i,m,l)| *ceff | *ceff | *ceff | *ceff |(i,m,l)|       |       |       |       | (m,l) | (m,l) |       |       |       |(i,m,l)| (m,l) |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |-canal |-canal |-canal |       |       |       |       |       |       |  crps |  crpj |  crpo |       |       |       |       |       |       |       |       | (m,l) | (m,l) |       |       |       | (m,l) | sfhold| sshold| gfhold| gshold|holdcrop sf% - | ss% - | gf% - | gs% - |       |       |       |       |       |
 !         |   |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       | +tail |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       |       | +gwcuf| +gscus|+gwcu()|sumsfcu|sumsscu|sumgfcu|sumgscu|       |       |       |       |       |
 !     ----|---|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------|-----------------------------------------------|---------------------------------------|---------------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|---------------------------------------|-------------------------------|---------------------------------------|-------------------------------|-------------------------------|---------------------------------------|---------------------------------------|-------------------------------|
         write(413,'(a865)')
@@ -2895,7 +2899,7 @@
      &   |       |       |       |       |       |       |       |      
      & |       |       |-canal |-canal |-canal |       |       |       |
      &       |       |       |  crps |  crpj |  crpo |       |       |  
-     &     |       |       |       |       |       |       | (m,l) |    
+     &     |       |       |       |       |       | (m,l) | (m,l) |    
      &   |       |       | (m,l) | sfhold| sshold| gfhold| gshold|holdcr
      &op sf% - | ss% - | gf% - | gs% - |       |       |       |       |
      &       |"
@@ -3027,6 +3031,7 @@
           tgsdiv(m,j)=0
           tgfdiv(m,j)=0
           tgwcu(m,j)=0
+          tgwcusm(m,j)=0
           tgwro(m,j)=0
           tfdiv(m,j)=0
           ttdp(m,j)=0
@@ -3261,6 +3266,7 @@
             gsdiv(j,k)=0
             gfdiv(j,k)=0
             gwcu(j,k)=0
+            gwcusm(j,k)=0
             gwro(j,k)=0
             fdiv(j,k)=0
             tdp(j,k)=0
@@ -3473,6 +3479,7 @@
               gsdiv(m,l) = -999
               gfdiv(m,l) = -999
               gwcu(m,l) = -999
+              gwcusm(m,l) = -999
               gwro(m,l) = -999
               tdp(m,l) = -999
               ettot(i,m,l) = -999
@@ -5266,9 +5273,9 @@
                 gwcus=min(gwtemps,gsreq(m,l))
 !jhb            --------------------------------------------------------
 !jhb            added the gw to sm component to the balance
-                gwcusm=gwdivsm(m,l)*smre_eff
+                gwcusm(m,l)=gwdivsm(m,l)*smre_eff
 !                gwcu(m,l)=gwcuf+gwcus
-                gwcu(m,l)=gwcuf+gwcus+gwcusm
+                gwcu(m,l)=gwcuf+gwcus+gwcusm(m,l)
                 if(gwcu(m,l) .lt. 1.) gwcu(m,l)=0.
               else
 !jhb            --------------------------------------------------------
@@ -5281,14 +5288,16 @@
                 gwcus=min(gwtemps,gsreq(m,l))
 !jhb          ----------------------------------------------------------
 !jhb          added the gw to sm component to the balance 
-                gwcusm=gwdivsm(m,l)*smre_eff
+                gwcusm(m,l)=gwdivsm(m,l)*smre_eff
 !                gwcu(m,l)=gwcuf+gwcus
-                gwcu(m,l)=gwcuf+gwcus+gwcusm
+                gwcu(m,l)=gwcuf+gwcus+gwcusm(m,l)
                 if(gwcu(m,l) .lt. 1.) gwcu(m,l)=0.
               endif
 !jhb          ----------------------------------------------------------
-              gwcu(m,13)    = gwcu(m,13)    + gwcu(m,l)
-              gwcu(nyrs1,l) = gwcu(nyrs1,l) + gwcu(m,l)
+              gwcu(m,13)      = gwcu(m,13)      + gwcu(m,l)
+              gwcu(nyrs1,l)   = gwcu(nyrs1,l)   + gwcu(m,l)
+              gwcusm(m,13)    = gwcusm(m,13)    + gwcusm(m,l)
+              gwcusm(nyrs1,l) = gwcusm(nyrs1,l) + gwcusm(m,l)
 !jhb          ----------------------------------------------------------
 !jhb          total gw pumping that did not go to CU on gw lands
 !jhb          ----------------------------------------------------------
@@ -5296,7 +5305,7 @@
               gwros         = gsdiv(m,l)    - gwcus
 !jhb          ----------------------------------------------------------
 !jhb          added the gw to sm component to the balance 
-              gwrosm        = gwdivsm(m,l)  - gwcusm
+              gwrosm        = gwdivsm(m,l)  - gwcusm(m,l)
               gwro(m,l)     = gwrof + gwros + gwrosm
               gwro(m,13)    = gwro(m,13)    + gwro(m,l)
               gwro(nyrs1,l) = gwro(nyrs1,l) + gwro(m,l)
@@ -5650,19 +5659,19 @@
      &            holdcrops,holdcropj,holdcropo,holdcrop,               !sm to cu
      &            gfdiv(m,l),gsdiv(m,l),gwdivsm(m,l),                   !gw pumping
      &            gdiv(m,l),mprate(i,m,l),                              !gw pumping
-     &            gwcuf,gwcus,gwcusm,gwcu(m,l),                         !gw pumping to cu
+     &            gwcuf,gwcus,gwcusm(m,l),gwcu(m,l),                    !gw pumping to cu
      &            gwrof,gwros,gwrosm,gwro(m,l),                         !unconsumed gw pumping
-     &            sfcu+sfhold,                                          !total cu on sw fl
-     &            sscu+sshold,                                          !total cu on sw sp
+     &            sfcu+sfhold,                                          !total crop cu on sw fl
+     &            sscu+sshold,                                          !total crop cu on sw sp
      &            gfcu+gfhold+gwcuf,                                    !total cu on gw fl
      &            gscu+gshold+gwcus,                                    !total cu on gw sp
-     &            holdt+holdcrop+gwcu(m,l),                             !total cu
+     &            holdt+holdcrop+gwcuf+gwcus,                           !total crop cu
      &            reqreq(m,l)*0.0-sfcu-sfhold,                          !total shortage on sw fl
      &            reqreq(m,l)*0.0-sscu-sshold,                          !total shortage on sw sp
      &            reqreq(m,l)*0.0-gfcu-gfhold-gwcuf,                    !total shortage on gw fl
      &            reqreq(m,l)*0.0-gscu-gshold-gwcus,                    !total shortage on gw sp
      &            reqreq(m,l)-holdt-holdcrop-gwcuf-gwcus,               !total shortage
-     &            holds1+gwcusm,holdj1,holdo1,holdt1+gwcusm             !total to s.m.
+     &            holds1+gwcusm(m,l),holdj1,holdo1,holdt1+gwcusm(m,l)   !total to s.m.
                 else
 !                  write(413,'(2I4,5F8.1,5F8.1,5F8.1,5F8.1,10F8.1,9F8.1,32X,5F8.1,4F8.1,32X,5F8.1,9F8.1,16X,3F8.1,16X,3F8.1,16X,3F8.1,5F8.1,5F8.1)')
                   write(413,'(I4,1X,I3,107F8.1)')
@@ -5714,19 +5723,19 @@
      &            holdcrops,holdcropj,holdcropo,holdcrop,               !sm to cu
      &            gfdiv(m,l),gsdiv(m,l),gwdivsm(m,l),                   !gw pumping
      &            gdiv(m,l),mprate(i,m,l),                              !gw pumping
-     &            gwcuf,gwcus,gwcusm,gwcu(m,l),                         !gw pumping to cu
+     &            gwcuf,gwcus,gwcusm(m,l),gwcu(m,l),                    !gw pumping to cu
      &            gwrof,gwros,gwrosm,gwro(m,l),                         !unconsumed gw pumping
-     &            sfcu+sfhold,                                          !total cu on sw fl
-     &            sscu+sshold,                                          !total cu on sw sp
-     &            gfcu+gfhold+gwcuf,                                    !total cu on gw fl
-     &            gscu+gshold+gwcus,                                    !total cu on gw sp
-     &            holdt+holdcrop+gwcu(m,l),                             !total cu
+     &            sfcu+sfhold,                                          !total crop cu on sw fl
+     &            sscu+sshold,                                          !total crop cu on sw sp
+     &            gfcu+gfhold+gwcuf,                                    !total crop cu on gw fl
+     &            gscu+gshold+gwcus,                                    !total crop cu on gw sp
+     &            holdt+holdcrop+gwcuf+gwcus,                           !total crop cu
      &            reqreq(m,l)*swflac(i,m)/t_area(i,m)-sfcu-sfhold,      !total shortage on sw fl
      &            reqreq(m,l)*swspac(i,m)/t_area(i,m)-sscu-sshold,      !total shortage on sw sp
      &          reqreq(m,l)*swgwflac(i,m)/t_area(i,m)-gfcu-gfhold-gwcuf,!total shortage on gw fl
      &          reqreq(m,l)*swgwspac(i,m)/t_area(i,m)-gscu-gshold-gwcus,!total shortage on gw sp
      &            reqreq(m,l)-holdt-holdcrop-gwcuf-gwcus,               !total shortage
-     &            holds1+gwcusm,holdj1,holdo1,holdt1+gwcusm             !total to s.m.
+     &            holds1+gwcusm(i,m),holdj1,holdo1,holdt1+gwcusm(i,m)   !total to s.m.
                 endif
                 endif
               endif
@@ -5859,6 +5868,7 @@
              gfdiv(m,13) = -999
              arech(m,13) = -999
              gwcu(m,13) = -999
+             gwcusm(m,13) = -999
              tdp(m,13) = -999
              crop_cus(m,13)= -999
              crop_cuj(m,13)= -999
@@ -5934,6 +5944,7 @@
              gfdiv(nyrs1,13)=gfdiv(nyrs1,13)+gfdiv(m,13)
              arech(nyrs1,13)=arech(nyrs1,13)+arech(m,13)
              gwcu(nyrs1,13)=gwcu(nyrs1,13)+gwcu(m,13)
+             gwcusm(nyrs1,13)=gwcusm(nyrs1,13)+gwcusm(m,13)
              tdp(nyrs1,13)=tdp(nyrs1,13)+tdp(m,13)
              crop_cus(nyrs1,13)=crop_cus(nyrs1,13)+crop_cus(m,13)
              crop_cuj(nyrs1,13)=crop_cuj(nyrs1,13)+crop_cuj(m,13)
@@ -6003,6 +6014,7 @@
              gfdiv(nyrs1,13)=gfdiv(nyrs1,13)/iyct
              arech(nyrs1,13)=arech(nyrs1,13)/iyct
              gwcu(nyrs1,13)=gwcu(nyrs1,13)/iyct
+             gwcusm(nyrs1,13)=gwcusm(nyrs1,13)/iyct
              tdp(nyrs1,13)=tdp(nyrs1,13)/iyct
              crop_cus(nyrs1,13)=crop_cus(nyrs1,13)/iyct
              crop_cuj(nyrs1,13)=crop_cuj(nyrs1,13)/iyct
@@ -6089,6 +6101,7 @@
              gfdiv(nyrs1,13)= -999
              arech(nyrs1,13)= -999
              gwcu(nyrs1,13)= -999
+             gwcusm(nyrs1,13)= -999
              tdp(nyrs1,13)= -999
              crop_cus(nyrs1,13)= -999
              crop_cuj(nyrs1,13)= -999
@@ -6163,6 +6176,7 @@
              gfdiv(nyrs1,l)=gfdiv(nyrs1,l)/imonth(l)
              arech(nyrs1,l)=arech(nyrs1,l)/imonth(l)
              gwcu(nyrs1,l)=gwcu(nyrs1,l)/imonth(l)
+             gwcusm(nyrs1,l)=gwcusm(nyrs1,l)/imonth(l)
              tdp(nyrs1,l)=tdp(nyrs1,l)/imonth(l)
              crop_cus(nyrs1,l)=crop_cus(nyrs1,l)/imonth(l)
              crop_cuj(nyrs1,l)=crop_cuj(nyrs1,l)/imonth(l)
@@ -6298,6 +6312,7 @@
              gfdiv(nyrs1,l)= -999
              arech(nyrs1,l)= -999
              gwcu(nyrs1,l)= -999
+             gwcusm(nyrs1,l)= -999
              tdp(nyrs1,l)= -999
              crop_cus(nyrs1,l)= -999
              crop_cuj(nyrs1,l)= -999
@@ -8721,6 +8736,12 @@
                     bgwcu(m,l)=
      &                bgwcu(m,l)+gwcu(m,l)
                   endif
+                  if(gwcusm(m,l).gt.-999.0)then
+                    sbgwcusm(sbsb(i),m,l)=
+     &                sbgwcusm(sbsb(i),m,l)+gwcusm(m,l)
+                    bgwcusm(m,l)=
+     &                bgwcusm(m,l)+gwcusm(m,l)
+                  endif
                   if(gwro(m,l).gt.-999.0)then
                     sbgwro(sbsb(i),m,l)=
      &                sbgwro(sbsb(i),m,l)+gwro(m,l)
@@ -9076,6 +9097,12 @@
                     bgwcu(m,l)=
      &                bgwcu(m,l)+gwcu(m,l)
                   endif
+                  if(gwcusm(m,l).gt.-999.0)then
+                    sbgwcusm(sbsb(i),m,l)=
+     &                sbgwcusm(sbsb(i),m,l)+gwcusm(m,l)
+                    bgwcusm(m,l)=
+     &                bgwcusm(m,l)+gwcusm(m,l)
+                  endif
                   if(gwro(m,l).gt.-999.0)then
                     sbgwro(sbsb(i),m,l)=
      &                sbgwro(sbsb(i),m,l)+gwro(m,l)
@@ -9195,6 +9222,7 @@
           gfdiv(m,14)=gfdiv(m,14)+gfdiv(m,13)
           arech(m,14)=arech(m,14)+arech(m,13)
           gwcu(m,14)=gwcu(m,14)+gwcu(m,13)
+          gwcusm(m,14)=gwcusm(m,14)+gwcusm(m,13)
           tdp(m,14)=tdp(m,14)+tdp(m,13)
           crop_cus(m,14) = crop_cus(m,14)+crop_cus(m,13)
           crop_cuj(m,14) = crop_cuj(m,14)+crop_cuj(m,13)
@@ -9270,6 +9298,7 @@
              gfdiv(nyrs2,l)=gfdiv(nyrs2,l)+gfdiv(nyrs1,l)
              arech(nyrs2,l)=arech(nyrs2,l)+arech(nyrs1,l)
              gwcu(nyrs2,l)=gwcu(nyrs2,l)+gwcu(nyrs1,l)
+             gwcusm(nyrs2,l)=gwcusm(nyrs2,l)+gwcusm(nyrs1,l)
              tdp(nyrs2,l)=tdp(nyrs2,l)+tdp(nyrs1,l)
              ddhmonot(nyrs2,l)=ddhmonot(nyrs2,l)+ddhmonot(nyrs1,l)
              crop_cus(nyrs2,l)=crop_cus(nyrs2,l)+crop_cus(nyrs1,l)
@@ -9336,6 +9365,7 @@
           tgfdiv(m,j)=tgfdiv(m,j)+gfdiv(m,j)
           tarech(m,j)=tarech(m,j)+arech(m,j)
           tgwcu(m,j)=tgwcu(m,j)+gwcu(m,j)
+          tgwcusm(m,j)=tgwcusm(m,j)+gwcusm(m,j)
           tgwro(m,j)=tgwro(m,j)+gwro(m,j)
           tfdiv(m,j)=tfdiv(m,j)+fdiv(m,j)
           ttdp(m,j)=ttdp(m,j)+tdp(m,j)

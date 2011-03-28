@@ -295,6 +295,7 @@
       real::sbdivcuo(0:dim_nsb,dim_ny,12),sbdivcu(0:dim_nsb,dim_ny,12)
       real :: sbgdiv(0:dim_nsb,dim_ny,12)
       real :: sbgwcu(0:dim_nsb,dim_ny,12)
+      real :: sbgwcusm(0:dim_nsb,dim_ny,12)
       real :: sbeffgw(0:dim_nsb,dim_ny,12)
       real :: sbgwro(0:dim_nsb,dim_ny,12)
       real :: sbcutot(0:dim_nsb,dim_ny,12)
@@ -348,6 +349,7 @@
       real :: bdivcuo(dim_ny,12),bdivcu(dim_ny,12)
       real :: bgdiv(dim_ny,12)
       real :: bgwcu(dim_ny,12)
+      real :: bgwcusm(dim_ny,12)
       real :: beffgw(dim_ny,12)
       real :: bgwro(dim_ny,12)
       real :: bcutot(dim_ny,12)
@@ -450,7 +452,7 @@
      &            sbcropcusoil,
      &            sbestcrps,sbestcrpj,sbestcrpo,sbestcrpt,
      &            sbdivcus,sbdivcuj,sbdivcuo,sbdivcu,
-     &            sbgdiv,sbgwcu,sbeffgw,sbgwro,
+     &            sbgdiv,sbgwcu,sbgwcusm,sbeffgw,sbgwro,
      &            sbgsdiv, sbgfdiv,
      &            sbcutot, sbcustot, sbtdp,
      &            sbulags,sbulagj,sbulago,sbulagt,
@@ -471,7 +473,7 @@
      &            bcropcusoil,
      &            bestcrps,bestcrpj,bestcrpo,bestcrpt,
      &            bdivcus,bdivcuj,bdivcuo,bdivcu,
-     &            bgdiv,bgwcu,beffgw,bgwro,
+     &            bgdiv,bgwcu,bgwcusm,beffgw,bgwro,
      &            bgsdiv, bgfdiv,
      &            bcutot, bcustot, btdp,
      &            bulags,bulagj,bulago,bulagt,
