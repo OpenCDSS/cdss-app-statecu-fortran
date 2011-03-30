@@ -8163,6 +8163,126 @@
 ***********************************************************************
 *  Report Form for ISUPLY = 4 - Supply Limited, ground water considered
 ***********************************************************************
+!         ==================================================================
+!         =  jhb March 2011                                                =
+!         =  the following changes ONLY apply to isuply=4 and iflood = 0   =
+!         ==================================================================
+!         =  original DWB                                  =
+!         ==================================================
+!         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |   Ground Water Diversion Accounting  |Delivered|       Estimated Crop CU       |          |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|--------------------------------------|  Soil   |-------------------------------|          |
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |   Diversion to    | Moisture|    From    |  From   |        |  Total   |
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    |  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |Consumed|         |  Diversion |         |        | Consumed |
+!         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!612     1x i4 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0      f9.0     f10.0      f13.0       f10.0     f9.0      f11.0
+!         xiiiixxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.
+!         ==================================================
+!         =  updated DWB                                   =
+!         ==================================================
+!         ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed |
+!         ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!612     1x i4 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0      f11.0      f9.0     f10.0      f13.0       f10.0     f9.0      f11.0
+!         xiiiixxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.
+!         ==================================================================
+!         =  jhb March 2011                                                =
+!         =  the following changes ONLY apply to isuply=4 and iflood <> 0  =
+!         ==================================================================
+!         =  original DWB                                  =
+!         ==================================================
+!         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |   Ground Water Diversion Accounting  |Delivered|       Estimated Crop CU       |          |  Ground Water   |        |   SubIrrigated  |   SubIrrigated  | Tail-  |                                            
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|--------------------------------------|  Soil   |-------------------------------|          |-----------------|        |      Crop 1     |      Crop 2     | Water  |                                            
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |   Diversion to    | Moisture|    From    |  From   |        |  Total   |  Diversion To   |        |                 |                 |        |                                            
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |-------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |-----------------| Total  |-----------------|-----------------|--------|                                            
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    |  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |Shortage|   IWR  | Acreage|   IWR  | Acreage| Diver- |                                            
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|        |        |        |        |        |  sion  |                                            
+!         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
+!         ==================================================
+!         =  "Yearly Totals" variables                     =
+!         ==================================================
+!632     1x i4 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0      f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xiiiixxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!        nyr1+m-1  method  ettot(i,m,13)        reqt(i,m,13)         reqreqts(m,13)         ceff(i,m)       fdiv(m,13)       sfeff(i,m)      soil_cu(m,13)         effcu(m,13)  gdiv(m,13)      gwcu(m,13) gwro(m,13)             cutot                 cust   tdp(m,13) gsdiv(m,13)         short         grass(i,m,13,2)  grass(i,m,13,4)
+!                                   effppt(i,m,13)         wbu(i,m,12)          divsup(i,m,13)    closs(m,13)        arech(m,13)     crop_cut(m,13)     ulagt(m,13)                     effgw(m,13)                soiltott(m,12)       cropcusoil(m,13)                          gfdiv(m,13)     grass(i,m,13,1)   grass(i,m,13,3)    tail(i,m,13)
+!         ==================================================
+!         =  "Average All Years" variables                 =
+!         ==================================================
+!634    2x'Ave'2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0      f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xxAvexxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!                  method  ettot(i,nyrs1,13)    reqt(i,nyrs1,13)     reqreqts(nyrs1,13)     ceff(i,nyrs1)   fdiv(nyrs1,13)   sfeff(i,nyrs1)  soil_cu(nyrs1,13)   effcu(nyrs1,13)        effgw(nyrs1,13)    gwro(nyrs1,13)        cutot  cropcusoil(nyrs1,13)   tdp(nyrs1,13)      gfdiv(nyrs1,13) grass(i,nyrs1,13,1) grass(i,nyrs1,13,3) tail(i,nyrs1,13)
+!                                   effppt(i,nyrs1,13) wbu(i,nyrs1,13)/nyrs/12 divsup(i,nyrs1,13) closs(nyrs1,13)    arech(nyrs1,13) crop_cut(nyrs1,13) ulagt(nyrs1,13)      gdiv(nyrs1,13)     gwcu(nyrs1,13)   soiltott(nyrs1,13)/nyrs/12             cust             gsdiv(nyrs1,13)     short         grass(i,nyrs1,13,2) grass(i,nyrs1,13,4)
+!         ==================================================
+!         =  "Monthly Average All Years" variables         =
+!         ==================================================
+!630     2x a3 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0      f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xxaaaxxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!          amn(l)  method  ettot(i,nyrs1,l)     reqt(i,nyrs1,l)      reqreqts(nyrs1,l)      ceff(i,nyrs1)   fdiv(nyrs1,l)    sfeff(i,nyrs1)  soil_cu(nyrs1,l)    effcu(nyrs1,l)         effgw(nyrs1,l)     gwro(nyrs1,l)         cutot  cropcusoil(nyrs1,l)    tdp(nyrs1,l)       gfdiv(nyrs1,l)  grass(i,nyrs1,l,1) grass(i,nyrs1,l,3) tail(i,nyrs1,l)
+!                                   effppt(i,nyrs1,l)  wbu(i,nyrs1,l)           divsup(i,nyrs1,l) closs(nyrs1,l)     arech(nyrs1,l)  crop_cut(nyrs1,l)  ulagt(nyrs1,l)       gdiv(nyrs1,l)      gwcu(nyrs1,l)    soiltott(nyrs1,l)                      cust             gsdiv(nyrs1,l)      short         grass(i,nyrs1,l,2) grass(i,nyrs1,l,4)
+!         ==================================================
+!         =  "Monthly Values" variables                    =
+!         ==================================================
+!631     2x a3 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0      f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xxaaaxxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!         amn(l)   method  ettot(i,m,l)         reqt(i,m,l)          reqreqts(m,l)          ceff(i,m)       fdiv(m,l)        sfeff(i,m)      soil_cu(m,l)          effcu(m,l)   gdiv(m,l)       gwcu(m,l)  gwro(m,l)              cutot            custot(i,m,l)         gsdiv(m,l)          short         grass(i,m,l,2)   grass(i,m,l,4)
+!                                   effppt(i,m,l)           wbu(i,m,l)          ddhmonot(m,l)     closs(m,l)         arech(m,l)    crop_cut(m,l)        ulagt(m,l)                      effgw(m,l)                 soiltott(m,l)        cropcusoil(m,l)        tdp(m,l)           gfdiv(m,l)      grass(i,m,l,1)    grass(i,m,l,3)     tail(i,m,l)
+!
+!         ==================================================
+!         =  updated DWB                                   =
+!         ==================================================
+!         -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |       Ground Water       |        |   SubIrrigated  |   SubIrrigated  | Tail-  |                                            
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |--------------------------|        |      Crop 1     |      Crop 2     | Water  |                                            
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |       Diversion To       |        |                 |                 |        |                                            
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |--------------------------| Total  |-----------------|-----------------|--------|                                            
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|   IWR  | Acreage| Diver- |                                            
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|  Zone  |        |        |        |        |        |  sion  |                                            
+!         -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
+!         ==================================================
+!         =  "Yearly Totals" variables                     =
+!         ==================================================
+!632     1x i4 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0       f11.0     f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xiiiixxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!        nyr1+m-1  method  ettot(i,m,13)        reqt(i,m,13)         reqreqts(m,13)         ceff(i,m)       fdiv(m,13)       sfeff(i,m)      soil_cu(m,13)         effcu(m,13)  gdiv(m,13)     ?gwcu(m,13)?           gwro(m,13)             cutot                 cust   tdp(m,13) gsdiv(m,13)       ????????   short         grass(i,m,13,2)  grass(i,m,13,4)
+!                                   effppt(i,m,13)         wbu(i,m,12)          divsup(i,m,13)    closs(m,13)        arech(m,13)     crop_cut(m,13)     ulagt(m,13)                     effgw(m,13)        ??????????         soiltott(m,12)       cropcusoil(m,13)                          gfdiv(m,13)              grass(i,m,13,1)   grass(i,m,13,3)    tail(i,m,13)
+!                                                                                                                                                                                             gwcu()-gwcusm()                                                                                         gwdivsm()
+!                                                                                                                                                                                                           gwcusm()
+!         ==================================================
+!         =  "Average All Years" variables                 =
+!         ==================================================
+!634    2x'Ave'2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0       f11.0     f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xxAvexxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!                  method  ettot(i,nyrs1,13)    reqt(i,nyrs1,13)     reqreqts(nyrs1,13)     ceff(i,nyrs1)   fdiv(nyrs1,13)   sfeff(i,nyrs1)  soil_cu(nyrs1,13)   effcu(nyrs1,13)        effgw(nyrs1,13)    ?????????? gwro(nyrs1,13)        cutot  cropcusoil(nyrs1,13)   tdp(nyrs1,13)      gfdiv(nyrs1,13)          grass(i,nyrs1,13,1) grass(i,nyrs1,13,3) tail(i,nyrs1,13)
+!                                   effppt(i,nyrs1,13) wbu(i,nyrs1,13)/nyrs/12 divsup(i,nyrs1,13) closs(nyrs1,13)    arech(nyrs1,13) crop_cut(nyrs1,13) ulagt(nyrs1,13)      gdiv(nyrs1,13)    ?gwcu(nyrs1,13)?             soiltott(nyrs1,13)/nyrs/12             cust             gsdiv(nyrs1,13)   ????????   short         grass(i,nyrs1,13,2) grass(i,nyrs1,13,4)
+!                                                                                                                                                                                             gwcu()-gwcusm()                                                                                         gwdivsm()
+!                                                                                                                                                                                                           gwcusm()
+!         ==================================================
+!         =  "Monthly Average All Years" variables         =
+!         ==================================================
+!630     2x a3 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0       f11.0     f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xxaaaxxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!          amn(l)  method  ettot(i,nyrs1,l)     reqt(i,nyrs1,l)      reqreqts(nyrs1,l)      ceff(i,nyrs1)   fdiv(nyrs1,l)    sfeff(i,nyrs1)  soil_cu(nyrs1,l)    effcu(nyrs1,l)         effgw(nyrs1,l)     ?????????? gwro(nyrs1,l)         cutot  cropcusoil(nyrs1,l)    tdp(nyrs1,l)       gfdiv(nyrs1,l)           grass(i,nyrs1,l,1) grass(i,nyrs1,l,3) tail(i,nyrs1,l)
+!                                   effppt(i,nyrs1,l)  wbu(i,nyrs1,l)           divsup(i,nyrs1,l) closs(nyrs1,l)     arech(nyrs1,l)  crop_cut(nyrs1,l)  ulagt(nyrs1,l)       gdiv(nyrs1,l)     ?gwcu(nyrs1,l)?              soiltott(nyrs1,l)                      cust             gsdiv(nyrs1,l)    ????????   short         grass(i,nyrs1,l,2) grass(i,nyrs1,l,4)
+!                                                                                                                                                                                             gwcu()-gwcusm()                                                                                         gwdivsm()
+!                                                                                                                                                                                                           gwcusm()
+!         ==================================================
+!         =  "Monthly Values" variables                    =
+!         ==================================================
+!631     2x a3 2x   a10   1x   f11.0  1x f7.0 1x   f11.0  1x  f9.0  1x   f11.0  1x   f11.0     f6.2  f8.0      f11.0    f8.0    f7.2    f9.0      f11.0    f9.0      f11.0      f12.0      f7.2    f11.0       f11.0     f9.0     f10.0      f13.0       f10.0     f9.0      f11.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0     f9.0  
+!         xxaaaxxaaaaaaaaaaxffffffffff.xffffff.xffffffffff.xffffffff.xffffffffff.xffffffffff.fffff.fffffff.ffffffffff.fffffff.ffff.00ffffffff.ffffffffff.ffffffff.ffffffffff.fffffffffff.ffff.00ffffffffff.ffffffffff.ffffffff.fffffffff.ffffffffffff.fffffffff.ffffffff.ffffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.ffffffff.
+!         amn(l)   method  ettot(i,m,l)         reqt(i,m,l)          reqreqts(m,l)          ceff(i,m)       fdiv(m,l)        sfeff(i,m)      soil_cu(m,l)          effcu(m,l)   gdiv(m,l)      ?gwcu(m,l)?            gwro(m,l)              cutot            custot(i,m,l)         gsdiv(m,l)        ????????   short         grass(i,m,l,2)   grass(i,m,l,4)
+!                                   effppt(i,m,l)           wbu(i,m,l)          ddhmonot(m,l)     closs(m,l)         arech(m,l)    crop_cut(m,l)        ulagt(m,l)                      effgw(m,l)         ??????????         soiltott(m,l)        cropcusoil(m,l)        tdp(m,l)           gfdiv(m,l)               grass(i,m,l,1)    grass(i,m,l,3)     tail(i,m,l)
+!                                                                                                                                                                                             gwcu()-gwcusm()                                                                                         gwdivsm()
+!                                                                                                                                                                                                           gwcusm()
+
+
       if (isuply .eq. 4) then
 !
 ! write totals for each year (for structure i)
@@ -8195,50 +8315,24 @@
      :    reqt(i,m,13),wbu(i,m,12),reqreqts(m,13),
      :    divsup(i,m,13),ceff(i,m),closs(m,13),fdiv(m,13),arech(m,13),
      :    sfeff(i,m),crop_cut(m,13),soil_cu(m,13),ulagt(m,13),
-     :    effcu(m,13),gdiv(m,13),effgw(m,13),gwcu(m,13),gwro(m,13),
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    effcu(m,13),gdiv(m,13),effgw(m,13),gwcu(m,13),gwro(m,13),
+     :    effcu(m,13),gdiv(m,13),effgw(m,13),gwcu(m,13)-gwcusm(m,13),
+     :    gwcusm(m,13),gwro(m,13),
      :    soiltott(m,12),cutot,cropcusoil(m,13),cust,tdp(m,13)
           else
-!         original DWB 
-!         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
-!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |   Ground Water Diversion Accounting  |Delivered|       Estimated Crop CU       |          |  Ground Water   |        |   SubIrrigated  |   SubIrrigated  | Tail-  |                                            
-!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|--------------------------------------|  Soil   |-------------------------------|          |-----------------|        |      Crop 1     |      Crop 2     | Water  |                                            
-!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |   Diversion to    | Moisture|    From    |  From   |        |  Total   |  Diversion To   |        |                 |                 |        |                                            
-!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |-------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |-----------------| Total  |-----------------|-----------------|--------|                                            
-!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    |  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |Shortage|   IWR  | Acreage|   IWR  | Acreage| Diver- |                                            
-!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|        |        |        |        |        |  sion  |                                            
-!         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
-!         "Yearly Totals" variables
-!        nyr1+m-1  method  ettot(i,m,13)        reqt(i,m,13)         reqreqts(m,13)         ceff(i,m)       fdiv(m,13)       sfeff(i,m)      soil_cu(m,13)         effcu(m,13)  gdiv(m,13)      gwcu(m,13) gwro(m,13)             cutot                 cust   tdp(m,13) gsdiv(m,13)         short         grass(i,m,13,2)  grass(i,m,13,4)
-!                                   effppt(i,m,13)         wbu(i,m,12)          divsup(i,m,13)    closs(m,13)        arech(m,13)   crop_cut(m,13)       ulagt(m,13)                     effgw(m,13)                soiltott(m,12)       cropcusoil(m,13)                          gfdiv(m,13)     grass(i,m,13,1)   grass(i,m,13,3)    tail(i,m,13)
-!         "Monthly Values" variables
-!         amn(l)   method  ettot(i,m,l)         reqt(i,m,l)          reqreqts(m,l)          ceff(i,m)       fdiv(m,l)        sfeff(i,m)      soil_cu(m,l)          effcu(m,l)   gdiv(m,l)       gwcu(m,l)  gwro(m,l)              cutot            custot(i,m,l)         gsdiv(m,l)          short         grass(i,m,l,2)   grass(i,m,l,4)
-!                                   effppt(i,m,l)           wbu(i,m,l)          ddhmonot(m,l)     closs(m,l)         arech(m,l)    crop_cut(m,l)        ulagt(m,l)                      effgw(m,l)                 soiltott(m,l)        cropcusoil(m,l)        tdp(m,l)           gfdiv(m,l)      grass(i,m,l,1)    grass(i,m,l,3)     tail(i,m,l)
-!
-!         updated DWB 
-!         -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
-!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |       Ground Water       |        |   SubIrrigated  |   SubIrrigated  | Tail-  |                                            
-!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |--------------------------|        |      Crop 1     |      Crop 2     | Water  |                                            
-!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |       Diversion To       |        |                 |                 |        |                                            
-!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |--------------------------| Total  |-----------------|-----------------|--------|                                            
-!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |  Crop  |Soil Moist|  Non-  |Water Appl| Diversion |Applic|   Crop   |Soil Moist|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|   IWR  | Acreage| Diver- |                                            
-!         |     |          |           |       |           |         |           |           |     |       |          |       |      |   CU   |    CU    |Consumed|Effic (%) |           |Effic |    CU    |    CU    |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|Moisture|        |        |        |        |        |  sion  |                                            
-!         -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                            
-!         "Yearly Totals" variables
-!        nyr1+m-1  method  ettot(i,m,13)        reqt(i,m,13)         reqreqts(m,13)         ceff(i,m)       fdiv(m,13)       sfeff(i,m)      soil_cu(m,13)         effcu(m,13)  gdiv(m,13)      ?gwcu(m,13)?          gwro(m,13)             cutot                 cust   tdp(m,13) gsdiv(m,13)         ???????  short         grass(i,m,13,2)  grass(i,m,13,4)
-!                                   effppt(i,m,13)         wbu(i,m,12)          divsup(i,m,13)    closs(m,13)        arech(m,13)   crop_cut(m,13)       ulagt(m,13)                     effgw(m,13)         ??????????        soiltott(m,12)       cropcusoil(m,13)                          gfdiv(m,13)              grass(i,m,13,1)   grass(i,m,13,3)    tail(i,m,13)
-!         "Monthly Values" variables
-!         amn(l)   method  ettot(i,m,l)         reqt(i,m,l)          reqreqts(m,l)          ceff(i,m)       fdiv(m,l)        sfeff(i,m)      soil_cu(m,l)          effcu(m,l)   gdiv(m,l)       ?gwcu(m,l)?           gwro(m,l)              cutot            custot(i,m,l)         gsdiv(m,l)          ???????  short         grass(i,m,l,2)   grass(i,m,l,4)
-!                                   effppt(i,m,l)           wbu(i,m,l)          ddhmonot(m,l)     closs(m,l)         arech(m,l)    crop_cut(m,l)        ulagt(m,l)                      effgw(m,l)          ??????????        soiltott(m,l)        cropcusoil(m,l)        tdp(m,l)           gfdiv(m,l)               grass(i,m,l,1)    grass(i,m,l,3)     tail(i,m,l)
-!         proposed variables
-!                                                                                                                                                                                               gwcu-gwcusm                                                                                            gwdivsm()
-!                                                                                                                                                                                                             gwcusm
           write(256,632) nyr1+m-1,method,ettot(i,m,13),effppt(i,m,13),
      :    reqt(i,m,13),wbu(i,m,12),reqreqts(m,13),
      :    divsup(i,m,13),ceff(i,m),closs(m,13),fdiv(m,13),arech(m,13),
      :    sfeff(i,m),crop_cut(m,13),soil_cu(m,13),ulagt(m,13),
-     :    effcu(m,13),gdiv(m,13),effgw(m,13),gwcu(m,13),gwro(m,13),
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    effcu(m,13),gdiv(m,13),effgw(m,13),gwcu(m,13),gwro(m,13),
+     :    effcu(m,13),gdiv(m,13),effgw(m,13),gwcu(m,13)-gwcusm(m,13),
+     :    gwcusm(m,13),gwro(m,13),
      :    soiltott(m,12),cutot,cropcusoil(m,13),cust,tdp(m,13),
-     :    gsdiv(m,13),gfdiv(m,13),short,
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!    :    gsdiv(m,13),gfdiv(m,13),short,
+     :    gsdiv(m,13),gfdiv(m,13),gwdivsm(m,13),short,
      :    (grass(i,m,13,ifx), ifx=1,iflood2),
      :     tail(i,m,13)
           endif
@@ -8272,7 +8366,9 @@
      :  ceff(i,nyrs1),closs(nyrs1,13),fdiv(nyrs1,13),arech(nyrs1,13),
      :  sfeff(i,nyrs1),crop_cut(nyrs1,13),soil_cu(nyrs1,13),
      :  ulagt(nyrs1,13),effcu(nyrs1,13),gdiv(nyrs1,13),effgw(nyrs1,13),
-     :  gwcu(nyrs1,13),gwro(nyrs1,13),
+!       jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :  gwcu(nyrs1,13),gwro(nyrs1,13),
+     :  gwcu(nyrs1,13)-gwcusm(nyrs1,13),gwcusm(nyrs1,13),gwro(nyrs1,13),
      :  soiltott(nyrs1,13)/nyrs/12,cutot,
      :  cropcusoil(nyrs1,13),cust,tdp(nyrs1,13)
         else
@@ -8282,12 +8378,16 @@
      :  ceff(i,nyrs1),closs(nyrs1,13),fdiv(nyrs1,13),arech(nyrs1,13),
      :  sfeff(i,nyrs1),crop_cut(nyrs1,13),soil_cu(nyrs1,13),
      :  ulagt(nyrs1,13),effcu(nyrs1,13),gdiv(nyrs1,13),effgw(nyrs1,13),
-     :  gwcu(nyrs1,13),gwro(nyrs1,13),
+!       jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :  gwcu(nyrs1,13),gwro(nyrs1,13),
+     :  gwcu(nyrs1,13)-gwcusm(nyrs1,13),gwcusm(nyrs1,13),gwro(nyrs1,13),
      :  soiltott(nyrs1,13)/nyrs/12,cutot,
      :  cropcusoil(nyrs1,13),cust,tdp(nyrs1,13),gsdiv(nyrs1,13),
-     :  gfdiv(nyrs1,13),short,(grass(i,nyrs1,13,ifx), ifx=1,iflood2),
-     :     tail(i,nyrs1,13)
-
+!       jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :  gfdiv(nyrs1,13),short,(grass(i,nyrs1,13,ifx), ifx=1,iflood2),
+!     :     tail(i,nyrs1,13)
+     :  gfdiv(nyrs1,13),gwdivsm(nyrs1,13),short,
+     :  (grass(i,nyrs1,13,ifx), ifx=1,iflood2),tail(i,nyrs1,13)
         endif
         do k1=1,3
            write(256,651) 
@@ -8313,9 +8413,13 @@
      :    divsup(i,nyrs1,l),ceff(i,nyrs1),closs(nyrs1,l),fdiv(nyrs1,l),
      :    arech(nyrs1,l),sfeff(i,nyrs1),crop_cut(nyrs1,l),
      :    soil_cu(nyrs1,l),ulagt(nyrs1,l),effcu(nyrs1,l),gdiv(nyrs1,l),
-     :    effgw(nyrs1,l),gwcu(nyrs1,l),gwro(nyrs1,l),
-     :    soiltott(nyrs1,l),cutot,cropcusoil(nyrs1,l),cust,
-     :    tdp(nyrs1,l)
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    effgw(nyrs1,l),gwcu(nyrs1,l),gwro(nyrs1,l),
+!     :    soiltott(nyrs1,l),cutot,cropcusoil(nyrs1,l),cust,
+!     :    tdp(nyrs1,l)
+     :    effgw(nyrs1,l),gwcu(nyrs1,l)-gwcusm(nyrs1,l),gwcusm(nyrs1,l),
+     :    gwro(nyrs1,l),soiltott(nyrs1,l),cutot,cropcusoil(nyrs1,l),
+     :    cust,tdp(nyrs1,l)
           else
             write(256,630)
      &      amn(l),method,ettot(i,nyrs1,l),effppt(i,nyrs1,l),
@@ -8323,9 +8427,14 @@
      :    divsup(i,nyrs1,l),ceff(i,nyrs1),closs(nyrs1,l),fdiv(nyrs1,l),
      :    arech(nyrs1,l),sfeff(i,nyrs1),crop_cut(nyrs1,l),
      :    soil_cu(nyrs1,l),ulagt(nyrs1,l),effcu(nyrs1,l),gdiv(nyrs1,l),
-     :    effgw(nyrs1,l),gwcu(nyrs1,l),gwro(nyrs1,l),
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    effgw(nyrs1,l),gwcu(nyrs1,l),gwro(nyrs1,l),
+     :    effgw(nyrs1,l),gwcu(nyrs1,l)-gwcusm(nyrs1,l),gwcusm(nyrs1,l),
+     :    gwro(nyrs1,l),
      :    soiltott(nyrs1,l),cutot,cropcusoil(nyrs1,l),cust,tdp(nyrs1,l),
-     :    gsdiv(nyrs1,l),gfdiv(nyrs1,l),short,
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    gsdiv(nyrs1,l),gfdiv(nyrs1,l),short,
+     :    gsdiv(nyrs1,l),gfdiv(nyrs1,l),gwdivsm(nyrs1,l),short,
      :    (grass(i,nyrs1,l,ifx), ifx=1, iflood2),
      :     tail(i,nyrs1,l)
           endif
@@ -8365,7 +8474,9 @@
      :  ceff(i,nyrs1),closs(nyrs1,13),fdiv(nyrs1,13),arech(nyrs1,13),
      :  sfeff(i,nyrs1),crop_cut(nyrs1,13),soil_cu(nyrs1,13),
      :  ulagt(nyrs1,13),effcu(nyrs1,13),gdiv(nyrs1,13),effgw(nyrs1,13),
-     :  gwcu(nyrs1,13),gwro(nyrs1,13),
+!       jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :  gwcu(nyrs1,13),gwro(nyrs1,13),
+     :  gwcu(nyrs1,13)-gwcusm(nyrs1,13),gwcusm(nyrs1,13),gwro(nyrs1,13),
      :  soiltott(nyrs1,13)/nyrs/12,cutot,
      :  cropcusoil(nyrs1,13),cust,tdp(nyrs1,13)
         else
@@ -8375,10 +8486,16 @@
      :  ceff(i,nyrs1),closs(nyrs1,13),fdiv(nyrs1,13),arech(nyrs1,13),
      :  sfeff(i,nyrs1),crop_cut(nyrs1,13),soil_cu(nyrs1,13),
      :  ulagt(nyrs1,13),effcu(nyrs1,13),gdiv(nyrs1,13),effgw(nyrs1,13),
-     :  gwcu(nyrs1,13),gwro(nyrs1,13),soiltott(nyrs1,13)/nyrs/12,
+!       jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :  gwcu(nyrs1,13),gwro(nyrs1,13),soiltott(nyrs1,13)/nyrs/12,
+     :  gwcu(nyrs1,13)-gwcusm(nyrs1,13),gwcusm(nyrs1,13),
+     :  gwro(nyrs1,13),soiltott(nyrs1,13)/nyrs/12,
      :  cutot,cropcusoil(nyrs1,13),cust,tdp(nyrs1,13),gsdiv(nyrs1,13),
-     :  gfdiv(nyrs1,13),short,(grass(i,nyrs1,13,ifx), ifx=1,iflood2),
-     :     tail(i, nyrs1,13)
+!       jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :  gfdiv(nyrs1,13),short,(grass(i,nyrs1,13,ifx), ifx=1,iflood2),
+!     :     tail(i, nyrs1,13)
+     :  gfdiv(nyrs1,13),gwdivsm(nyrs1,13),short,
+     :  (grass(i,nyrs1,13,ifx), ifx=1,iflood2),tail(i, nyrs1,13)
         endif
 !
 ! write out monthly values for each year (for structure i)
@@ -8459,7 +8576,10 @@
      :          reqreqts(m,l),
      :          ddhmonot(m,l),ceff(i,m),closs(m,l),fdiv(m,l),arech(m,l),
      :          sfeff(i,m),crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
-     :          effcu(m,l),gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!               jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :          effcu(m,l),gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+     :          effcu(m,l),gdiv(m,l),effgw(m,l),gwcu(m,l)-gwcusm(m,l),
+     :          gwcusm(m,l),gwro(m,l),
      :          soiltott(m,l),cutot,cropcusoil(m,l),
      :          custot(i,m,l),tdp(m,l)
 
@@ -8809,9 +8929,14 @@
      :          reqreqts(m,l),
      :          ddhmonot(m,l),ceff(i,m),closs(m,l),fdiv(m,l),arech(m,l),
      :          sfeff(i,m),crop_cut(m,l),soil_cu(m,l),ulagt(m,l),
-     :          effcu(m,l),gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!               jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :          effcu(m,l),gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+     :          effcu(m,l),gdiv(m,l),effgw(m,l),gwcu(m,l)-gwcusm(m,l),
+     :          gwcusm(m,l),gwro(m,l),
      :          soiltott(m,l),cutot,cropcusoil(m,l),custot(i,m,l),
-     :          tdp(m,l),gsdiv(m,l),gfdiv(m,l),short,
+!               jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :          tdp(m,l),gsdiv(m,l),gfdiv(m,l),short,
+     :          tdp(m,l),gsdiv(m,l),gfdiv(m,l),gwdivsm(m,l),short,
      :          (grass(i,m,l,ifx), ifx=1,iflood2),
      :          tail(i,m,l)
 
@@ -11058,24 +11183,34 @@
 610   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
      :f9.0,f11.0,
-     : f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)      
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     : f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
+     : f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
 611   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
      :f9.0,f11.0,
-     : f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)      
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     : f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)      
+     : f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)      
 612   Format (1x,i4,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
      :f9.0,f11.0,
-     : f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)      
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     : f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)      
+     : f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)      
 613   Format('    % of structure diversions considered:',f8.2,206(" "))
 614   Format (2x,'Ave',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,
      :f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,
      :f7.2,f9.0,f11.0,
-     :f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
+     :f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
 626   Format (2x,'Tot',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,
      :f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,
      :f7.2,f9.0,f11.0,
-     :f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
+     :f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0)
 615   Format('    % of structure acreage considered:   ',f8.2,206(" "))
 ! grb 05-11-00 remove separate print without soil moisture
 !616   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
@@ -11098,16 +11233,28 @@
      :         f6.2,2x,'Sprinkler Efficiency = ',f6.2,167(" "))
 630   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,f9.0,f11.0,f9.0,f11.0,f12.0,
-     :f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     (note that the final 20f9.0 takes care of any new 9-wide fields on right side of report)
+!     :f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+     :f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
 631   Format (2x,a3,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,f9.0,f11.0,f9.0,f11.0,f12.0,
-     :f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     (note that the final 20f9.0 takes care of any new 9-wide fields on right side of report)
+!     :f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+     :f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
 632   Format (1x,i4,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,f9.0,f11.0,f9.0,f11.0,f12.0,
-     :f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     (note that the final 20f9.0 takes care of any new 9-wide fields on right side of report)
+!     :f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+     :f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
 634   Format (2x,'Ave',2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,
      :f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,f9.0,f11.0,f9.0,f11.0,
-     :f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     (note that the final 20f9.0 takes care of any new 9-wide fields on right side of report)
+!     :f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
+     :f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,f11.0,20f9.0)
 !636   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
 !     :11x,'|',5x,'|',7x,'|',
 !     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
