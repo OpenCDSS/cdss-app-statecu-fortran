@@ -83,6 +83,9 @@
 !                revise distribution of pvh pumping to assign it to sprinkler first, flood second
 !                reprorate sr, jr, other when isuply=2,3 and when filling missing diversions (ifill)
 !                  (calls slimit again when itime=2) 
+! jhb/emw 03/11  version 13.07
+!                allow pvh pumping to go to soil moisture
+!                update all the output files (DWB, SWB, BD1) to include the new gw to sm values
 !                
 !                
 !***************************************************************************
@@ -107,8 +110,8 @@
       CHARACTER*16 RDATE
       REAL VERS
 ! grb new version number 
-      PARAMETER (VERS = 13.06)
-      PARAMETER (RDATE = '02/17/11 11:11AM')
+      PARAMETER (VERS = 13.07)
+      PARAMETER (RDATE = '03/31/11 05:40PM')
 !     jhb 07/10
 !     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
