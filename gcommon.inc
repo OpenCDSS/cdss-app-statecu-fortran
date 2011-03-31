@@ -303,6 +303,7 @@
       real :: sbtdp(0:dim_nsb,dim_ny,12)
       real :: sbgsdiv(0:dim_nsb,dim_ny,12)
       real :: sbgfdiv(0:dim_nsb,dim_ny,12)
+      real :: sbgwdivsm(0:dim_nsb,dim_ny,12)
       real :: sbulags(0:dim_nsb,dim_ny,12),sbulagj(0:dim_nsb,dim_ny,12)
       real :: sbulago(0:dim_nsb,dim_ny,12),sbulagt(0:dim_nsb,dim_ny,12)
       real :: sblagrets(0:dim_nsb,dim_ny,12)
@@ -357,6 +358,7 @@
       real :: btdp(dim_ny,12)
       real :: bgsdiv(dim_ny,12)
       real :: bgfdiv(dim_ny,12)
+      real :: bgwdivsm(dim_ny,12)
       real :: bulags(dim_ny,12),bulagj(dim_ny,12)
       real :: bulago(dim_ny,12),bulagt(dim_ny,12)
       real :: blagrets(dim_ny,12)
@@ -453,7 +455,7 @@
      &            sbestcrps,sbestcrpj,sbestcrpo,sbestcrpt,
      &            sbdivcus,sbdivcuj,sbdivcuo,sbdivcu,
      &            sbgdiv,sbgwcu,sbgwcusm,sbeffgw,sbgwro,
-     &            sbgsdiv, sbgfdiv,
+     &            sbgsdiv, sbgfdiv, sbgwdivsm,
      &            sbcutot, sbcustot, sbtdp,
      &            sbulags,sbulagj,sbulago,sbulagt,
      &            sblagrets,sblagretj,sblagreto,sblagrett,sbtotret,
@@ -474,7 +476,7 @@
      &            bestcrps,bestcrpj,bestcrpo,bestcrpt,
      &            bdivcus,bdivcuj,bdivcuo,bdivcu,
      &            bgdiv,bgwcu,bgwcusm,beffgw,bgwro,
-     &            bgsdiv, bgfdiv,
+     &            bgsdiv, bgfdiv, bgwdivsm,
      &            bcutot, bcustot, btdp,
      &            bulags,bulagj,bulago,bulagt,
      &            blagrets,blagretj,blagreto,blagrett,btotret,

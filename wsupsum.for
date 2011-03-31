@@ -284,6 +284,7 @@
       REAL :: ttdp(DIM_NY,14),tcloss(DIM_NY,14)
       REAL :: tfdiv(DIM_NY,14),tgwdiv(DIM_NY,14)
       REAL :: tgsdiv(DIM_NY,14),tgfdiv(DIM_NY,14)
+      REAL :: tgwdivsm(DIM_NY,14)
       REAL :: teffgw(DIM_NY,14),tsfeff(dim_ny)
       REAL :: tet(dim_ny,14),teffr(dim_ny,14)
       REAL :: treqt(dim_ny,14),twbu(dim_ny,14)
@@ -423,6 +424,7 @@
           gwdiv(j,k)=0.
           gsdiv(j,k)=0.
           gfdiv(j,k)=0.
+          gwdivsm(j,k)=0.
           treq(j,k)=0.
           tdiv(j,k)=0.
           ttail(j,k)=0.
@@ -477,6 +479,7 @@
           tgwdiv(j,k)=0.
           tgsdiv(j,k)=0.
           tgfdiv(j,k)=0.
+          tgwdivsm(j,k)=0.
           teffgw(j,k)=0.
           tet(j,k)=0.
           teffr(j,k)=0.
@@ -1178,13 +1181,11 @@
       thefile1(fn_len:fn_len+4) = '.dwb'
 !     close the drain file      
       close(190)
-
 !jhb=&==================================================================
 !jhb  open binary file 1
       IF (LBD1OUT.and.(ipresim.ne.1)) THEN
 !jhb     call the routine to initialize the bd1 binary file output
 !jhb     call CreateBD1FileHeader(dfile)
-
 !jhb    add file name extension
         BD1FN=dfile
         NCH=len_trim(BD1FN)
@@ -1220,8 +1221,6 @@
 !jhb     call CreateBD5FileHeader(dfile)
       ENDIF
 !jhb=&==================================================================
-
-
       IF (LBD1OUT.and.(ipresim.ne.1)) THEN
 !jhb=&==================================================================
 !jhb  Description of this BD1 binary file:
@@ -2182,7 +2181,7 @@
 !jhb=&==================================================================
            IBD1TSA=12 !# time steps per year
            IBD1TS=IBD1TSA*NYRS !total # time steps
-           IBD1NF=34 !number output values per timestep per structure
+           IBD1NF=36 !number output values per timestep per structure
            IBD1NSF=3 !number nontime series value output per structure
            if(sboutput) then
            WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,
@@ -2344,7 +2343,7 @@
      &    'Calc GW Application Eff ',0,
      &    'PERCENT   '
 !jhb=&=====27===========================================================
-!jhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
+!jhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)-gwcusm(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW CU                   ',0,
      &    'ACFT      '
@@ -2380,12 +2379,22 @@
      &    'ACFT      '
 !jhb=&=====34===========================================================
 !jhb       Real*4 Calculated CU shortage, SHORTAGE
-!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
+!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU [gwcu(m,l)-gwcusm(m,l)]
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
      &    'ACFT      '
+!jhb=&=====35===========================================================
+!jhb       Real*4 Soil Zone Delivery, gwdivsm(m,l)
+           WRITE(UNIT=IBD1UN)'R',4,
+     &    'GW Soil Zone Delivery   ',1,
+     &    'ACFT      '
+!jhb=&=====36===========================================================
+!jhb       Real*4 Soil Zone Consumption, gwcusm(m,l)
+           WRITE(UNIT=IBD1UN)'R',4,
+     &    'GW Soil Zone Storage    ',1,
+     &    'ACFT      '
 !jhb=&==================================================================
-!jhb       Total record size = 3*4+3+4+4+10+27*4 = 137 bytes
+!jhb       Total record size = 3*4+3+4+4+10+29*4 = 145 bytes
 !jhb=&==================================================================
 !jhb
 !jhb=&==================================================================
@@ -2413,7 +2422,7 @@
 !jhb=&==================================================================
            IBD1TSA=12 !# time steps per year
            IBD1TS=IBD1TSA*NYRS !total # time steps
-           IBD1NF=36+IFLOOD2 !number output values per timestep per structure
+           IBD1NF=38+IFLOOD2 !number output values per timestep per structure
            IBD1NSF=3 !number nontime series value output per structure
            if(sboutput) then
            WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,
@@ -2443,7 +2452,7 @@
 !jhb       Total record size = 4+12+12 = 28 bytes
 !jhb=&==================================================================
 !jhb=&==================================================================
-!jhb       Here are the IBD1NF (33+IFLOOD2+1) values on the time series records for ISUPLY=4 and IFLOOD<>0
+!jhb       Here are the IBD1NF (37+IFLOOD2+1) values on the time series records for ISUPLY=4 and IFLOOD<>0
 !jhb=======1============================================================
 !jhb       Integer Structure Index, I
            WRITE(UNIT=IBD1UN)'I',4,
@@ -2575,7 +2584,7 @@
      &    'Calc GW Application Eff ',0,
      &    'PERCENT   '
 !jhb=&=====27===========================================================
-!jhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)
+!jhb       Real*4 GW Diversion Acct. - 'GW CU                   ', gwcu(m,l)-gwcusm(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW CU                   ',0,
      &    'ACFT      '
@@ -2611,7 +2620,7 @@
      &    'ACFT      '
 !jhb=&=====34===========================================================
 !jhb       Real*4 Calculated CU shortage, SHORTAGE
-!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU gwcu(m,l)
+!jhb       = IWR reqreqts(m,l) - SWCU estcrpt(i,m,l) - GWCU [gwcu(m,l)-gwcusm(m,l)]
            WRITE(UNIT=IBD1UN)'R',4,
      &    'CU Shortage             ',0,
      &    'ACFT      '
@@ -2625,7 +2634,17 @@
            WRITE(UNIT=IBD1UN)'R',4,
      &    'GW Applied by Flood Irr ',1,
      &    'ACFT      '
-!jhb=&=====37-??========================================================
+!jhb=&=====37===========================================================
+!jhb       Real*4 Soil Zone Delivery, gwdivsm(m,l)
+           WRITE(UNIT=IBD1UN)'R',4,
+     &    'GW Soil Zone Delivery   ',1,
+     &    'ACFT      '
+!jhb=&=====38===========================================================
+!jhb       Real*4 Soil Zone Consumption, gwcusm(m,l)
+           WRITE(UNIT=IBD1UN)'R',4,
+     &    'GW Soil Zone Storage    ',1,
+     &    'ACFT      '
+!jhb=&=====39-??========================================================
            DO I=1,IFLOOD
            CHTMP1=subname(i) // ' IWR               '
            CHTMP1=CHTMP1 // REPEAT(' ',24-LEN(CHTMP1))
@@ -2641,7 +2660,7 @@
      &    'ACFT      '
            END DO
 !jhb=&==================================================================
-!jhb       Total record size = 3*4+3+4+4+10+29*4+IFLOOD2*4 = ?? bytes
+!jhb       Total record size = 3*4+3+4+4+10+31*4+IFLOOD2*4 = ?? bytes
 !jhb=&==================================================================
 !jhb
 !jhb=&==================================================================
@@ -3030,6 +3049,7 @@
           tgdiv(m,j)=0
           tgsdiv(m,j)=0
           tgfdiv(m,j)=0
+          tgwdivsm(m,j)=0
           tgwcu(m,j)=0
           tgwcusm(m,j)=0
           tgwro(m,j)=0
@@ -3265,6 +3285,7 @@
             gdiv(j,k)=0
             gsdiv(j,k)=0
             gfdiv(j,k)=0
+            gwdivsm(j,k)=0
             gwcu(j,k)=0
             gwcusm(j,k)=0
             gwro(j,k)=0
@@ -3478,6 +3499,7 @@
               gdiv(m,l) = -999
               gsdiv(m,l) = -999
               gfdiv(m,l) = -999
+              gwdivsm(m,l) = -999
               gwcu(m,l) = -999
               gwcusm(m,l) = -999
               gwro(m,l) = -999
@@ -5232,10 +5254,14 @@
                 gwholds1 = 0.0
                 gwholdj1 = 0.0
                 gwholdo1 = 0.0
-                gwholdt1 = gwholds1 + gwholdj1 + gwholdo1 
-                smre_eff=(swgwflac(i,m)*fleff(i,m)+
+                gwholdt1 = gwholds1 + gwholdj1 + gwholdo1
+                if(swgwflac(i,m)+swgwspac(i,m).gt.0.)then
+                  smre_eff=(swgwflac(i,m)*fleff(i,m)+
      &                    swgwspac(i,m)*speff(i,m))/
      &                   (swgwflac(i,m)+swgwspac(i,m))
+                else
+                  smre_eff=(fleff(i,m)+speff(i,m))/2.0
+                endif
 !jhb              --------------------------------------------------------
                 soiltot  = soiltot + gwholdt1
                 soiltots = soiltots + gwholds1
@@ -5735,7 +5761,7 @@
      &          reqreq(m,l)*swgwflac(i,m)/t_area(i,m)-gfcu-gfhold-gwcuf,!total shortage on gw fl
      &          reqreq(m,l)*swgwspac(i,m)/t_area(i,m)-gscu-gshold-gwcus,!total shortage on gw sp
      &            reqreq(m,l)-holdt-holdcrop-gwcuf-gwcus,               !total shortage
-     &            holds1+gwcusm(i,m),holdj1,holdo1,holdt1+gwcusm(i,m)   !total to s.m.
+     &            holds1+gwcusm(m,l),holdj1,holdo1,holdt1+gwcusm(m,l)   !total to s.m.
                 endif
                 endif
               endif
@@ -5866,6 +5892,8 @@
              gdiv(m,13) = -999
              gsdiv(m,13) = -999
              gfdiv(m,13) = -999
+!jhb         added the gw to sm component
+             gwdivsm(m,13) = -999
              arech(m,13) = -999
              gwcu(m,13) = -999
              gwcusm(m,13) = -999
@@ -5942,8 +5970,11 @@
              gdiv(nyrs1,13)=gdiv(nyrs1,13)+gdiv(m,13)
              gsdiv(nyrs1,13)=gsdiv(nyrs1,13)+gsdiv(m,13)
              gfdiv(nyrs1,13)=gfdiv(nyrs1,13)+gfdiv(m,13)
+!jhb         added the gw to sm component
+             gwdivsm(nyrs1,13)=gwdivsm(nyrs1,13)+gwdivsm(m,13)
              arech(nyrs1,13)=arech(nyrs1,13)+arech(m,13)
              gwcu(nyrs1,13)=gwcu(nyrs1,13)+gwcu(m,13)
+!jhb         added the gw to sm component
              gwcusm(nyrs1,13)=gwcusm(nyrs1,13)+gwcusm(m,13)
              tdp(nyrs1,13)=tdp(nyrs1,13)+tdp(m,13)
              crop_cus(nyrs1,13)=crop_cus(nyrs1,13)+crop_cus(m,13)
@@ -6012,8 +6043,11 @@
              gdiv(nyrs1,13)=gdiv(nyrs1,13)/iyct
              gsdiv(nyrs1,13)=gsdiv(nyrs1,13)/iyct
              gfdiv(nyrs1,13)=gfdiv(nyrs1,13)/iyct
+!jhb         added the gw to sm component
+             gwdivsm(nyrs1,13)=gwdivsm(nyrs1,13)/iyct
              arech(nyrs1,13)=arech(nyrs1,13)/iyct
              gwcu(nyrs1,13)=gwcu(nyrs1,13)/iyct
+!jhb         added the gw to sm component
              gwcusm(nyrs1,13)=gwcusm(nyrs1,13)/iyct
              tdp(nyrs1,13)=tdp(nyrs1,13)/iyct
              crop_cus(nyrs1,13)=crop_cus(nyrs1,13)/iyct
@@ -6099,8 +6133,11 @@
              gdiv(nyrs1,13)= -999
              gsdiv(nyrs1,13)= -999
              gfdiv(nyrs1,13)= -999
+!jhb         added the gw to sm component
+             gwdivsm(nyrs1,13)= -999
              arech(nyrs1,13)= -999
              gwcu(nyrs1,13)= -999
+!jhb         added the gw to sm component
              gwcusm(nyrs1,13)= -999
              tdp(nyrs1,13)= -999
              crop_cus(nyrs1,13)= -999
@@ -6174,6 +6211,7 @@
              gdiv(nyrs1,l)=gdiv(nyrs1,l)/imonth(l)
              gsdiv(nyrs1,l)=gsdiv(nyrs1,l)/imonth(l)
              gfdiv(nyrs1,l)=gfdiv(nyrs1,l)/imonth(l)
+             gwdivsm(nyrs1,l)=gwdivsm(nyrs1,l)/imonth(l)
              arech(nyrs1,l)=arech(nyrs1,l)/imonth(l)
              gwcu(nyrs1,l)=gwcu(nyrs1,l)/imonth(l)
              gwcusm(nyrs1,l)=gwcusm(nyrs1,l)/imonth(l)
@@ -6310,6 +6348,7 @@
              gdiv(nyrs1,l)= -999
              gsdiv(nyrs1,l)= -999
              gfdiv(nyrs1,l)= -999
+             gwdivsm(nyrs1,l)= -999
              arech(nyrs1,l)= -999
              gwcu(nyrs1,l)= -999
              gwcusm(nyrs1,l)= -999
@@ -8169,10 +8208,11 @@
 !         ==================================================================
 !         =  original DWB                                  =
 !         ==================================================
-!         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 !         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |   Ground Water Diversion Accounting  |Delivered|       Estimated Crop CU       |          |
-!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|--------------------------------------|  Soil   |-------------------------------|          |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|--------------------------------------|  Soil   |-------------------------------|----------|
 !         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |   Diversion to    | Moisture|    From    |  From   |        |  Total   |
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |-------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |
 !         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    |  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |
 !         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |Consumed|         |  Diversion |         |        | Consumed |
 !         ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -8302,8 +8342,8 @@
               imiss=1
             endif
           if(crop_cut(m,13) .gt. -998) then
-             cutot=crop_cut(m,13)+gwcu(m,13)
-             cust=estcrpt(i,m,13)+gwcu(m,13)
+             cutot=crop_cut(m,13)+(gwcu(m,13)-gwcusm(m,13))
+             cust=estcrpt(i,m,13)+(gwcu(m,13)-gwcusm(m,13))
           else
              cutot=-999
              cust=-999
@@ -8343,8 +8383,8 @@
 !
         write(256,651)
           if(crop_cut(nyrs1,13) .gt. -998) then
-             cutot=crop_cut(nyrs1,13)+gwcu(nyrs1,13)
-             cust=estcrpt(i,nyrs1,13)+gwcu(nyrs1,13)
+             cutot=crop_cut(nyrs1,13)+(gwcu(nyrs1,13)-gwcusm(nyrs1,13))
+             cust=estcrpt(i,nyrs1,13)+(gwcu(nyrs1,13)-gwcusm(nyrs1,13))
              short = reqreqts(nyrs1,13)-cust
           else
              cutot=-999
@@ -8398,8 +8438,8 @@
         write(256,618) nyr1, nyr2
         do l=1,12
           if(crop_cut(nyrs1,l) .gt. -998) then
-             cutot=crop_cut(nyrs1,l)+gwcu(nyrs1,l)
-             cust=estcrpt(i,nyrs1,l)+gwcu(nyrs1,l)
+             cutot=crop_cut(nyrs1,l)+(gwcu(nyrs1,l)-gwcusm(nyrs1,l))
+             cust=estcrpt(i,nyrs1,l)+(gwcu(nyrs1,l)-gwcusm(nyrs1,l))
              short = reqreqts(nyrs1,l)-cust
           else
              cutot=-999
@@ -8459,8 +8499,8 @@
 !
         write(256,651)
           if(crop_cut(nyrs1,13) .gt. -998) then
-             cutot=crop_cut(nyrs1,13)+gwcu(nyrs1,13)
-             cust=estcrpt(i,nyrs1,13)+gwcu(nyrs1,13)
+             cutot=crop_cut(nyrs1,13)+(gwcu(nyrs1,13)-gwcusm(nyrs1,13))
+             cust=estcrpt(i,nyrs1,13)+(gwcu(nyrs1,13)-gwcusm(nyrs1,13))
              short = reqreqts(nyrs1,13)-cust
           else
              cutot=-999
@@ -8555,8 +8595,8 @@
 !jhb=&==================================================================
               do l=1,12
               if(crop_cut(m,l) .gt. -998) then
-                 cutot=crop_cut(m,l)+gwcu(m,l)
-                 custot(i,m,l)=estcrpt(i,m,l)+gwcu(m,l)
+                 cutot=crop_cut(m,l)+(gwcu(m,l)-gwcusm(m,l))
+                 custot(i,m,l)=estcrpt(i,m,l)+(gwcu(m,l)-gwcusm(m,l))
                  short=reqreqts(m,l)-custot(i,m,l)
               else
                  cutot=-999
@@ -8635,9 +8675,9 @@
      :            effcu(m,l),seffcu(m,l),
 !jhb  (25) REAL gdiv(m,l) - GW Diversion Acct. - 'GW Diversion            ' ***REPORT***
 !jhb  (26) REAL effgw(m,l) - GW Diversion Acct. - 'Calc GW Application Eff '  ***REPORT***
-!jhb  (27) REAL gwcu(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
+!jhb  (27) REAL gwcu(m,l)-gwcusm(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
 !jhb  (28) REAL gwro(m,l) - GW Diversion Acct. - 'GW - Non-Consumed       ' ***REPORT***
-     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+     :            gdiv(m,l),effgw(m,l),gwcu(m,l)-gwcusm(m,l),gwro(m,l),
 !jhb  (29) REAL soiltott(m,l) - Total Soil Moisture EOM Contents  ***REPORT***
      :            soiltott(m,l),
 !jhb  (30) REAL cutot - Estimated Crop CU - From SW/GW Diversion  ***REPORT***
@@ -8646,7 +8686,10 @@
      :            cutot,cropcusoil(m,l),custot(i,m,l),
 !jhb  (33) REAL tdp(m,l) - Total Month Non-Consumed  ***REPORT***
 !jhb  (34) REAL SHORTAGE - Total Shortage
-     :            tdp(m,l),SHORTAGE
+     :            tdp(m,l),SHORTAGE,
+!jhb  (35) REAL gwdivsm(m,l) - GW delivery to soil zone ***REPORT***
+!jhb  (36) REAL gwcusm(m,l) - GW consumed by soil zone ***REPORT***
+     :            gwdivsm(m,l),gwcusm(m,l)
 !jhb====================================================================
 !                 update the district totals that change by month
 !jhb====================================================================
@@ -8850,6 +8893,12 @@
                     bgfdiv(m,l)=
      &                bgfdiv(m,l)+gfdiv(m,l)
                   endif
+                  if(gwdivsm(m,l).gt.-999.0)then
+                    sbgwdivsm(sbsb(i),m,l)=
+     &                sbgwdivsm(sbsb(i),m,l)+gwdivsm(m,l)
+                    bgwdivsm(m,l)=
+     &                bgwdivsm(m,l)+gwdivsm(m,l)
+                  endif
                   if(gwcu(m,l).gt.-999.0)then
                     sbgwcu(sbsb(i),m,l)=
      &                sbgwcu(sbsb(i),m,l)+gwcu(m,l)
@@ -8995,9 +9044,9 @@
      :            effcu(m,l),seffcu(m,l),
 !jhb  (25) REAL gdiv(m,l) - GW Diversion Acct. - 'GW Diversion            ' ***REPORT***
 !jhb  (26) REAL effgw(m,l) - GW Diversion Acct. - 'Calc GW Application Eff '  ***REPORT***
-!jhb  (27) REAL gwcu(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
+!jhb  (27) REAL gwcu(m,l)-gwcusm(m,l) - GW Diversion Acct. - 'GW CU                   ' ***REPORT***
 !jhb  (28) REAL gwro(m,l) - GW Diversion Acct. - 'GW - Non-Consumed       ' ***REPORT***
-     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+     :            gdiv(m,l),effgw(m,l),gwcu(m,l)-gwcusm(m,l),gwro(m,l),
 !jhb  (29) REAL soiltott(m,l) - Total Soil Moisture EOM Contents  ***REPORT***
      :            soiltott(m,l),
 !jhb  (30) REAL cutot - Estimated Crop CU - From SW/GW Diversion  ***REPORT***
@@ -9010,6 +9059,9 @@
 !jhb  (35) REAL gsdiv(m,l) - GW div to Sprinkler  ***REPORT***
 !jhb  (36) REAL gfdiv(m,l) - GW div to Flood  ***REPORT***
      :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
+!jhb  (37) REAL gwdivsm(m,l) - GW delivery to soil zone ***REPORT***
+!jhb  (38) REAL gwcusm(m,l) - GW consumed by soil zone ***REPORT***
+     :            gwdivsm(m,l),gwcusm(m,l),
 !jhb  2*IFLOOD REAL (grass(i,m,l,ifx),ifx=1,iflood2) - IWR Pasture  ***REPORT***
 !jhb  REAL tail(i,m,l) - ???  ***REPORT***
      :            (grass(i,m,l,ifx),ifx=1,iflood2)
@@ -9216,6 +9268,12 @@
                     bgfdiv(m,l)=
      &                bgfdiv(m,l)+gfdiv(m,l)
                   endif
+                  if(gwdivsm(m,l).gt.-999.0)then
+                    sbgwdivsm(sbsb(i),m,l)=
+     &                sbgwdivsm(sbsb(i),m,l)+gwdivsm(m,l)
+                    bgwdivsm(m,l)=
+     &                bgwdivsm(m,l)+gwdivsm(m,l)
+                  endif
                   if(gwcu(m,l).gt.-999.0)then
                     sbgwcu(sbsb(i),m,l)=
      &                sbgwcu(sbsb(i),m,l)+gwcu(m,l)
@@ -9345,8 +9403,11 @@
           gdiv(m,14)=gdiv(m,14)+gdiv(m,13)
           gsdiv(m,14)=gsdiv(m,14)+gsdiv(m,13)
           gfdiv(m,14)=gfdiv(m,14)+gfdiv(m,13)
+!jhb      added the gw to sm component
+          gwdivsm(m,14)=gwdivsm(m,14)+gwdivsm(m,13)
           arech(m,14)=arech(m,14)+arech(m,13)
           gwcu(m,14)=gwcu(m,14)+gwcu(m,13)
+!jhb      added the gw to sm component
           gwcusm(m,14)=gwcusm(m,14)+gwcusm(m,13)
           tdp(m,14)=tdp(m,14)+tdp(m,13)
           crop_cus(m,14) = crop_cus(m,14)+crop_cus(m,13)
@@ -9421,6 +9482,7 @@
              gdiv(nyrs2,l)=gdiv(nyrs2,l)+gdiv(nyrs1,l)
              gsdiv(nyrs2,l)=gsdiv(nyrs2,l)+gsdiv(nyrs1,l)
              gfdiv(nyrs2,l)=gfdiv(nyrs2,l)+gfdiv(nyrs1,l)
+             gwdivsm(nyrs2,l)=gwdivsm(nyrs2,l)+gwdivsm(nyrs1,l)
              arech(nyrs2,l)=arech(nyrs2,l)+arech(nyrs1,l)
              gwcu(nyrs2,l)=gwcu(nyrs2,l)+gwcu(nyrs1,l)
              gwcusm(nyrs2,l)=gwcusm(nyrs2,l)+gwcusm(nyrs1,l)
@@ -9488,6 +9550,7 @@
           tgdiv(m,j)=tgdiv(m,j)+gdiv(m,j)
           tgsdiv(m,j)=tgsdiv(m,j)+gsdiv(m,j)
           tgfdiv(m,j)=tgfdiv(m,j)+gfdiv(m,j)
+          tgwdivsm(m,j)=tgwdivsm(m,j)+gwdivsm(m,j)
           tarech(m,j)=tarech(m,j)+arech(m,j)
           tgwcu(m,j)=tgwcu(m,j)+gwcu(m,j)
           tgwcusm(m,j)=tgwcusm(m,j)+gwcusm(m,j)
@@ -9797,15 +9860,17 @@
      &              sbcrop_cut(i,m,l),sbsoil_cu(i,m,l),sbulagt(i,m,l),
 !     :            effcu(m,l),seffcu(m,l),
      :              sbeffcu(i,m,l),sbseffcu(i,m,l),
-!     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!     :            gdiv(m,l),effgw(m,l),gwcu(m,l)-gwcusm(m,l),gwro(m,l),
      :              sbgdiv(i,m,l),sbeffgw(i,m,l),
-     &              sbgwcu(i,m,l),sbgwro(i,m,l),
+     &              sbgwcu(i,m,l)-sbgwcusm(i,m,l),sbgwro(i,m,l),
 !     :            soiltott(m,l),
      :              sbsoiltott(i,m,l),
 !     :            cutot,cropcusoil(m,l),custot(i,m,l),
      :              sbcutot(i,m,l),sbcropcusoil(i,m,l),sbcustot(i,m,l),
-!     :            tdp(m,l),SHORTAGE
-     :              sbtdp(i,m,l),sbshortage(i,m,l)
+!     :            tdp(m,l),SHORTAGE,
+     :              sbtdp(i,m,l),sbshortage(i,m,l),
+!     :            gwdivsm(m,l),gwcusm(m,l),
+     :              sbgwdivsm(i,m,l),sbgwcusm(i,m,l)
                     case default
                   WRITE(UNIT=IBD1UN)
 !     :            I,NYR1+M-1,L,AMN(L),
@@ -9827,9 +9892,9 @@
      &              sbcrop_cut(i,m,l),sbsoil_cu(i,m,l),sbulagt(i,m,l),
 !     :            effcu(m,l),seffcu(m,l),
      :              sbeffcu(i,m,l),sbseffcu(i,m,l),
-!     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!     :            gdiv(m,l),effgw(m,l),gwcu(m,l)-gwcusm(m,l),gwro(m,l),
      :              sbgdiv(i,m,l),sbeffgw(i,m,l),
-     &              sbgwcu(i,m,l),sbgwro(i,m,l),
+     &              sbgwcu(i,m,l)-sbgwcusm(i,m,l),sbgwro(i,m,l),
 !     :            soiltott(m,l),
      :              sbsoiltott(i,m,l),
 !     :            cutot,cropcusoil(m,l),custot(i,m,l),
@@ -9838,6 +9903,8 @@
      :              sbtdp(i,m,l),
 !     :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
      :              sbshortage(i,m,l),sbgsdiv(i,m,l),sbgfdiv(i,m,l),
+!     :            gwdivsm(m,l),gwcusm(m,l),
+     :              sbgwdivsm(i,m,l),sbgwcusm(i,m,l),
 !     :            (grass(i,m,l,ifx),ifx=1,iflood2)
      :              (sbgrass(i,m,l,ifx),ifx=1,iflood2)
                   end select !iflood
@@ -10047,15 +10114,17 @@
      :              bcrop_cut(m,l),bsoil_cu(m,l),bulagt(m,l),
 !     :            effcu(m,l),seffcu(m,l),
      :              beffcu(m,l),bseffcu(m,l),
-!     :            gdiv(m,l),effgw(m,l),gwcu(m,l),gwro(m,l),
+!     :            gdiv(m,l),effgw(m,l),gwcu(m,l)-gwcusm(m,l),gwro(m,l),
      :              bgdiv(m,l),beffgw(m,l),
-     &              bgwcu(m,l),bgwro(m,l),
+     &              bgwcu(m,l)-bgwcusm(m,l),bgwro(m,l),
 !     :            soiltott(m,l),
      :              bsoiltott(m,l),
 !     :            cutot,cropcusoil(m,l),custot(i,m,l),
      :              bcutot(m,l),bcropcusoil(m,l),bcustot(m,l),
 !     :            tdp(m,l),SHORTAGE
-     :              btdp(m,l), bshortage(m,l)
+     :              btdp(m,l), bshortage(m,l),
+!     :            gwdivsm(m,l),gwcusm(m,l),
+     :              bgwdivsm(m,l),bgwcusm(m,l)
 !jhb====================================================================
                     case default
                   WRITE(UNIT=IBD1UN)
@@ -10089,6 +10158,8 @@
      :              btdp(m,l),
 !     :            SHORTAGE,gsdiv(m,l),gfdiv(m,l),
      :              bshortage(m,l),bgsdiv(m,l),bgfdiv(m,l),
+!     :            gwdivsm(m,l),gwcusm(m,l),
+     :              bgwdivsm(m,l),bgwcusm(m,l),
 !     :            (grass(i,m,l,ifx),ifx=1,iflood2)
      :              (bgrass(m,l,ifx),ifx=1,iflood2)
                   end select !iflood
@@ -10790,7 +10861,10 @@
      :    reqreqts(m,14),
      :    divsup(nbasin+1,m,14),conv,closs(m,14),fdiv(m,14),arech(m,14),
      :    tsfeff(m),crop_cut(m,14),soil_cu(m,14),ulagt(m,14),
-     :    effcu(m,14),gdiv(m,14),effgw(m,14),gwcu(m,14),gwro(m,14),
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    effcu(m,14),gdiv(m,14),effgw(m,14),gwcu(m,14),gwro(m,14),
+     :    effcu(m,14),gdiv(m,14),effgw(m,14),gwcu(m,14)-gwcusm(m,14),
+     :    gwcusm(m,14),gwro(m,14),
      :    soiltott(m,14),cutot,cropcusoil(m,14),cust,tdp(m,14)
           else
           write(800,1632) percenta(m),method2,nyr1+m-1,
@@ -10799,9 +10873,14 @@
      :    reqreqts(m,14),
      :    divsup(nbasin+1,m,14),conv,closs(m,14),fdiv(m,14),arech(m,14),
      :    tsfeff(m),crop_cut(m,14),soil_cu(m,14),ulagt(m,14),
-     :    effcu(m,14),gdiv(m,14),effgw(m,14),gwcu(m,14),gwro(m,14),
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    effcu(m,14),gdiv(m,14),effgw(m,14),gwcu(m,14),gwro(m,14),
+     :    effcu(m,14),gdiv(m,14),effgw(m,14),gwcu(m,14)-gwcusm(m,14),
+     :    gwcusm(m,14),gwro(m,14),
      :    soiltott(m,14),cutot,cropcusoil(m,14),cust,tdp(m,14),
-     :    gsdiv(m,14),gfdiv(m,14)
+!         jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :    gsdiv(m,14),gfdiv(m,14)
+     :    gsdiv(m,14),gfdiv(m,14),gwdivsm(m,14)
           endif
         enddo
         write(800,1651) 
@@ -10823,7 +10902,10 @@
      :   divsup(nbasin+1,nyrs2,13),conv,closs(nyrs2,13),fdiv(nyrs2,13),
      :   arech(nyrs2,13),tsfeff(nyrs1),crop_cut(nyrs2,13),
      :   soil_cu(nyrs2,13),ulagt(nyrs2,13),effcu(nyrs2,13),
-     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+!        jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13)-gwcusm(nyrs2,13),
+     :   gwcusm(nyrs2,13),gwro(nyrs2,13),
      :   soiltott(nyrs,14),cutot,cropcusoil(nyrs2,13),cust,
      :   tdp(nyrs2,13)
          else
@@ -10833,9 +10915,13 @@
      :   divsup(nbasin+1,nyrs2,13),conv,closs(nyrs2,13),fdiv(nyrs2,13),
      :   arech(nyrs2,13),tsfeff(nyrs1),crop_cut(nyrs2,13),
      :   soil_cu(nyrs2,13),ulagt(nyrs2,13),effcu(nyrs2,13),
-     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+!        jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13)-gwcusm(nyrs2,13),
+     :   gwcusm(nyrs2,13),gwro(nyrs2,13),
      :   soiltott(nyrs,14),cutot,cropcusoil(nyrs2,13),cust,
-     :   tdp(nyrs2,13),gsdiv(nyrs2,13),gfdiv(nyrs2,13)
+!     :   tdp(nyrs2,13),gsdiv(nyrs2,13),gfdiv(nyrs2,13)
+     :   tdp(nyrs2,13),gsdiv(nyrs2,13),gfdiv(nyrs2,13),gwdivsm(nyrs2,13)
          endif
         do k1=1,3
            write(800,1651) 
@@ -10862,7 +10948,10 @@
      :arech(nyrs2,l),tsfeff(nyrs1),crop_cut(nyrs2,l),
      :soil_cu(nyrs2,l),
      :ulagt(nyrs2,l),effcu(nyrs2,l),gdiv(nyrs2,l),effgw(nyrs2,l),
-     :gwcu(nyrs2,l),gwro(nyrs2,l),soiltott(nyrs2,l),
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :gwcu(nyrs2,l),gwro(nyrs2,l),soiltott(nyrs2,l),
+     :gwcu(nyrs2,l)-gwcusm(nyrs2,l),gwcusm(nyrs2,l),
+     :gwro(nyrs2,l),soiltott(nyrs2,l),
      :cutot,cropcusoil(nyrs2,l),cust,tdp(nyrs2,l)
         else
          write(800,1630) method2,amn(l),ettot(nbasin+1,nyrs2,l),
@@ -10871,9 +10960,14 @@
      :divsup(nbasin+1,nyrs2,l),conv,closs(nyrs2,l),fdiv(nyrs2,l),
      :arech(nyrs2,l),tsfeff(nyrs1),crop_cut(nyrs2,l),
      :soil_cu(nyrs2,l),ulagt(nyrs2,l),effcu(nyrs2,l),gdiv(nyrs2,l),
-     :effgw(nyrs2,l),gwcu(nyrs2,l),gwro(nyrs2,l),soiltott(nyrs2,l),
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :effgw(nyrs2,l),gwcu(nyrs2,l),gwro(nyrs2,l),soiltott(nyrs2,l),
+     :effgw(nyrs2,l),gwcu(nyrs2,l)-gwcusm(nyrs2,l),gwcusm(nyrs2,l),
+     :gwro(nyrs2,l),soiltott(nyrs2,l),
      :cutot,cropcusoil(nyrs2,l),cust,tdp(nyrs2,l),gsdiv(nyrs2,l),
-     :gfdiv(nyrs2,l)
+!     jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :gfdiv(nyrs2,l)
+     :gfdiv(nyrs2,l),gwdivsm(nyrs2,l)
         endif
         enddo
       write(800,1651)
@@ -10895,7 +10989,10 @@
      :   divsup(nbasin+1,nyrs2,13),conv,closs(nyrs2,13),fdiv(nyrs2,13),
      :   arech(nyrs2,13),tsfeff(nyrs1),crop_cut(nyrs2,13),
      :   soil_cu(nyrs2,13),ulagt(nyrs2,13),effcu(nyrs2,13),
-     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+!        jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13)-gwcusm(nyrs2,13),
+     :   gwcusm(nyrs2,13),gwro(nyrs2,13),
      :   soiltott(nyrs,14),cutot,cropcusoil(nyrs2,13),cust,
      :   tdp(nyrs2,13)
          else
@@ -10905,9 +11002,13 @@
      :   divsup(nbasin+1,nyrs2,13),conv,closs(nyrs2,13),fdiv(nyrs2,13),
      :   arech(nyrs2,13),tsfeff(nyrs1),crop_cut(nyrs2,13),
      :   soil_cu(nyrs2,13),ulagt(nyrs2,13),effcu(nyrs2,13),
-     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+!        jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13),gwro(nyrs2,13),
+     :   gdiv(nyrs2,13),effgw(nyrs2,13),gwcu(nyrs2,13)-gwcusm(nyrs2,13),
+     :   gwcusm(nyrs2,13),gwro(nyrs2,13),
      :   soiltott(nyrs,14),cutot,cropcusoil(nyrs2,13),cust,
-     :   tdp(nyrs2,13),gsdiv(nyrs2,13),gfdiv(nyrs2,13)
+!     :   tdp(nyrs2,13),gsdiv(nyrs2,13),gfdiv(nyrs2,13)
+     :   tdp(nyrs2,13),gsdiv(nyrs2,13),gfdiv(nyrs2,13),gwdivsm(nyrs2,13)
          endif
 
           write(800,1651)
@@ -10937,7 +11038,10 @@
      :           treqt(m,l),twbu(m,l),treq(m,l),
      :          tdiv(m,l),conv,tcloss(m,l),tfdiv(m,l),tarech(m,l),
      :       tsfeff(m),tcut(m,l),tscu(m,l),tulagt(m,l),teffcu(m,l),
-     :          tgdiv(m,l),teffgw(m,l),tgwcu(m,l),tgwro(m,l),
+!               jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :          tgdiv(m,l),teffgw(m,l),tgwcu(m,l),tgwro(m,l),
+     :          tgdiv(m,l),teffgw(m,l),tgwcu(m,l)-tgwcusm(m,l),
+     :          tgwcusm(m,l),tgwro(m,l),
      :          ttott(m,l),cutot,tcusoil(m,l),
      :          cust,ttdp(m,l)
                 else
@@ -10945,9 +11049,13 @@
      :           treqt(m,l),twbu(m,l),treq(m,l),
      :          tdiv(m,l),conv,tcloss(m,l),tfdiv(m,l),tarech(m,l),
      :       tsfeff(m),tcut(m,l),tscu(m,l),tulagt(m,l),teffcu(m,l),
-     :          tgdiv(m,l),teffgw(m,l),tgwcu(m,l),tgwro(m,l),
+!               jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :          tgdiv(m,l),teffgw(m,l),tgwcu(m,l),tgwro(m,l),
+     :          tgdiv(m,l),teffgw(m,l),tgwcu(m,l)-tgwcusm(m,l),
+     :          tgwcusm(m,l),tgwro(m,l),
      :          ttott(m,l),cutot,tcusoil(m,l),
-     :          cust,ttdp(m,l),tgsdiv(m,l),tgfdiv(m,l)
+!     :          cust,ttdp(m,l),tgsdiv(m,l),tgfdiv(m,l)
+     :          cust,ttdp(m,l),tgsdiv(m,l),tgfdiv(m,l),tgwdivsm(m,l)
                 endif
             enddo
          enddo        
@@ -10955,219 +11063,466 @@
 
 !  format statements
 !  600 series for when groundwater is considered
-600   Format (256('-'))
-601   Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
-     :3x,'EOM',3x,'|    IWR    |',
-     :24x,'River Diversion (Surface Water) Accounting',
-     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
-     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|')
-602   Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
-     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
-     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|')
-603   Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
-     :t|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
-     :'|',
-     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
-     :,3x,'|',8x,'|',2x,'Total',3x,'|')
-604   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
-     :,3x,'Precip  |',3x,'River',3x,'|Conv',
-     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
-     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
-     :1x,'  EOM   |',
-     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|')
-605   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :1x,'Diversion',1x,'|Effic|',
-     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
-     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
-     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
-     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |')
-606   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :11x,'|',5x,'|',7x,'|',
-     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
-     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |')
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!600   Format (256('-'))
+!601   Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
+!     :3x,'EOM',3x,'|    IWR    |',
+!     :24x,'River Diversion (Surface Water) Accounting',
+!     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
+!     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|')
+!602   Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
+!     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
+!     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|')
+!603   Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
+!     :t|  Precip |   Winter  |',2x,
+!     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
+!     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+!     :'|',
+!     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
+!     :,3x,'|',8x,'|',2x,'Total',3x,'|')
+!604   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
+!     :,3x,'Precip  |',3x,'River',3x,'|Conv',
+!     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
+!     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
+!     :1x,'  EOM   |',
+!     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|')
+!605   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :1x,'Diversion',1x,'|Effic|',
+!     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
+!     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
+!     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
+!     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |')
+!606   Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
+!     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |')
+!         ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed |
+!         ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+600   Format ('---------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------')
+601   Format ('|Year/| Analysis | Potential | Effect| Irrigation|   EOM 
+     :  |    IWR    |                        River Diversion (Surface Wa
+     :ter) Accounting                         |       Ground Water Diver
+     :sion Accounting         |Delivered|       Estimated Crop CU       
+     :|          |')
+602   Format ('|     |          |   Crop    |       |   Water   |  Winte
+     :r |   After   |---------------------------------------------------
+     :----------------------------------------|-------------------------
+     :------------------------|  Soil   |-------------------------------
+     :|          |')
+603   Format ('|Month|  Method  |    ET     | Precip|Requirement|  Preci
+     :p |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim 
+     :|     Farm Diversion to      |Calculated|Groundwater|      |      
+     :Farm Diversion to       | Moisture|    From    |  From   |        
+     :|  Total   |')
+604   Format ('|     |          |           |       |   (IWR)   |Carryov
+     :er|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic
+     :|----------------------------| Surface  |           |Calcd |------
+     :------------------------|   EOM   |  Surface/  |  Soil   |        
+     :|  Month   |')
+605   Format ('|     |          |           |       |           |       
+     :  |           | Diversion |Effic| Loss  | Diversion|Applied|Effic 
+     :|   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU
+     :    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total 
+     :|   Non-   |')
+606   Format ('|     |          |           |       |           |       
+     :  |           |           |     |       |          |       |      
+     :|        |          |Consumed|Effic (%) |           |Effic |      
+     :    |          |Consumed|         |  Diversion |         |        
+     :| Consumed |')
 ! jhb 09-06-07 add variable length column headers for different values of iflood (1 and 2 for now)
 ! jhb 09-06-07 iflood = 1
-2600  Format (310('-'))
-2601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
-     :3x,'EOM',3x,'|    IWR    |',
-     :24x,'River Diversion (Surface Water) Accounting',
-     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
-     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
-     :'  Ground Water   |        |   SubIrrigated  | Tail-  |')
-2602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
-     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
-     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
-     :'-----------------|        |      Crop 1     | Water  |')
-2603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
-     :t|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
-     :'|',
-     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
-     :,3x,'|',8x,'|',2x,'Total',3x,'|',
-     :'  Diversion To   |        |                 |        |')
-2604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
-     :,3x,'Precip  |',3x,'River',3x,'|Conv',
-     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
-     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
-     :1x,'  EOM   |',
-     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
-     :'-----------------| Total  |-----------------|--------|')
-2605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :1x,'Diversion',1x,'|Effic|',
-     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
-     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
-     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
-     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
-     :'  Spr   | Flood  |Shortage|   IWR  | Acreage| Diver- |')
-2606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :11x,'|',5x,'|',7x,'|',
-     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
-     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
-     :' Acreage| Acreage|        |        |        |  sion  |')
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!2600  Format (310('-'))
+!2601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
+!     :3x,'EOM',3x,'|    IWR    |',
+!     :24x,'River Diversion (Surface Water) Accounting',
+!     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
+!     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
+!     :'  Ground Water   |        |   SubIrrigated  | Tail-  |')
+!2602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
+!     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
+!     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
+!     :'-----------------|        |      Crop 1     | Water  |')
+!2603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
+!     :t|  Precip |   Winter  |',2x,
+!     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
+!     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+!     :'|',
+!     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
+!     :,3x,'|',8x,'|',2x,'Total',3x,'|',
+!     :'  Diversion To   |        |                 |        |')
+!2604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
+!     :,3x,'Precip  |',3x,'River',3x,'|Conv',
+!     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
+!     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
+!     :1x,'  EOM   |',
+!     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
+!     :'-----------------| Total  |-----------------|--------|')
+!2605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :1x,'Diversion',1x,'|Effic|',
+!     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
+!     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
+!     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
+!     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
+!     :'  Spr   | Flood  |Shortage|   IWR  | Acreage| Diver- |')
+!2606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
+!     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
+!     :' Acreage| Acreage|        |        |        |  sion  |')
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |       Ground Water       |        |   SubIrrigated  | Tail-  |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |--------------------------|        |      Crop 1     | Water  |
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |        Delivery To       |        |                 |        |
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |--------------------------| Total  |-----------------|--------|
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage| Diver- |
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|  Zone  |        |        |        |  sion  |
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2600  Format ('---------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :---------')
+2601  Format ('|Year/| Analysis | Potential | Effect| Irrigation|   EOM 
+     :  |    IWR    |                        River Diversion (Surface Wa
+     :ter) Accounting                         |       Ground Water Diver
+     :sion Accounting         |Delivered|       Estimated Crop CU       
+     :|          |       Ground Water       |        |   SubIrrigated  |
+     : Tail-  |')
+2602  Format ('|     |          |   Crop    |       |   Water   |  Winte
+     :r |   After   |---------------------------------------------------
+     :----------------------------------------|-------------------------
+     :------------------------|  Soil   |-------------------------------
+     :|          |--------------------------|        |      Crop 1     |
+     : Water  |')
+2603  Format ('|Month|  Method  |    ET     | Precip|Requirement|  Preci
+     :p |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim 
+     :|     Farm Diversion to      |Calculated|Groundwater|      |      
+     :Farm Diversion to       | Moisture|    From    |  From   |        
+     :|  Total   |        Delivery To       |        |                 |
+     :        |')
+2604  Format ('|     |          |           |       |   (IWR)   |Carryov
+     :er|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic
+     :|----------------------------| Surface  |           |Calcd |------
+     :------------------------|   EOM   |  Surface/  |  Soil   |        
+     :|  Month   |--------------------------| Total  |-----------------|
+     :--------|')
+2605  Format ('|     |          |           |       |           |       
+     :  |           | Diversion |Effic| Loss  | Diversion|Applied|Effic 
+     :|   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU
+     :    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total 
+     :|   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|
+     : Diver- |')
+2606  Format ('|     |          |           |       |           |       
+     :  |           |           |     |       |          |       |      
+     :|        |          |Consumed|Effic (%) |           |Effic |      
+     :    |          |Consumed|         |  Diversion |         |        
+     :| Consumed | Acreage| Acreage|  Zone  |        |        |        |
+     :  sion  |')
 ! jhb 09-06-07 iflood = 2
-3600  Format (328('-'))
-3601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
-     :3x,'EOM',3x,'|    IWR    |',
-     :24x,'River Diversion (Surface Water) Accounting',
-     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
-     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
-     :'  Ground Water   |        |   SubIrrigated  |',
-     :'   SubIrrigated  | Tail-  |')
-3602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
-     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
-     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
-     :'-----------------|        |      Crop 1     |',
-     :'      Crop 2     | Water  |')
-3603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
-     :t|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
-     :'|',
-     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
-     :,3x,'|',8x,'|',2x,'Total',3x,'|',
-     :'  Diversion To   |        |                 |',
-     :'                 |        |')
-3604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
-     :,3x,'Precip  |',3x,'River',3x,'|Conv',
-     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
-     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
-     :1x,'  EOM   |',
-     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
-     :'-----------------| Total  |-----------------|',
-     :'-----------------|--------|')
-3605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :1x,'Diversion',1x,'|Effic|',
-     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
-     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
-     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
-     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
-     :'  Spr   | Flood  |Shortage|   IWR  | Acreage|',
-     :'   IWR  | Acreage| Diver- |')
-3606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :11x,'|',5x,'|',7x,'|',
-     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
-     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
-     :' Acreage| Acreage|        |        |        |',
-     :'        |        |  sion  |')
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!3600  Format (328('-'))
+!3601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
+!     :3x,'EOM',3x,'|    IWR    |',
+!     :24x,'River Diversion (Surface Water) Accounting',
+!     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
+!     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
+!     :'  Ground Water   |        |   SubIrrigated  |',
+!     :'   SubIrrigated  | Tail-  |')
+!3602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
+!     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
+!     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
+!     :'-----------------|        |      Crop 1     |',
+!     :'      Crop 2     | Water  |')
+!3603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
+!     :t|  Precip |   Winter  |',2x,
+!     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
+!     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+!     :'|',
+!     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
+!     :,3x,'|',8x,'|',2x,'Total',3x,'|',
+!     :'  Diversion To   |        |                 |',
+!     :'                 |        |')
+!3604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
+!     :,3x,'Precip  |',3x,'River',3x,'|Conv',
+!     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
+!     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
+!     :1x,'  EOM   |',
+!     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
+!     :'-----------------| Total  |-----------------|',
+!     :'-----------------|--------|')
+!3605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :1x,'Diversion',1x,'|Effic|',
+!     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
+!     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
+!     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
+!     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
+!     :'  Spr   | Flood  |Shortage|   IWR  | Acreage|',
+!     :'   IWR  | Acreage| Diver- |')
+!3606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
+!     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
+!     :' Acreage| Acreage|        |        |        |',
+!     :'        |        |  sion  |')
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |       Ground Water       |        |   SubIrrigated  |   SubIrrigated  | Tail-  |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |--------------------------|        |      Crop 1     |      Crop 2     | Water  |
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |       Diversion To       |        |                 |                 |        |
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |--------------------------| Total  |-----------------|-----------------|--------|
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|   IWR  | Acreage| Diver- |
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|  Zone  |        |        |        |        |        |  sion  |
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3600  Format ('---------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :---------------------------')
+3601  Format ('|Year/| Analysis | Potential | Effect| Irrigation|   EOM 
+     :  |    IWR    |                        River Diversion (Surface Wa
+     :ter) Accounting                         |       Ground Water Diver
+     :sion Accounting         |Delivered|       Estimated Crop CU       
+     :|          |       Ground Water       |        |   SubIrrigated  |
+     :   SubIrrigated  | Tail-  |')
+3602  Format ('|     |          |   Crop    |       |   Water   |  Winte
+     :r |   After   |---------------------------------------------------
+     :----------------------------------------|-------------------------
+     :------------------------|  Soil   |-------------------------------
+     :|          |--------------------------|        |      Crop 1     |
+     :      Crop 2     | Water  |')
+3603  Format ('|Month|  Method  |    ET     | Precip|Requirement|  Preci
+     :p |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim 
+     :|     Farm Diversion to      |Calculated|Groundwater|      |      
+     :Farm Diversion to       | Moisture|    From    |  From   |        
+     :|  Total   |        Delivery To       |        |                 |
+     :                 |        |')
+3604  Format ('|     |          |           |       |   (IWR)   |Carryov
+     :er|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic
+     :|----------------------------| Surface  |           |Calcd |------
+     :------------------------|   EOM   |  Surface/  |  Soil   |        
+     :|  Month   |--------------------------| Total  |-----------------|
+     :-----------------|--------|')
+3605  Format ('|     |          |           |       |           |       
+     :  |           | Diversion |Effic| Loss  | Diversion|Applied|Effic 
+     :|   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU
+     :    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total 
+     :|   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|
+     :   IWR  | Acreage| Diver- |')
+3606  Format ('|     |          |           |       |           |       
+     :  |           |           |     |       |          |       |      
+     :|        |          |Consumed|Effic (%) |           |Effic |      
+     :    |          |Consumed|         |  Diversion |         |        
+     :| Consumed | Acreage| Acreage|  Zone  |        |        |        |
+     :        |        |  sion  |')
 ! jhb 09-06-07 iflood = 3
-4600  Format (346('-'))
-4601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
-     :3x,'EOM',3x,'|    IWR    |',
-     :24x,'River Diversion (Surface Water) Accounting',
-     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
-     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
-     :'  Ground Water   |        |   SubIrrigated  |',
-     :'   SubIrrigated  |   SubIrrigated  | Tail-  |')
-4602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
-     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
-     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
-     :'-----------------|        |      Crop 1     |',
-     :'      Crop 2     |      Crop 3     | Water  |')
-4603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
-     :t|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
-     :'|',
-     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
-     :,3x,'|',8x,'|',2x,'Total',3x,'|',
-     :'  Diversion To   |        |                 |',
-     :'                 |                 |        |')
-4604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
-     :,3x,'Precip  |',3x,'River',3x,'|Conv',
-     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
-     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
-     :1x,'  EOM   |',
-     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
-     :'-----------------| Total  |-----------------|',
-     :'-----------------|-----------------|--------|')
-4605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :1x,'Diversion',1x,'|Effic|',
-     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
-     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
-     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
-     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
-     :'  Spr   | Flood  |Shortage|   IWR  | Acreage|',
-     :'   IWR  | Acreage|   IWR  | Acreage| Diver- |')
-4606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :11x,'|',5x,'|',7x,'|',
-     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
-     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
-     :' Acreage| Acreage|        |        |        |',
-     :'        |        |        |        |  sion  |')
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!4600  Format (346('-'))
+!4601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
+!     :3x,'EOM',3x,'|    IWR    |',
+!     :24x,'River Diversion (Surface Water) Accounting',
+!     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
+!     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
+!     :'  Ground Water   |        |   SubIrrigated  |',
+!     :'   SubIrrigated  |   SubIrrigated  | Tail-  |')
+!4602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
+!     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
+!     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
+!     :'-----------------|        |      Crop 1     |',
+!     :'      Crop 2     |      Crop 3     | Water  |')
+!4603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
+!     :t|  Precip |   Winter  |',2x,
+!     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
+!     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+!     :'|',
+!     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
+!     :,3x,'|',8x,'|',2x,'Total',3x,'|',
+!     :'  Diversion To   |        |                 |',
+!     :'                 |                 |        |')
+!4604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
+!     :,3x,'Precip  |',3x,'River',3x,'|Conv',
+!     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
+!     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
+!     :1x,'  EOM   |',
+!     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
+!     :'-----------------| Total  |-----------------|',
+!     :'-----------------|-----------------|--------|')
+!4605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :1x,'Diversion',1x,'|Effic|',
+!     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
+!     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
+!     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
+!     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
+!     :'  Spr   | Flood  |Shortage|   IWR  | Acreage|',
+!     :'   IWR  | Acreage|   IWR  | Acreage| Diver- |')
+!4606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
+!     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
+!     :' Acreage| Acreage|        |        |        |',
+!     :'        |        |        |        |  sion  |')
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |       Ground Water       |        |   SubIrrigated  |   SubIrrigated  |   SubIrrigated  | Tail-  |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |--------------------------|        |      Crop 1     |      Crop 2     |      Crop 3     | Water  |
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |       Diversion To       |        |                 |                 |                 |        |
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |--------------------------| Total  |-----------------|-----------------|-----------------|--------|
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|   IWR  | Acreage|   IWR  | Acreage| Diver- |
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|  Zone  |        |        |        |        |        |        |        |  sion  |
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4600  Format ('---------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :---------------------------------------------')
+4601  Format ('|Year/| Analysis | Potential | Effect| Irrigation|   EOM 
+     :  |    IWR    |                        River Diversion (Surface Wa
+     :ter) Accounting                         |       Ground Water Diver
+     :sion Accounting         |Delivered|       Estimated Crop CU       
+     :|          |       Ground Water       |        |   SubIrrigated  |
+     :   SubIrrigated  |   SubIrrigated  | Tail-  |')
+4602  Format ('|     |          |   Crop    |       |   Water   |  Winte
+     :r |   After   |---------------------------------------------------
+     :----------------------------------------|-------------------------
+     :------------------------|  Soil   |-------------------------------
+     :|          |--------------------------|        |      Crop 1     |
+     :      Crop 2     |      Crop 3     | Water  |')
+4603  Format ('|Month|  Method  |    ET     | Precip|Requirement|  Preci
+     :p |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim 
+     :|     Farm Diversion to      |Calculated|Groundwater|      |      
+     :Farm Diversion to       | Moisture|    From    |  From   |        
+     :|  Total   |        Delivery To       |        |                 |
+     :                 |                 |        |')
+4604  Format ('|     |          |           |       |   (IWR)   |Carryov
+     :er|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic
+     :|----------------------------| Surface  |           |Calcd |------
+     :------------------------|   EOM   |  Surface/  |  Soil   |        
+     :|  Month   |--------------------------| Total  |-----------------|
+     :-----------------|-----------------|--------|')
+4605  Format ('|     |          |           |       |           |       
+     :  |           | Diversion |Effic| Loss  | Diversion|Applied|Effic 
+     :|   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU
+     :    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total 
+     :|   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|
+     :   IWR  | Acreage|   IWR  | Acreage| Diver- |')
+4606  Format ('|     |          |           |       |           |       
+     :  |           |           |     |       |          |       |      
+     :|        |          |Consumed|Effic (%) |           |Effic |      
+     :    |          |Consumed|         |  Diversion |         |        
+     :| Consumed | Acreage| Acreage|  Zone  |        |        |        |
+     :        |        |        |        |  sion  |')
 ! jhb 09-06-07 iflood = 4 or more
-5600  Format (364('-'))
-5601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
-     :3x,'EOM',3x,'|    IWR    |',
-     :24x,'River Diversion (Surface Water) Accounting',
-     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
-     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
-     :'  Ground Water   |        |   SubIrrigated  |',
-     :'   SubIrrigated  |   SubIrrigated  |   SubIrrigated  | Tail-  |')
-5602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
-     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
-     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
-     :'-----------------|        |      Crop 1     |',
-     :'      Crop 2     |      Crop 3     |      Crop 4     | Water  |')
-5603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
-     :t|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
-     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
-     :'|',
-     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
-     :,3x,'|',8x,'|',2x,'Total',3x,'|',
-     :'  Diversion To   |        |                 |',
-     :'                 |                 |                 |        |')
-5604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
-     :,3x,'Precip  |',3x,'River',3x,'|Conv',
-     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
-     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
-     :1x,'  EOM   |',
-     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
-     :'-----------------| Total  |-----------------|',
-     :'-----------------|-----------------|-----------------|--------|')
-5605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :1x,'Diversion',1x,'|Effic|',
-     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
-     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
-     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
-     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
-     :'  Spr   | Flood  |Shortage|   IWR  | Acreage|',
-     :'   IWR  | Acreage|   IWR  | Acreage|   IWR  | Acreage| Diver- |')
-5606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
-     :11x,'|',5x,'|',7x,'|',
-     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
-     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
-     :' Acreage| Acreage|        |        |        |',
-     :'        |        |        |        |        |        |  sion  |')
-
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!5600  Format (364('-'))
+!5601  Format ('|','Year/| Analysis | Potential | Effect| Irrigation|',
+!     :3x,'EOM',3x,'|    IWR    |',
+!     :24x,'River Diversion (Surface Water) Accounting',
+!     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered',
+!     :'|',7x,'Estimated Crop CU',7x,'|',10x,'|',
+!     :'  Ground Water   |        |   SubIrrigated  |',
+!     :'   SubIrrigated  |   SubIrrigated  |   SubIrrigated  | Tail-  |')
+!5602  Format('|',5x,'|',10x,'|   Crop    |',7x,'|',3x,'Water',3x,
+!     :'|  Winter |',3x,'After',3x,'|',91('-'),'|',38('-'),
+!     :'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
+!     :'-----------------|        |      Crop 1     |',
+!     :'      Crop 2     |      Crop 3     |      Crop 4     | Water  |')
+!5603  Format ('|','Month','|  Method  |',4x,'ET',5x,'| Precip|Requiremen
+!     :t|  Precip |   Winter  |',2x,
+!     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm',3x,'|Sprnklr|','Maxim',
+!     :1x,'|',5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,
+!     :'|',
+!     :3x,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From'
+!     :,3x,'|',8x,'|',2x,'Total',3x,'|',
+!     :'  Diversion To   |        |                 |',
+!     :'                 |                 |                 |        |')
+!5604  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|   (IWR)   |Carryover|'
+!     :,3x,'Precip  |',3x,'River',3x,'|Conv',
+!     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate',1x,'|FHG(Not|Applic|',
+!     :28('-'),'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',
+!     :1x,'  EOM   |',
+!     :2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,'Month',3x,'|',
+!     :'-----------------| Total  |-----------------|',
+!     :'-----------------|-----------------|-----------------|--------|')
+!5605  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :1x,'Diversion',1x,'|Effic|',
+!     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic |',3x,'CU',3x,'|',
+!     :1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
+!     :'|Applic|',4x,'CU',4x,'|  Non-  |',' Contents|',1x,'Groundwater|',
+!     :1x,'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
+!     :'  Spr   | Flood  |Shortage|   IWR  | Acreage|',
+!     :'   IWR  | Acreage|   IWR  | Acreage|   IWR  | Acreage| Diver- |')
+!5606  Format ('|',5x,'|',10x,'|',11x,'|',7x,'|',11x,'|',9x,'|',11x,'|',
+!     :11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|'6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
+!     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
+!     :' Acreage| Acreage|        |        |        |',
+!     :'        |        |        |        |        |        |  sion  |')
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!         |Year/| Analysis | Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |       Ground Water Diversion Accounting         |Delivered|       Estimated Crop CU       |          |       Ground Water       |        |   SubIrrigated  |   SubIrrigated  |   SubIrrigated  |   SubIrrigated  | Tail-  |
+!         |     |          |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |--------------------------|        |      Crop 1     |      Crop 2     |      Crop 3     |      Crop 4     | Water  |
+!         |Month|  Method  |    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |       Diversion To       |        |                 |                 |                 |                 |        |
+!         |     |          |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |--------------------------| Total  |-----------------|-----------------|-----------------|-----------------|--------|
+!         |     |          |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|   IWR  | Acreage|   IWR  | Acreage|   IWR  | Acreage| Diver- |
+!         |     |          |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|  Zone  |        |        |        |        |        |        |        |        |        |  sion  |
+!         ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5600  Format ('---------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :---------------------------------------------------------------')
+5601  Format ('|Year/| Analysis | Potential | Effect| Irrigation|   EOM 
+     :  |    IWR    |                        River Diversion (Surface Wa
+     :ter) Accounting                         |       Ground Water Diver
+     :sion Accounting         |Delivered|       Estimated Crop CU       
+     :|          |       Ground Water       |        |   SubIrrigated  |
+     :   SubIrrigated  |   SubIrrigated  |   SubIrrigated  | Tail-  |')
+5602  Format ('|     |          |   Crop    |       |   Water   |  Winte
+     :r |   After   |---------------------------------------------------
+     :----------------------------------------|-------------------------
+     :------------------------|  Soil   |-------------------------------
+     :|          |--------------------------|        |      Crop 1     |
+     :      Crop 2     |      Crop 3     |      Crop 4     | Water  |')
+5603  Format ('|Month|  Method  |    ET     | Precip|Requirement|  Preci
+     :p |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim 
+     :|     Farm Diversion to      |Calculated|Groundwater|      |      
+     :Farm Diversion to       | Moisture|    From    |  From   |        
+     :|  Total   |        Delivery To       |        |                 |
+     :                 |                 |                 |        |')
+5604  Format ('|     |          |           |       |   (IWR)   |Carryov
+     :er|   Precip  |   River   |Conv | Conv  | Headgate |FHG(Not|Applic
+     :|----------------------------| Surface  |           |Calcd |------
+     :------------------------|   EOM   |  Surface/  |  Soil   |        
+     :|  Month   |--------------------------| Total  |-----------------|
+     :-----------------|-----------------|-----------------|--------|')
+5605  Format ('|     |          |           |       |           |       
+     :  |           | Diversion |Effic| Loss  | Diversion|Applied|Effic 
+     :|   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU
+     :    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total 
+     :|   Non-   |  Spr   | Flood  |  Soil  |Shortage|   IWR  | Acreage|
+     :   IWR  | Acreage|   IWR  | Acreage|   IWR  | Acreage| Diver- |')
+5606  Format ('|     |          |           |       |           |       
+     :  |           |           |     |       |          |       |      
+     :|        |          |Consumed|Effic (%) |           |Effic |      
+     :    |          |Consumed|         |  Diversion |         |        
+     :| Consumed | Acreage| Acreage|  Zone  |        |        |        |
+     :        |        |        |        |        |        |  sion  |')
 ! grb 05-11-00 remove separate print without soil moisture
 !607   Format (1x,i4,2x,a10,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
 !     :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.2,
@@ -11597,76 +11952,184 @@
      :  f6.2,'|',15(1x,f6.2,1x,'|'),300(" "))
 983   Format (t5, 'Starting Soil Moisture:  Senior = ', f8.2,'   Junior
      := ', f8.2, '   Other = ',f8.2,438(" "))
-1600  Format (264('-'))
-1601  Format ('|   %   | Analysis |','Year/| Potential | Effect|',
-     :' Irrigation|',3x,'EOM',3x,'|    IWR    |',
-     :24x,'River Diversion (Surface Water) Accounting',
-     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered|',
-     :7x,'Estimated Crop CU',7x,'|',10x,'|')
-1602  Format('|Project|',10x,'|',5x,'|   Crop    |',7x,'|',3x,'Water',
-     :3x,'|  Winter |',3x,'After',3x,'|',91('-'),'|',
-     :38('-'),'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|')
-1603  Format ('| Calcd |  Method  |','Month','|',4x,'ET',5x,'| Precip|Re
-     :quirement|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm   |Sprnklr|Maxim',1x,'|'
-     :,5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,'|',3x
-     :,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
-     :3x,'|',8x,'|',2x,'Total',3x,'|')
-1604  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|   (IWR)   |Carryov
-     :er|',3x,'Precip  |',3x,'River',3x,'|Conv',
-     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate |FHG-Not|Applic|',28('-'),
-     :'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',1x,
-     :'  EOM   |',2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,
-     :'Month',3x,'|')
-1605  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,'|',
-     :11x,'|',1x,'Diversion',1x,'|Effic|',
-     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic',1x,'|',3x,'CU',3x,
-     :'|',1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
-     :'|Applic|',4x,'CU',4x,'|  Non-  | Contents|',1x,'Groundwater|',1x,
-     :'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |')
-1606  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,
-     :'|',11x,'|',11x,'|',5x,'|',7x,'|',
-     :10x,'|',7x,'|',6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
-     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |')
-6600  Format (282('-'))
-6601  Format ('|   %   | Analysis |','Year/| Potential | Effect|',
-     :' Irrigation|',3x,'EOM',3x,'|    IWR    |',
-     :24x,'River Diversion (Surface Water) Accounting',
-     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered|',
-     :7x,'Estimated Crop CU',7x,'|',10x,'|',
-     :'  Ground Water   |')
-6602  Format('|Project|',10x,'|',5x,'|   Crop    |',7x,'|',3x,'Water',
-     :3x,'|  Winter |',3x,'After',3x,'|',91('-'),'|',
-     :38('-'),'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
-     :'-----------------|')
-6603  Format ('| Calcd |  Method  |','Month','|',4x,'ET',5x,'| Precip|Re
-     :quirement|  Precip |   Winter  |',2x,
-     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm   |Sprnklr|Maxim',1x,'|'
-     :,5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,'|',3x
-     :,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
-     :3x,'|',8x,'|',2x,'Total',3x,'|',
-     :'  Diversion To   |')
-6604  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|   (IWR)   |Carryov
-     :er|',3x,'Precip  |',3x,'River',3x,'|Conv',
-     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate |FHG-Not|Applic|',28('-'),
-     :'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',1x,
-     :'  EOM   |',2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,
-     :'Month',3x,'|',
-     :'-----------------|')
-6605  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,'|',
-     :11x,'|',1x,'Diversion',1x,'|Effic|',
-     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic',1x,'|',3x,'CU',3x,
-     :'|',1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
-     :'|Applic|',4x,'CU',4x,'|  Non-  | Contents|',1x,'Groundwater|',1x,
-     :'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
-     :'  Spr   | Flood  |')
-6606  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,
-     :'|',11x,'|',11x,'|',5x,'|',7x,'|',
-     :10x,'|',7x,'|',6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
-     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
-     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
-     :' Acreage| Acreage|')
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!1600  Format (264('-'))
+!1601  Format ('|   %   | Analysis |','Year/| Potential | Effect|',
+!     :' Irrigation|',3x,'EOM',3x,'|    IWR    |',
+!     :24x,'River Diversion (Surface Water) Accounting',
+!     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered|',
+!     :7x,'Estimated Crop CU',7x,'|',10x,'|')
+!1602  Format('|Project|',10x,'|',5x,'|   Crop    |',7x,'|',3x,'Water',
+!     :3x,'|  Winter |',3x,'After',3x,'|',91('-'),'|',
+!     :38('-'),'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|')
+!1603  Format ('| Calcd |  Method  |','Month','|',4x,'ET',5x,'| Precip|Re
+!     :quirement|  Precip |   Winter  |',2x,
+!     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm   |Sprnklr|Maxim',1x,'|'
+!     :,5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,'|',3x
+!     :,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
+!     :3x,'|',8x,'|',2x,'Total',3x,'|')
+!1604  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|   (IWR)   |Carryov
+!     :er|',3x,'Precip  |',3x,'River',3x,'|Conv',
+!     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate |FHG-Not|Applic|',28('-'),
+!     :'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',1x,
+!     :'  EOM   |',2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,
+!     :'Month',3x,'|')
+!1605  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,'|',
+!     :11x,'|',1x,'Diversion',1x,'|Effic|',
+!     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic',1x,'|',3x,'CU',3x,
+!     :'|',1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
+!     :'|Applic|',4x,'CU',4x,'|  Non-  | Contents|',1x,'Groundwater|',1x,
+!     :'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |')
+!1606  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,
+!     :'|',11x,'|',11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|',6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
+!     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |')
+!old
+!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!|   %   | Analysis |Year/| Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |   Ground Water Diversion Accounting  |Delivered|       Estimated Crop CU       |          |
+!|Project|          |     |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|--------------------------------------|  Soil   |-------------------------------|          |
+!| Calcd |  Method  |Month|    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |   Diversion to    | Moisture|    From    |  From   |        |  Total   |
+!|       |          |     |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG-Not|Applic|----------------------------| Surface  |           |Calcd |-------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |
+!|       |          |     |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    |  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |
+!|       |          |     |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |Consumed|         |  Diversion |         |        | Consumed |
+!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!new
+!-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!|   %   | Analysis |Year/| Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |        Ground Water Diversion Accounting        |Delivered|       Estimated Crop CU       |          |
+!|Project|          |     |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |
+!| Calcd |  Method  |Month|    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |        Diversion to          | Moisture|    From    |  From   |        |  Total   |
+!|       |          |     |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG-Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |
+!|       |          |     |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |
+!|       |          |     |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed |
+!-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1600  Format ('---------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :--------------------')
+1601  Format ('|   %   | Analysis |Year/| Potential | Effect| Irrigation
+     :|   EOM   |    IWR    |                        River Diversion (Su
+     :rface Water) Accounting                         |        Ground Wa
+     :ter Diversion Accounting        |Delivered|       Estimated Crop C
+     :U       |          |')
+1602  Format ('|Project|          |     |   Crop    |       |   Water   
+     :|  Winter |   After   |-------------------------------------------
+     :------------------------------------------------|-----------------
+     :--------------------------------|  Soil   |-----------------------
+     :--------|          |')
+1603  Format ('| Calcd |  Method  |Month|    ET     | Precip|Requirement
+     :|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnkl
+     :r|Maxim |     Farm Diversion to      |Calculated|Groundwater|     
+     : |      Farm Diversion to       | Moisture|    From    |  From   |
+     :        |  Total   |')
+1604  Format ('|       |          |     |           |       |   (IWR)   
+     :|Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG-No
+     :t|Applic|----------------------------| Surface  |           |Calcd
+     : |------------------------------|   EOM   |  Surface/  |  Soil   |
+     :        |  Month   |')
+1605  Format ('|       |          |     |           |       |           
+     :|         |           | Diversion |Effic| Loss  | Diversion|Applie
+     :d|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Appli
+     :c|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|
+     :  Total |   Non-   |')
+1606  Format ('|       |          |     |           |       |           
+     :|         |           |           |     |       |          |      
+     : |      |        |          |Consumed|Effic (%) |           |Effic
+     : |          |          |Consumed|         |  Diversion |         |
+     :        | Consumed |')
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!6600  Format (282('-'))
+!6601  Format ('|   %   | Analysis |','Year/| Potential | Effect|',
+!     :' Irrigation|',3x,'EOM',3x,'|    IWR    |',
+!     :24x,'River Diversion (Surface Water) Accounting',
+!     :25x,'|',3x,'Ground Water Diversion Accounting',2x,'|Delivered|',
+!     :7x,'Estimated Crop CU',7x,'|',10x,'|',
+!     :'  Ground Water   |')
+!6602  Format('|Project|',10x,'|',5x,'|   Crop    |',7x,'|',3x,'Water',
+!     :3x,'|  Winter |',3x,'After',3x,'|',91('-'),'|',
+!     :38('-'),'|',2x,'Soil',3x,'|',31('-'),'|',10x,'|',
+!     :'-----------------|')
+!6603  Format ('| Calcd |  Method  |','Month','|',4x,'ET',5x,'| Precip|Re
+!     :quirement|  Precip |   Winter  |',2x,
+!     : 'Historic',1x,'|',5x,'|',7x,'|',3x,'Farm   |Sprnklr|Maxim',1x,'|'
+!     :,5x,'Farm Diversion to',6x,'|','Calculated|Groundwater|',6x,'|',3x
+!     :,'Diversion to',4x,'|',1x,'Moisture|',4x,'From',4x,'|',2x,'From',
+!     :3x,'|',8x,'|',2x,'Total',3x,'|',
+!     :'  Diversion To   |')
+!6604  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|   (IWR)   |Carryov
+!     :er|',3x,'Precip  |',3x,'River',3x,'|Conv',
+!     :1x,'|',1x,'Conv ',1x,'|',1x,'Headgate |FHG-Not|Applic|',28('-'),
+!     :'|',1x,'Surface',2x,'|',11x,'|Calcd',1x,'|',19('-'),'|',1x,
+!     :'  EOM   |',2x,'Surface/',2x,'|',2x,'Soil',3x,'|',8x,'|',2x,
+!     :'Month',3x,'|',
+!     :'-----------------|')
+!6605  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,'|',
+!     :11x,'|',1x,'Diversion',1x,'|Effic|',
+!     :1x,'Loss',2x,'|',1x,'Diversion|Applied|Effic',1x,'|',3x,'CU',3x,
+!     :'|',1x,'Soil Zone|  Non-  |','Water Appl','|',1x,'Diversion',1x,
+!     :'|Applic|',4x,'CU',4x,'|  Non-  | Contents|',1x,'Groundwater|',1x,
+!     :'Moisture|',2x,'Total',1x,'|',1x,'  Non-   |',
+!     :'  Spr   | Flood  |')
+!6606  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,
+!     :'|',11x,'|',11x,'|',5x,'|',7x,'|',
+!     :10x,'|',7x,'|',6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
+!     :1x,'|',11x,'|Effic', 1x, '|',10x,'|Consumed|',9x,'|',
+!     :2x,'Diversion',1x,'|',9x,'|',8x,'| Consumed |',
+!     :' Acreage| Acreage|')
+!old
+!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!|   %   | Analysis |Year/| Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |   Ground Water Diversion Accounting  |Delivered|       Estimated Crop CU       |          |  Ground Water   |
+!|Project|          |     |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|--------------------------------------|  Soil   |-------------------------------|          |-----------------|
+!| Calcd |  Method  |Month|    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |   Diversion to    | Moisture|    From    |  From   |        |  Total   |  Diversion To   |
+!|       |          |     |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG-Not|Applic|----------------------------| Surface  |           |Calcd |-------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |-----------------|
+!|       |          |     |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    |  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |
+!|       |          |     |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|
+!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!new
+!--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!|   %   | Analysis |Year/| Potential | Effect| Irrigation|   EOM   |    IWR    |                        River Diversion (Surface Water) Accounting                         |        Ground Water Diversion Accounting        |Delivered|       Estimated Crop CU       |          |       Ground Water       |
+!|Project|          |     |   Crop    |       |   Water   |  Winter |   After   |-------------------------------------------------------------------------------------------|-------------------------------------------------|  Soil   |-------------------------------|          |--------------------------|
+!| Calcd |  Method  |Month|    ET     | Precip|Requirement|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnklr|Maxim |     Farm Diversion to      |Calculated|Groundwater|      |         Diversion to         | Moisture|    From    |  From   |        |  Total   |       Diversion To       |
+!|       |          |     |           |       |   (IWR)   |Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG-Not|Applic|----------------------------| Surface  |           |Calcd |------------------------------|   EOM   |  Surface/  |  Soil   |        |  Month   |-----------------|--------|
+!|       |          |     |           |       |           |         |           | Diversion |Effic| Loss  | Diversion|Applied|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Applic|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|  Total |   Non-   |  Spr   | Flood  |  Soil  |
+!|       |          |     |           |       |           |         |           |           |     |       |          |       |      |        |          |Consumed|Effic (%) |           |Effic |          |          |Consumed|         |  Diversion |         |        | Consumed | Acreage| Acreage|  Zone  |
+!--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+6600  Format ('---------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :------------------------------------------------------------------
+     :-----------------------------------------------')
+6601  Format ('|   %   | Analysis |Year/| Potential | Effect| Irrigation
+     :|   EOM   |    IWR    |                        River Diversion (Su
+     :rface Water) Accounting                         |        Ground Wa
+     :ter Diversion Accounting        |Delivered|       Estimated Crop C
+     :U       |          |       Ground Water       |')
+6602  Format ('|Project|          |     |   Crop    |       |   Water   
+     :|  Winter |   After   |-------------------------------------------
+     :------------------------------------------------|-----------------
+     :--------------------------------|  Soil   |-----------------------
+     :--------|          |--------------------------|')
+6603  Format ('| Calcd |  Method  |Month|    ET     | Precip|Requirement
+     :|  Precip |   Winter  |  Historic |     |       |   Farm   |Sprnkl
+     :r|Maxim |     Farm Diversion to      |Calculated|Groundwater|     
+     : |      Farm Diversion to       | Moisture|    From    |  From   |
+     :        |  Total   |        Delivery To       |')
+6604  Format ('|       |          |     |           |       |   (IWR)   
+     :|Carryover|   Precip  |   River   |Conv | Conv  | Headgate |FHG-No
+     :t|Applic|----------------------------| Surface  |           |Calcd
+     : |------------------------------|   EOM   |  Surface/  |  Soil   |
+     :        |  Month   |-----------------|--------|')
+6605  Format ('|       |          |     |           |       |           
+     :|         |           | Diversion |Effic| Loss  | Diversion|Applie
+     :d|Effic |   CU   | Soil Zone|  Non-  |Water Appl| Diversion |Appli
+     :c|    CU    | Soil Zone|  Non-  | Contents| Groundwater| Moisture|
+     :  Total |   Non-   |  Spr   | Flood  |  Soil  |')
+6606  Format ('|       |          |     |           |       |           
+     :|         |           |           |     |       |          |      
+     : |      |        |          |Consumed|Effic (%) |           |Effic
+     : |          |          |Consumed|         |  Diversion |         |
+     :        | Consumed | Acreage| Acreage|  Zone  |')
 ! grb 5-11-00 following format not used so commented out
 !1607  Format (f6.1,'%',2x,a10,2x,i4,1x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
 !     :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,
@@ -11675,40 +12138,62 @@
 1608  Format (T5, 'Soil Moisture Capacity:',11x,f11.2,' af',211(" "))
 1610  Format (9x,a10,2x,a3,3x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,f9.0
-     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+     :,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
      :f10.0,1x)
 1611  Format (9x,a10,2x,a3,3x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,f9.0
-     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+     :,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
      :f10.0,1x)
 1612  Format (f6.1,'%',2x,a10,2x,i4,2x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
      :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,
-     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0
      :,f9.0,f10.0,1x)
 1613  Format (9x,a10,2x,'Ave.',2x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
      :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,
-     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0
      :,f9.0,f10.0,1x)
 1614  Format (9x,a10,2x,'Tot.',2x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
      :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,
-     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0
      :,f9.0,f10.0,1x)
 1630  Format (9x,a10,2x,a3,3x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,f9.0
-     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
-     :f10.0,f9.0,f9.0,1x)
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+     :,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+!     :f10.0,f9.0,f9.0,1x)
+     :f10.0,f9.0,f9.0,f9.0)
 1631  Format (9x,a10,2x,a3,3x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,1x,f11.0,
      :1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,f9.0
-     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
-     :f10.0,f9.0,f9.0,1x)
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+     :,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0,f9.0,
+!     :f10.0,f9.0,f9.0,1x)
+     :f10.0,f9.0,f9.0,f9.0)
 1632  Format (f6.1,'%',2x,a10,2x,i4,2x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
      :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,
-     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
-     :,f9.0,f10.0,f9.0,f9.0,1x)
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0
+!     :,f9.0,f10.0,f9.0,f9.0,1x)
+     :,f9.0,f10.0,f9.0,f9.0,f9.0)
 1633  Format (9x,a10,2x,'Ave.',2x,f11.0,1x,f7.0,1x,f11.0,1x,f9.0,
      :1x,f11.0,1x,f11.0,f6.2,f8.0,f11.0,f8.0,f7.0,
-     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
-     :,f9.0,f10.0,f9.0,f9.0,1x)
+!jhb march 2011 - adjust output for the new water budget component, gw to sm
+!     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,f11.0,f9.0,f10.0,f13.0,f10.0
+     :f9.0,f11.0,f9.0,f11.0,f12.0,f7.2,2f11.0,f9.0,f10.0,f13.0,f10.0
+!     :,f9.0,f10.0,f9.0,f9.0,1x)
+     :,f9.0,f10.0,f9.0,f9.0,f9.0)
 !1636  Format ('|',7x,'|',10x,'|',5x,'|',11x,'|',7x,'|',11x,'|',9x,
 !     :'|',11x,'|',11x,'|',5x,'|',7x,'|',
 !     :10x,'|',7x,'|',6x,'|',8x,'|',10x,'|Consumed|Effic (%)',
