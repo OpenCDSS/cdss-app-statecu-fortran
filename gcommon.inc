@@ -86,6 +86,14 @@
 ! jhb/emw 03/11  version 13.07
 !                allow pvh pumping to go to soil moisture
 !                update all the output files (DWB, SWB, BD1) to include the new gw to sm values
+! jhb/lre 12/11  version 13.08
+!                added new input file types containing IWR data to replace the calculated values in the REQT array
+!                RCR - completely replace the REQT array
+!                      initialize the whole array with -999.0 values
+!                      and then overwrite with the values that are in the RCR file
+!                PCR - partially replace the REQT array
+!                      only overwrite with the values that are in the PCR file
+!                      leave the rest of the array alone
 !                
 !                
 !***************************************************************************
@@ -110,8 +118,8 @@
       CHARACTER*16 RDATE
       REAL VERS
 ! grb new version number 
-      PARAMETER (VERS = 13.07)
-      PARAMETER (RDATE = '03/31/11 05:40PM')
+      PARAMETER (VERS = 13.08)
+      PARAMETER (RDATE = '12/08/11 01:30PM')
 !     jhb 07/10
 !     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
@@ -182,6 +190,9 @@
 ! grb 06-29-00 add admfile and dddfile
 ! jhb 07-12-00 add gisfile (known, but unused in statecu)
       character*200 admfile,dddfile,addfile,dcufile,gisfile
+! jhb 12-07-11 add rcr file types - only used by statecu, not statecui
+      character*200 rcrfile
+      character*200 pcrfile
       character*12 wsid(DIM_NW),ttid(DIM_NW),S4CATID
       integer dbyear,deyear,ddcsw,iwheat
       integer ifir,ddstrctt,ddindex,iddrec

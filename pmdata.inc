@@ -102,6 +102,15 @@ Cjhb  the following is recognized, but ignored by StateCU (used by StateCUI)
 Cjhb=&==================================================================
       character(len=*),parameter :: Token29="gis"
       character(len=*),parameter :: Token69="GeographicInformation"
+Cjhb=&==================================================================
+Cjhb  the following are used by StateCU, but not StateCUI (yet!)
+Cjhb=&==================================================================
+      character(len=*),parameter :: Token30="rcr"
+      character(len=*),parameter :: 
+     & Token70="Replacement_Crop_Requirement"
+      character(len=*),parameter :: Token31="pcr"
+      character(len=*),parameter :: 
+     & Token71="PartialReplacement_Crop_Requirement"
 C0000000011111111112222222222333333333344444444445555555555666666666677777777778
 C2345678901234567890123456789012345678901234567890123456789012345678901234567890
 Cjhb=&==================================================================

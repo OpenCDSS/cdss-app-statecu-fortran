@@ -90,6 +90,7 @@ Cjhb=&==================================================================
       integer(4) istat, itmp
       logical bUseAcreage
       integer ArgCount
+      integer numch
 
       CALL DATE_AND_TIME (CURDATE, CURTIME)
       nbuff=1
@@ -97,6 +98,8 @@ Cjhb=&==================================================================
       call FNM_INIT !init the file name variables
       call lw_init !initialize the log file warning arrays
       call GDATA_INIT !init constant variables (GDATA)
+      rcrfile='xxx'
+      pcrfile='xxx'
       INCH=0
       ITMP=100
       ISUPLY=0
@@ -434,6 +437,24 @@ C add daily files
          case (1)
          write(999,*)'  GIS Information filename = ',trim(gisfile)
          write(999,*)'  GIS Information file type is known but unused.'
+         case default
+         end select
+       case(Token30,Token70)
+         rcrfile=trim(file2)
+         select case (scu_debug)
+         case (0)
+         case (1)
+         write(999,*)'  RCR Input filename = ',trim(rcrfile)
+         write(999,*)'  RCR Input file type is only used by StateCU'
+         case default
+         end select
+       case(Token31,Token71)
+         pcrfile=trim(file2)
+         select case (scu_debug)
+         case (0)
+         case (1)
+         write(999,*)'  PCR Partial Input filename = ',trim(pcrfile)
+         write(999,*)'  PCR Input file type is only used by StateCU'
          case default
          end select
        case("comment_line")
@@ -1769,7 +1790,27 @@ C-----Start Calculation
         Case Default
       end select
 
-
+Cjhb &==================================================================
+Cjhb  12/07/2011 - add the RCR and PCR input file processing
+Cjhb  these files completely or partially replace the calculated IWR
+Cjhb    in the REQT array
+Cjhb &==================================================================
+      if(rcrfile .eq. 'xxx') then
+c-------do nothing
+      else
+c-------init the reqt array to all -999 values (initflag=1) and
+c-------read the rcrfile and replace the reqt array entries as necessary
+        initflag=1
+        call readrcr(initflag,rcrfile)
+      endif
+      if(pcrfile .eq. 'xxx') then
+c-------do nothing
+      else
+c-------leave the reqt array unchanged (initflag=0) and
+c-------read the pcrfile and replace the reqt array entries as necessary
+        initflag=0
+        call readrcr(initflag,pcrfile)
+      endif
 Cjhb &==================================================================
 Cjhb  
 Cjhb &==================================================================

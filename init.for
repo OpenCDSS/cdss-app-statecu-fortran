@@ -34,6 +34,8 @@
       addfile=''
       dcufile=''
       gisfile=''
+      rcrfile='xxx'
+      pcrfile='xxx'
       end subroutine
       
       subroutine gdata_init()
