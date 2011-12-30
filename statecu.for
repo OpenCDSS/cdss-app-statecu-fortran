@@ -1096,7 +1096,7 @@ c      read(1,*) ttypout
       read(fline(1:20),*)ttypout
 c     check for sub basin output in binary output (added 10 to typout value)
       select case (ttypout)
-      case (10,11,12,13,14)
+      case (10,11,12,13,14,15)
         sboutput=.true.
         ttypout=ttypout-10
       case default
@@ -1110,6 +1110,9 @@ c     now handle the normal typout value (has the 10 subtracted)
         read(fline(1:20),*,ERR=454)idum,tempid
         s4catid=trim(tempid)
 454     ttypout=3
+      case (5)
+        s4catid="everything"
+        ttypout=3
       case default
         s4catid=""
       end select
