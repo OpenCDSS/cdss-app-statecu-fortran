@@ -94,6 +94,11 @@
 !                PCR - partially replace the REQT array
 !                      only overwrite with the values that are in the PCR file
 !                      leave the rest of the array alone
+! jhb/lre 12/11  version 13.09
+!                added new 4WB feature - typout=5 puts ALL structures in the 4WB file
+!                changed 4WB file format slightly:
+!                  hash marks on header records
+!                  structure ID at end of every record
 !                
 !                
 !***************************************************************************
@@ -118,8 +123,8 @@
       CHARACTER*16 RDATE
       REAL VERS
 ! grb new version number 
-      PARAMETER (VERS = 13.08)
-      PARAMETER (RDATE = '12/08/11 01:30PM')
+      PARAMETER (VERS = 13.09)
+      PARAMETER (RDATE = '12/30/11 06:00PM')
 !     jhb 07/10
 !     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
