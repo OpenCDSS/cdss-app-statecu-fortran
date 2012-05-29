@@ -99,7 +99,11 @@ c     rather than nothing ... set it to November 1?
 c     probably will not really matter since if it is missing
 c     there is likely other missing data
 cjhb=&==================================================================
-           if (JEND(IP,IY-1).lt.1) then
+           if (IY.EQ.1) THEN
+             IRNF(1,11) = 1
+             IRNF(1,12) = 1
+           ELSE
+             if (JEND(IP,IY-1).lt.1) then
 c            WARNINGS=.TRUE.
 c             write(999,*)'Warning: Winter carry-over (wbuild.for):',
 c     &       ' season end date of previous year is missing.',
@@ -107,16 +111,17 @@ c     &       ' previous year index:',IY-1,
 c     &       ' structure index:',ib,
 c     &       ' parcel index:',ip,
 c     &       ' Set to November 1.'
-             ENDSN=julian(11,1)
-           else
-             ENDSN=JEND(IP,IY-1)
-           endif
-           DO 7 J=ENDSN,ENDYR
-            CALL CLNDR(J,m1,d1)    ! DETERMINE MONTH
-            WBU(IB,IY-1,M1)=WBU(IB,IY-1,M1)+TRAIN(IY-1,J)*SMEF*
+               ENDSN=julian(11,1)
+             else
+               ENDSN=JEND(IP,IY-1)
+             endif
+             DO 7 J=ENDSN,ENDYR
+              CALL CLNDR(J,m1,d1)    ! DETERMINE MONTH
+              WBU(IB,IY-1,M1)=WBU(IB,IY-1,M1)+TRAIN(IY-1,J)*SMEF*
      :                   AREA(IB,IP,IY)/12
-            IF(TRAIN(IY-1,J) .LT. -998) IRNF(1,M1) = 1
-7          CONTINUE
+              IF(TRAIN(IY-1,J) .LT. -998) IRNF(1,M1) = 1
+7            CONTINUE
+           ENDIF
 
 cjhb=&==================================================================
 c     rewrite to change the feb count because the clndr routine was sometimes breaking here
