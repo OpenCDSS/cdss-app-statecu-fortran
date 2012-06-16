@@ -36,6 +36,11 @@
 ! jhb 2007/09/25    temporarily remove warning message for extra structures in the DRA (drain) file
 ! jhb 2011/01/19    changed the ISUPLY=2 DWB output back to farm deliv (seniorf(), etc.).  the new values (changed in Dec 08) were not working
 ! jhb 2011/03/04    added new component to gw pumping - excess pumping to soil moisture
+! jhb 2012/06/15   version 13.10
+!                  isuply=2 ONLY:
+!                  changed output (DWB, SWB) header labeling to farm headgate deliv instead of river div by priority
+!                  changed output (DWB, SWB) "total" output to farm headgate deliv total, allf(), instead of river div total
+!                  changed output (binary) labeling of farm headgate deliv by priority outputs
 !
 !   Calling program : statecu.f
 !   Called programs : none
@@ -164,7 +169,8 @@
       REAL :: gfreqdef(dim_ny,14),gsreqdef(dim_ny,14)
       REAL :: scalefctr=0.
       REAL :: seniorf(DIM_NY,14),juniorf(DIM_NY,14)
-      REAL :: otherf(DIM_NY,14)
+! added allf() to calculate various farm headgate total averages
+      REAL :: otherf(DIM_NY,14),allf(DIM_NY,14)
       REAL :: gdiv(DIM_NY,14),gwcu(DIM_NY,14),gwro(DIM_NY,14)
       REAL :: gwcusm(DIM_NY,14)
       REAL :: gwcuf,gwcus,gwrof,gwros
@@ -278,7 +284,8 @@
       REAL :: tdepj(DIM_NY,14),tdepo(DIM_NY,14)
       REAL :: tdept(DIM_NY,14),tarech(dim_ny,14)
       REAL :: tsenf(DIM_NY,14),tjunf(DIM_NY,14)
-      REAL :: tothf(DIM_NY,14),tgdiv(DIM_NY,14)
+      REAL :: tothf(DIM_NY,14),tallf(DIM_NY,14)
+      REAL :: tgdiv(DIM_NY,14)
       REAL :: tgwcu(DIM_NY,14),tgwro(DIM_NY,14)
       REAL :: tgwcusm(DIM_NY,14)
       REAL :: ttdp(DIM_NY,14),tcloss(DIM_NY,14)
@@ -409,6 +416,7 @@
           seniorf(j,k)=0.
           juniorf(j,k)=0.
           otherf(j,k)=0.
+          allf(j,k)=0.
           gdiv(j,k)=0.
           gwcu(j,k)=0.
           gwcusm(j,k)=0.
@@ -469,6 +477,7 @@
           tsenf(j,k)=0.
           tjunf(j,k)=0.
           tothf(j,k)=0.
+          tallf(j,k)=0.
           tgdiv(j,k)=0.
           tgwcu(j,k)=0.
           tgwcusm(j,k)=0.
@@ -1595,24 +1604,28 @@
      &    'IWR After Winter Precip ',1,
      &    'ACFT      '
 !jhb=&=====13===========================================================
-!jhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l)
+!jhb       Real*4 River Diversion Acct - Div By Priority - Senior, seniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdps - 01/19/11 changed back to seniorf(m,l) - 06/15/12 changed label to match value
            WRITE(UNIT=IBD1UN)'R',4,
-     &    'River Diversion_Senior  ',1,
+!    &    'River Diversion_Senior  ',1,
+     &    'Farm Headgate Deliv Sr  ',1,
      &    'ACFT      '
 !jhb=&=====14===========================================================
-!jhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l)
+!jhb       Real*4 River Diversion Acct - Div By Priority - Junior, juniorf(m,l), ***REPORT*** - 12/19/08 replaced with holdpj - 01/19/11 changed back to juniorf(m,l) - 06/15/12 changed label to match value
            WRITE(UNIT=IBD1UN)'R',4,
-     &    'River Diversion_Junior  ',1,
+!    &    'River Diversion_Junior  ',1,
+     &    'Farm Headgate Deliv Jr  ',1,
      &    'ACFT      '
 !jhb=&=====15===========================================================
-!jhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l)
+!jhb       Real*4 River Diversion Acct - Div By Priority - other, otherf(m,l), ***REPORT*** - 12/19/08 replaced with holdpo - 01/19/11 changed back to otherf(m,l) - 06/15/12 changed label to match value
            WRITE(UNIT=IBD1UN)'R',4,
-     &    'River Diversion_Other   ',1,
+!    &    'River Diversion_Other   ',1,
+     &    'Farm Headgate Deliv Oth ',1,
      &    'ACFT      '
 !jhb=&=====16===========================================================
-!jhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT***
+!jhb       Real*4 River Diversion Acct - Div By Priority - Total, ddhmonot(m,l), ***REPORT*** - 06/15/12 changed to farm headgate total allf(m,l)
            WRITE(UNIT=IBD1UN)'R',4,
-     &    'River Diversion_Total   ',1,
+!     &    'River Diversion_Total   ',1,
+     &    'Farm Headgate Deliv Tot ',1,
      &    'ACFT      '
 !jhb=&=====17===========================================================
 !jhb       Real*4 Conveyance Efficiency   , ceff(i,m)
@@ -3048,6 +3061,7 @@ C       write(413,'(a881)')
           tsenf(m,j)=0
           tjunf(m,j)=0
           tothf(m,j)=0
+          tallf(m,j)=0
           tarech(m,j)=0
           tgdiv(m,j)=0
           tgsdiv(m,j)=0
@@ -3284,6 +3298,7 @@ C       write(413,'(a881)')
             seniorf(j,k)=0
             juniorf(j,k)=0
             otherf(j,k)=0
+            allf(j,k)=0
             arech(j,k)=0
             gdiv(j,k)=0
             gsdiv(j,k)=0
@@ -3496,6 +3511,7 @@ C       write(413,'(a881)')
               seniorf(m,l)=-999
               juniorf(m,l)=-999
               otherf(m,l)=-999
+              allf(m,l)=-999
               fdiv(m,l) = -999
               closs(m,l) = -999
               arech(m,l) = -999
@@ -4013,6 +4029,9 @@ C       write(413,'(a881)')
             otherf(m,l)=otherf(m,l)+holdfo
             otherf(m,13)=otherf(m,13)+holdfo
             otherf(nyrs1,l)=otherf(nyrs1,l)+holdfo
+            allf(m,l)=allf(m,l)+holdfs+holdfj+holdfo
+            allf(m,13)=allf(m,13)+holdfs+holdfj+holdfo
+            allf(nyrs1,l)=allf(nyrs1,l)+holdfs+holdfj+holdfo
 !
 !jhb=&==================================================================
 !           DISTRIBUTE FARM DELIVERIES FROM SURFACE SOURCES TO THE FOUR LAND CATEGORIES
@@ -5892,6 +5911,7 @@ C       write(413,'(a881)')
              seniorf(m,13) = -999
              juniorf(m,13) = -999
              otherf(m,13) = -999
+             allf(m,13) = -999
              closs(m,13) = -999
              fdiv(m,13) = -999
              gwro(m,13) = -999
@@ -5970,6 +5990,7 @@ C       write(413,'(a881)')
              seniorf(nyrs1,13)=seniorf(nyrs1,13)+seniorf(m,13)
              juniorf(nyrs1,13)=juniorf(nyrs1,13)+juniorf(m,13)
              otherf(nyrs1,13)=otherf(nyrs1,13)+otherf(m,13)
+             allf(nyrs1,13)=allf(nyrs1,13)+allf(m,13)
              closs(nyrs1,13)=closs(nyrs1,13)+closs(m,13)
              fdiv(nyrs1,13)=fdiv(nyrs1,13)+fdiv(m,13)
              gwro(nyrs1,13)=gwro(nyrs1,13)+gwro(m,13)
@@ -6043,6 +6064,7 @@ C       write(413,'(a881)')
              seniorf(nyrs1,13)=seniorf(nyrs1,13)/iyct
              juniorf(nyrs1,13)=juniorf(nyrs1,13)/iyct
              otherf(nyrs1,13)=otherf(nyrs1,13)/iyct
+             allf(nyrs1,13)=allf(nyrs1,13)/iyct
              closs(nyrs1,13)=closs(nyrs1,13)/iyct
              fdiv(nyrs1,13)=fdiv(nyrs1,13)/iyct
              gwro(nyrs1,13)=gwro(nyrs1,13)/iyct
@@ -6133,6 +6155,7 @@ C       write(413,'(a881)')
              seniorf(nyrs1,13)= -999
              juniorf(nyrs1,13)= -999
              otherf(nyrs1,13)= -999
+             allf(nyrs1,13)= -999
              closs(nyrs1,13)= -999
              fdiv(nyrs1,13)= -999
              gwro(nyrs1,13)= -999
@@ -6211,6 +6234,7 @@ C       write(413,'(a881)')
              seniorf(nyrs1,l)=seniorf(nyrs1,l)/imonth(l)
              juniorf(nyrs1,l)=juniorf(nyrs1,l)/imonth(l)
              otherf(nyrs1,l)=otherf(nyrs1,l)/imonth(l)
+             allf(nyrs1,l)=allf(nyrs1,l)/imonth(l)
              closs(nyrs1,l)=closs(nyrs1,l)/imonth(l)
              fdiv(nyrs1,l)=fdiv(nyrs1,l)/imonth(l)
              gwro(nyrs1,l)=gwro(nyrs1,l)/imonth(l)
@@ -6348,6 +6372,7 @@ C       write(413,'(a881)')
              seniorf(nyrs1,l)= -999
              juniorf(nyrs1,l)= -999
              otherf(nyrs1,l)= -999
+             allf(nyrs1,l)= -999
              closs(nyrs1,l)= -999
              fdiv(nyrs1,l)= -999
              gwro(nyrs1,l)= -999
@@ -6896,24 +6921,6 @@ C       write(413,'(a881)')
                     breqreq(m,l)=
      &                breqreq(m,l)+reqreqts(m,l)
                   endif
-                  if(seniorf(m,l).gt.-999.0)then
-                    sbseniorf(sbsb(i),m,l)=
-     &                sbseniorf(sbsb(i),m,l)+seniorf(m,l)
-                    bseniorf(m,l)=
-     &                bseniorf(m,l)+seniorf(m,l)
-                  endif
-                  if(juniorf(m,l).gt.-999.0)then
-                    sbjuniorf(sbsb(i),m,l)=
-     &                sbjuniorf(sbsb(i),m,l)+juniorf(m,l)
-                    bjuniorf(m,l)=
-     &                bjuniorf(m,l)+juniorf(m,l)
-                  endif
-                  if(otherf(m,l).gt.-999.0)then
-                    sbotherf(sbsb(i),m,l)=
-     &                sbotherf(sbsb(i),m,l)+otherf(m,l)
-                    botherf(m,l)=
-     &                botherf(m,l)+otherf(m,l)
-                  endif
                   if(divsup(i,m,l).gt.-999.0)then
                     sbdivsup(sbsb(i),m,l)=
      &                sbdivsup(sbsb(i),m,l)+divsup(i,m,l)
@@ -7131,7 +7138,9 @@ C       write(413,'(a881)')
             endif
         write(256,835) nyr1+m-1,method,ettot(i,m,13),effppt(i,m,13),
      :   reqt(i,m,13),wbu(i,m,12),reqreqts(m,13),
-     :    seniorf(m,13),juniorf(m,13),otherf(m,13),divsup(i,m,13),
+!    06/15/2012 - jhb - change total to farm headgate total (not river diversion total)
+!     :    seniorf(m,13),juniorf(m,13),otherf(m,13),divsup(i,m,13),
+     :    seniorf(m,13),juniorf(m,13),otherf(m,13),allf(m,13),
      :    crop_cus(m,13),crop_cuj(m,13),crop_cuo(m,13),crop_cut(m,13),
      :    soil_cus(m,13),soil_cuj(m,13),soil_cuo(m,13),soil_cu(m,13),
 !     :    ulags(m,13),ulagj(m,13),ulago(m,13),ulagt(m,13),divcu(m,13),
@@ -7162,7 +7171,9 @@ C       write(413,'(a881)')
           write(256,836) method,ettot(i,nyrs1,13),effppt(i,nyrs1,13),
      :    reqt(i,nyrs1,13),wbu(i,nyrs1,13)/nyrs/12, reqreqts(nyrs1,13),
      :    seniorf(nyrs1,13),juniorf(nyrs1,13),
-     :    otherf(nyrs1,13),divsup(i,nyrs1,13),
+!    06/15/2012 - jhb - change total to farm headgate total (not river diversion total)
+!     :    otherf(nyrs1,13),divsup(i,nyrs1,13),
+     :    otherf(nyrs1,13),allf(nyrs1,13),
      :    crop_cus(nyrs1,13),crop_cuj(nyrs1,13),
      :    crop_cuo(nyrs1,13),crop_cut(nyrs1,13),
      :    soil_cus(nyrs1,13),soil_cuj(nyrs1,13),
@@ -7195,7 +7206,9 @@ C       write(413,'(a881)')
      :	 effppt(i,nyrs1,l),
      :    reqt(i,nyrs1,l),wbu(i,nyrs1,l),reqreqts(nyrs1,l),
      :    seniorf(nyrs1,l),juniorf(nyrs1,l),otherf(nyrs1,l),
-     :    divsup(i,nyrs1,l),crop_cus(nyrs1,l),crop_cuj(nyrs1,l),
+!    06/15/2012 - jhb - change total to farm headgate total (not river diversion total)
+!     :    divsup(i,nyrs1,l),crop_cus(nyrs1,l),crop_cuj(nyrs1,l),
+     :    allf(nyrs1,l),crop_cus(nyrs1,l),crop_cuj(nyrs1,l),
      :    crop_cuo(nyrs1,l),crop_cut(nyrs1,l),soil_cus(nyrs1,l),
      :    soil_cuj(nyrs1,l),soil_cuo(nyrs1,l),soil_cu(nyrs1,l),
      :    ulags(nyrs1,l),ulagj(nyrs1,l),ulago(nyrs1,l),
@@ -7223,7 +7236,9 @@ C       write(413,'(a881)')
           write(256,837) method,ettot(i,nyrs1,13),effppt(i,nyrs1,13),
      :    reqt(i,nyrs1,13),wbu(i,nyrs1,13)/nyrs/12,reqreqts(nyrs1,13),
      :    seniorf(nyrs1,13),juniorf(nyrs1,13),
-     :    otherf(nyrs1,13),divsup(i,nyrs1,13),
+!    06/15/2012 - jhb - change total to farm headgate total (not river diversion total)
+!     :    otherf(nyrs1,13),divsup(i,nyrs1,13),
+     :    otherf(nyrs1,13),allf(nyrs1,13),
      :    crop_cus(nyrs1,13),crop_cuj(nyrs1,13),
      :    crop_cuo(nyrs1,13),crop_cut(nyrs1,13),
      :    soil_cus(nyrs1,13),soil_cuj(nyrs1,13),
@@ -7273,9 +7288,12 @@ C       write(413,'(a881)')
      :           reqt(i,m,l),wbu(i,m,l),reqreqts(m,l)
 !                12/18/08 these are farm deliveries, do not match the label
 !                12/18/08 change to river diversions
+!     :          ,holdps,holdpj,holdpo
 !                01/19/11 change back to farm deliveries
      :          ,seniorf(m,l),juniorf(m,l),otherf(m,l)
-     :          ,ddhmonot(m,l),crop_cus(m,l),crop_cuj(m,l)
+!    06/15/2012 - jhb - change total to farm headgate total (not river diversion total)
+!     :          ,ddhmonot(m,l),crop_cus(m,l),crop_cuj(m,l)
+     :          ,allf(m,l),crop_cus(m,l),crop_cuj(m,l)
      :          ,crop_cuo(m,l),crop_cut(m,l),soil_cus(m,l)
      :          ,soil_cuj(m,l),soil_cuo(m,l),soil_cu(m,l)
 !     :          ,ulags(m,l),ulagj(m,l),ulago(m,l),ulagt(m,l)
@@ -7325,7 +7343,8 @@ C       write(413,'(a881)')
 !jhb  16 REAL ddhmonot(m,l) - River Diversion Acct. - Div By Priority - Total  ***REPORT***
 !                12/18/08 these are farm deliveries, do not match the label
 !                12/18/08 change to river diversions
-!                01/19/11 changed back to river diversions
+!     :            holdps,holdpj,holdpo,ddhmonot(m,l),
+!                01/19/11 changed back to farm deliveries
      :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
 !jhb  17 REAL ceff(i,m) - River Diversion Acct. - Conveyance Efficiency   
 !jhb  18 REAL closs(m,l) - River Diversion Acct. - Conveyance Loss         
@@ -7428,6 +7447,12 @@ C       write(413,'(a881)')
      &                sbotherf(sbsb(i),m,l)+otherf(m,l)
                     botherf(m,l)=
      &                botherf(m,l)+otherf(m,l)
+                  endif
+                  if(allf(m,l).gt.-999.0)then
+                    sballf(sbsb(i),m,l)=
+     &                sballf(sbsb(i),m,l)+allf(m,l)
+                    ballf(m,l)=
+     &                ballf(m,l)+allf(m,l)
                   endif
                   if(divsup(i,m,l).gt.-999.0)then
                     sbdivsup(sbsb(i),m,l)=
@@ -8729,24 +8754,6 @@ C       write(413,'(a881)')
                     breqreq(m,l)=
      &                breqreq(m,l)+reqreqts(m,l)
                   endif
-                  if(seniorf(m,l).gt.-999.0)then
-                    sbseniorf(sbsb(i),m,l)=
-     &                sbseniorf(sbsb(i),m,l)+seniorf(m,l)
-                    bseniorf(m,l)=
-     &                bseniorf(m,l)+seniorf(m,l)
-                  endif
-                  if(juniorf(m,l).gt.-999.0)then
-                    sbjuniorf(sbsb(i),m,l)=
-     &                sbjuniorf(sbsb(i),m,l)+juniorf(m,l)
-                    bjuniorf(m,l)=
-     &                bjuniorf(m,l)+juniorf(m,l)
-                  endif
-                  if(otherf(m,l).gt.-999.0)then
-                    sbotherf(sbsb(i),m,l)=
-     &                sbotherf(sbsb(i),m,l)+otherf(m,l)
-                    botherf(m,l)=
-     &                botherf(m,l)+otherf(m,l)
-                  endif
                   if(divsup(i,m,l).gt.-999.0)then
                     sbdivsup(sbsb(i),m,l)=
      &                sbdivsup(sbsb(i),m,l)+divsup(i,m,l)
@@ -9104,24 +9111,6 @@ C       write(413,'(a881)')
                     breqreq(m,l)=
      &                breqreq(m,l)+reqreqts(m,l)
                   endif
-                  if(seniorf(m,l).gt.-999.0)then
-                    sbseniorf(sbsb(i),m,l)=
-     &                sbseniorf(sbsb(i),m,l)+seniorf(m,l)
-                    bseniorf(m,l)=
-     &                bseniorf(m,l)+seniorf(m,l)
-                  endif
-                  if(juniorf(m,l).gt.-999.0)then
-                    sbjuniorf(sbsb(i),m,l)=
-     &                sbjuniorf(sbsb(i),m,l)+juniorf(m,l)
-                    bjuniorf(m,l)=
-     &                bjuniorf(m,l)+juniorf(m,l)
-                  endif
-                  if(otherf(m,l).gt.-999.0)then
-                    sbotherf(sbsb(i),m,l)=
-     &                sbotherf(sbsb(i),m,l)+otherf(m,l)
-                    botherf(m,l)=
-     &                botherf(m,l)+otherf(m,l)
-                  endif
                   if(divsup(i,m,l).gt.-999.0)then
                     sbdivsup(sbsb(i),m,l)=
      &                sbdivsup(sbsb(i),m,l)+divsup(i,m,l)
@@ -9403,6 +9392,7 @@ C       write(413,'(a881)')
           seniorf(m,14)=seniorf(m,14)+seniorf(m,13)
           juniorf(m,14)=juniorf(m,14)+juniorf(m,13)
           otherf(m,14)=otherf(m,14)+otherf(m,13)
+          allf(m,14)=allf(m,14)+allf(m,13)
           closs(m,14)=closs(m,14)+closs(m,13)
           fdiv(m,14)=fdiv(m,14)+fdiv(m,13)
           gwro(m,14)=gwro(m,14)+gwro(m,13)
@@ -9482,6 +9472,7 @@ C       write(413,'(a881)')
              seniorf(nyrs2,l)=seniorf(nyrs2,l)+seniorf(nyrs1,l)
              juniorf(nyrs2,l)=juniorf(nyrs2,l)+juniorf(nyrs1,l)
              otherf(nyrs2,l)=otherf(nyrs2,l)+otherf(nyrs1,l)
+             allf(nyrs2,l)=allf(nyrs2,l)+allf(nyrs1,l)
              closs(nyrs2,l)=closs(nyrs2,l)+closs(nyrs1,l)
              fdiv(nyrs2,l)=fdiv(nyrs2,l)+fdiv(nyrs1,l)
              gwro(nyrs2,l)=gwro(nyrs2,l)+gwro(nyrs1,l)
@@ -9553,6 +9544,7 @@ C       write(413,'(a881)')
           tsenf(m,j)=tsenf(m,j)+seniorf(m,j)
           tjunf(m,j)=tjunf(m,j)+juniorf(m,j)
           tothf(m,j)=tothf(m,j)+otherf(m,j)
+          tallf(m,j)=tallf(m,j)+allf(m,j)
           tgdiv(m,j)=tgdiv(m,j)+gdiv(m,j)
           tgsdiv(m,j)=tgsdiv(m,j)+gsdiv(m,j)
           tgfdiv(m,j)=tgfdiv(m,j)+gfdiv(m,j)
@@ -9754,7 +9746,8 @@ C       write(413,'(a881)')
      :              sbreqt(i,m,l),sbwbu(i,m,l),sbreqreq(i,m,l),
 !     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
      &              sbseniorf(i,m,l), sbjuniorf(i,m,l),
-     &              sbotherf(i,m,l), sbdivsup(i,m,l),
+!     &              sbotherf(i,m,l), sbdivsup(i,m,l),
+     &              sbotherf(i,m,l), sballf(i,m,l),
 !     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              sbceff(i,m,l), sbcloss(i,m,l),
      :              sbfdiv(i,m,l),
@@ -9799,7 +9792,8 @@ C       write(413,'(a881)')
 !     :            seniorf(m,l),juniorf(m,l),otherf(m,l),
 !     :            ddhmonot(m,l),
      :              sbseniorf(i,m,l), sbjuniorf(i,m,l),
-     &              sbotherf(i,m,l), sbdivsup(i,m,l),
+!     &              sbotherf(i,m,l), sbdivsup(i,m,l),
+     &              sbotherf(i,m,l), sballf(i,m,l),
 !     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              sbceff(i,m,l), sbcloss(i,m,l),
      :              sbfdiv(i,m,l),
@@ -10008,7 +10002,8 @@ C       write(413,'(a881)')
      :              breqt(m,l),bwbu(m,l),breqreq(m,l),
 !     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
      &              bseniorf(m,l), bjuniorf(m,l),
-     &              botherf(m,l), bdivsup(m,l),
+!     &              botherf(m,l), bdivsup(m,l),
+     &              botherf(m,l), ballf(m,l),
 !     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              bceff(m,l), bcloss(m,l),
      :              bfdiv(m,l),
@@ -10053,7 +10048,8 @@ C       write(413,'(a881)')
 !     :            seniorf(m,l),juniorf(m,l),otherf(m,l),
 !     :            ddhmonot(m,l),
      &              bseniorf(m,l), bjuniorf(m,l),
-     &              botherf(m,l), bdivsup(m,l),
+!     &              botherf(m,l), bdivsup(m,l),
+     &              botherf(m,l), ballf(m,l),
 !     :            ceff(i,m),closs(m,l),fdiv(m,l),
      :              bceff(m,l), bcloss(m,l),
      :              bfdiv(m,l),
@@ -10575,7 +10571,8 @@ C       write(413,'(a881)')
      :	  ettot(nbasin+1,m,14),
      :  effppt(nbasin+1,m,14),reqt(nbasin+1,m,14),wbu(nbasin+1,m,14),
      :  reqreqts(m,14),
-     :    seniorf(m,14),juniorf(m,14),otherf(m,14),divsup(nbasin+1,m,14)
+!     :    seniorf(m,14),juniorf(m,14),otherf(m,14),divsup(nbasin+1,m,14)
+     :    seniorf(m,14),juniorf(m,14),otherf(m,14),allf(m,14)
      :,crop_cus(m,14),crop_cuj(m,14),crop_cuo(m,14),crop_cut(m,14),
      :    soil_cus(m,14),soil_cuj(m,14),soil_cuo(m,14),soil_cu(m,14),
 !     :    ulags(m,14),ulagj(m,14),ulago(m,14),ulagt(m,14),divcu(m,14),
@@ -10599,7 +10596,8 @@ C       write(413,'(a881)')
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    seniorf(nyrs2,13),juniorf(nyrs2,13),otherf(nyrs2,13),
-     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+!     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+     :    allf(nyrs2,13),crop_cus(nyrs2,13),
      :    crop_cuj(nyrs2,13),
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
@@ -10630,7 +10628,8 @@ C       write(413,'(a881)')
      :    effppt(nbasin+1,nyrs2,l),reqt(nbasin+1,nyrs2,l),
      :    wbu(nbasin+1,nyrs2,l),reqreqts(nyrs2,l),
      :    seniorf(nyrs2,l),juniorf(nyrs2,l),otherf(nyrs2,l),
-     :    divsup(nbasin+1,nyrs2,l),crop_cus(nyrs2,l),crop_cuj(nyrs2,l),
+!     :    divsup(nbasin+1,nyrs2,l),crop_cus(nyrs2,l),crop_cuj(nyrs2,l),
+     :    allf(nyrs2,l),crop_cus(nyrs2,l),crop_cuj(nyrs2,l),
      :    crop_cuo(nyrs2,l),crop_cut(nyrs2,l),soil_cus(nyrs2,l),
      :    soil_cuj(nyrs2,l),soil_cuo(nyrs2,l),soil_cu(nyrs2,l),
      :    ulags(nyrs2,l),ulagj(nyrs2,l),ulago(nyrs2,l),
@@ -10655,7 +10654,8 @@ C       write(413,'(a881)')
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    seniorf(nyrs2,13),juniorf(nyrs2,13),otherf(nyrs2,13),
-     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+!     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+     :    allf(nyrs2,13),crop_cus(nyrs2,13),
      :    crop_cuj(nyrs2,13),
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
@@ -10701,7 +10701,8 @@ C       write(413,'(a881)')
      :		treqt(m,l),
      :         twbu(m,l),treq(m,l)
      :          ,tsenf(m,l),tjunf(m,l),tothf(m,l)
-     :          ,tdiv(m,l),tcus(m,l),tcuj(m,l)
+!     :          ,tdiv(m,l),tcus(m,l),tcuj(m,l)
+     :          ,tallf(m,l),tcus(m,l),tcuj(m,l)
      :          ,tcuo(m,l),tcut(m,l),tscus(m,l)
      :          ,tscuj(m,l),tscuo(m,l),tscu(m,l)
 !     :          ,tulags(m,l),tulagj(m,l),tulago(m,l),tulagt(m,l)
@@ -10722,7 +10723,8 @@ C       write(413,'(a881)')
      :	  ettot(nbasin+1,m,14),
      :    effppt(nbasin+1,m,14),reqt(nbasin+1,m,14),wbu(nbasin+1,m,14),
      :   reqreqts(m,14),
-     :seniorf(m,14),juniorf(m,14),otherf(m,14),divsup(nbasin+1,m,14),
+!     :seniorf(m,14),juniorf(m,14),otherf(m,14),divsup(nbasin+1,m,14),
+     :seniorf(m,14),juniorf(m,14),otherf(m,14),allf(m,14),
      :    crop_cus(m,14),crop_cuj(m,14),crop_cuo(m,14),crop_cut(m,14),
      :    soil_cus(m,14),soil_cuj(m,14),soil_cuo(m,14),soil_cu(m,14),
      :    ulags(m,14),ulagj(m,14),ulago(m,14),ulagt(m,14),divcu(m,14),
@@ -10742,7 +10744,8 @@ C       write(413,'(a881)')
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    seniorf(nyrs2,13),juniorf(nyrs2,13),otherf(nyrs2,13),
-     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+!     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+     :    allf(nyrs2,13),crop_cus(nyrs2,13),
      :    crop_cuj(nyrs2,13),
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
@@ -10769,7 +10772,8 @@ C       write(413,'(a881)')
      :    effppt(nbasin+1,nyrs2,l),reqt(nbasin+1,nyrs2,l),
      :    wbu(nbasin+1,nyrs2,l),reqreqts(nyrs2,l),
      :    seniorf(nyrs2,l),juniorf(nyrs2,l),otherf(nyrs2,l),
-     :    divsup(nbasin+1,nyrs2,l),crop_cus(nyrs2,l),crop_cuj(nyrs2,l),
+!     :    divsup(nbasin+1,nyrs2,l),crop_cus(nyrs2,l),crop_cuj(nyrs2,l),
+     :    allf(nyrs2,l),crop_cus(nyrs2,l),crop_cuj(nyrs2,l),
      :    crop_cuo(nyrs2,l),crop_cut(nyrs2,l),soil_cus(nyrs2,l),
      :    soil_cuj(nyrs2,l),soil_cuo(nyrs2,l),soil_cu(nyrs2,l),
      :    ulags(nyrs2,l),ulagj(nyrs2,l),ulago(nyrs2,l),
@@ -10792,7 +10796,8 @@ C       write(413,'(a881)')
      :    effppt(nbasin+1,nyrs2,13),reqt(nbasin+1,nyrs2,13),
      :    wbu(nbasin+1,nyrs2,13),reqreqts(nyrs2,13),
      :    seniorf(nyrs2,13),juniorf(nyrs2,13),otherf(nyrs2,13),
-     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+!     :    divsup(nbasin+1,nyrs2,13),crop_cus(nyrs2,13),
+     :    allf(nyrs2,13),crop_cus(nyrs2,13),
      :    crop_cuj(nyrs2,13),
      :    crop_cuo(nyrs2,13),crop_cut(nyrs2,13),soil_cus(nyrs2,13),
      :    soil_cuj(nyrs2,13),soil_cuo(nyrs2,13),soil_cu(nyrs2,13),
@@ -10835,7 +10840,8 @@ C       write(413,'(a881)')
      :		  treqt(m,l),
      :           twbu(m,l),treq(m,l)
      :          ,tsenf(m,l),tjunf(m,l),tothf(m,l)
-     :          ,tdiv(m,l),tcus(m,l),tcuj(m,l)
+!     :          ,tdiv(m,l),tcus(m,l),tcuj(m,l)
+     :          ,tallf(m,l),tcus(m,l),tcuj(m,l)
      :          ,tcuo(m,l),tcut(m,l),tscus(m,l)
      :          ,tscuj(m,l),tscuo(m,l),tscu(m,l)
      :          ,tulags(m,l),tulagj(m,l),tulago(m,l),tulagt(m,l)
@@ -11731,8 +11737,10 @@ C       write(413,'(a881)')
      : '|',35('-'),'|',61('-'),'|','Requirement','|')
 803   Format('|','Month','|','  Method  ','|',4x,'ET',5x,'| Precip|
      :Requirement|  Precip |
-     :   Winter  |',13x,'Diversion By Priority'
-     :,13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
+!    :   Winter  |',13x,'Diversion By Priority'
+!    :,13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
+     :   Winter  |',13x,'Farm Headgate Delivery'
+     :,12x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
      :7x,'|',3x,'Non-Consumed River Diversion',4x,'|',2x,'Efficiency Cal
      :c.',
      :2x,'|',1x,'Senior',1x,'|',1x,'Junior',1x,'|',1x,'Other',2x,
@@ -12274,8 +12282,10 @@ C       write(413,'(a881)')
      : '|',35('-'),'|',61('-'),'|','Requirement','|')
 1803  Format ('| Calcd |  Method  |',5x,'|',4x,'ET',5x,'| Precip|
      :Requirement|  Prec
-     :ip |   Winter  |',13x,'Diversion By Priority'
-     :,13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
+!    :ip |   Winter  |',13x,'Diversion By Priority'
+!     :,13x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
+     :ip |   Winter  |',13x,'Farm Headgate Delivery'
+     :,12x,'|',10x,'Diversion to CU',10x,'|',8x,'Add To Soil Moisture',
      :7x,'|',3x,'Non-Consumed River Diversion',4x,'|',2x,'Efficiency Cal
      :c.',
      :2x,'|',1x,'Senior',1x,'|',1x,'Junior',1x,'|',1x,'Other',2x,

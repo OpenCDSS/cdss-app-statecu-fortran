@@ -99,7 +99,11 @@
 !                changed 4WB file format slightly:
 !                  hash marks on header records
 !                  structure ID at end of every record
-!                
+! jhb 2012/06/15   version 13.10
+!                  isuply=2 ONLY:
+!                  changed output (DWB, SWB) header labeling to farm headgate deliv instead of river div by priority
+!                  changed output (DWB, SWB) "total" output to farm headgate deliv total, allf(), instead of river div total
+!                  changed output (binary) labeling of farm headgate deliv by priority outputs
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
@@ -123,8 +127,8 @@
       CHARACTER*16 RDATE
       REAL VERS
 ! grb new version number 
-      PARAMETER (VERS = 13.09)
-      PARAMETER (RDATE = '12/30/11 06:00PM')
+      PARAMETER (VERS = 13.10)
+      PARAMETER (RDATE = '06/15/12 06:00PM')
 !     jhb 07/10
 !     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
@@ -293,6 +297,7 @@
       real :: sbseniorf(0:dim_nsb,dim_ny,12)
       real :: sbjuniorf(0:dim_nsb,dim_ny,12)
       real :: sbotherf(0:dim_nsb,dim_ny,12)
+      real :: sballf(0:dim_nsb,dim_ny,12)
       real :: sbcrop_cus(0:dim_nsb,dim_ny,12)
       real :: sbcrop_cuj(0:dim_nsb,dim_ny,12)
       real :: sbcrop_cuo(0:dim_nsb,dim_ny,12)
@@ -355,7 +360,7 @@
       real :: barech(dim_ny,12)
       real :: btail(dim_ny,12)
       real :: bseniorf(dim_ny,12), bjuniorf(dim_ny,12)
-      real :: botherf(dim_ny,12)
+      real :: botherf(dim_ny,12),ballf(dim_ny,12)
       real :: bcrop_cus(dim_ny,12),bcrop_cuj(dim_ny,12)
       real :: bcrop_cuo(dim_ny,12),bcrop_cut(dim_ny,12)
       real :: bsoil_cus(dim_ny,12),bsoil_cuj(dim_ny,12)
@@ -465,8 +470,8 @@
      &            sbettot, sbeffppt, sbreqt,
      &            sbwbu, sbwbused, sbreqreq,
      &            sbceff, sbcloss, sbfdiv, sbtail,
-     &            sbseniorf, sbjuniorf, sbotherf, sbdivsup,
-     &            sbarech,
+     &            sbseniorf, sbjuniorf, sbotherf, sballf,
+     &            sbdivsup, sbarech,
      &            sbcrop_cus,sbcrop_cuj,sbcrop_cuo,sbcrop_cut,
      &            sbsoil_cus,sbsoil_cuj,sbsoil_cuo,sbsoil_cu,
      &            sbsoiltotts,sbsoiltottj,sbsoiltotto,sbsoiltott,
@@ -486,8 +491,8 @@
      &            bettot, beffppt, breqt,
      &            bwbu, bwbused, breqreq,
      &            bceff, bcloss, bfdiv, btail,
-     &            bseniorf, bjuniorf, botherf, bdivsup, 
-     &            barech,
+     &            bseniorf, bjuniorf, botherf, ballf,  
+     &            bdivsup, barech,
      &            bcrop_cus,bcrop_cuj,bcrop_cuo,bcrop_cut,
      &            bsoil_cus,bsoil_cuj,bsoil_cuo,bsoil_cu,
      &            bsoiltotts,bsoiltottj,bsoiltotto,bsoiltott,
