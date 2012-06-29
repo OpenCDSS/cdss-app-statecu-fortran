@@ -699,8 +699,8 @@
 !jhb=&==================================================================
 !jhb=&  see if it's in the modeled time period
 !jhb=&==================================================================
-!      if(itmp1.lt.nyr1) goto 30 !read the next line in the IPY file
-!      if(itmp1.gt.nyr2) goto 32 !done reading the IPY file
+      if(itmp1.lt.nyr1) goto 30 !read the next line in the IPY file
+      if(itmp1.gt.nyr2) goto 32 !done reading the IPY file
 !jhb=&==================================================================
 !jhb=&  it is! so loop through the structures until the ID matches
 !jhb=&==================================================================
