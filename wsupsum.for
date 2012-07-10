@@ -7345,7 +7345,9 @@ C       write(413,'(a881)')
 !                12/18/08 change to river diversions
 !     :            holdps,holdpj,holdpo,ddhmonot(m,l),
 !                01/19/11 changed back to farm deliveries
-     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
+!    06/15/2012 - jhb - change total to farm headgate total (not river diversion total)
+!     :            seniorf(m,l),juniorf(m,l),otherf(m,l),ddhmonot(m,l),
+     :            seniorf(m,l),juniorf(m,l),otherf(m,l),allf(m,l),
 !jhb  17 REAL ceff(i,m) - River Diversion Acct. - Conveyance Efficiency   
 !jhb  18 REAL closs(m,l) - River Diversion Acct. - Conveyance Loss         
 !jhb  19 REAL fdiv(m,l) - River Diversion Acct. - Farm Headgate Delivery  
