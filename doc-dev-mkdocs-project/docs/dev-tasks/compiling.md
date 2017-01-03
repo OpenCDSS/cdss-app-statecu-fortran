@@ -13,8 +13,39 @@ This documentation contains the following sections:
 
 ## Compile StateCU on Command Line
 
-**TODO smalers 2017-01-01 Need to fill this out once the Git repo files are cleaned up but Jim Brannon's makefile worked with:  make -f makefile_eclipse_linux**
+### Linux
+
+### Windows - MinGW
+
+To compile StateCU on the command line, open a Windows command prompt window.
+Then run the following batch file to configure the MinGW environment:
+
+```
+> C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\mingw\setup-mingw-env.bat`
+```
+
+Then change to the code location and run the makefile:
+
+```
+> C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\src\main\fortran
+> make clean
+> make statecu
+```
+
+The executable is created in the same folder.
 
 ## Compile StateCU in Eclipse
 
-**TODO smalers 2017-01-01 Need to describe once Eclipse project is put together**
+### Linux
+
+### Windows - MinGW
+
+To compile StateCU in Eclipse, start Eclipse with the run script:
+
+```
+> C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\eclipse\run-eclipse-statecu-mingw.bat`
+```
+
+Then right-click in the ***Project Explorer*** area and select ***Make / Targets***.  Then select ***Build...***.  Then select a target and press the ***Build*** button.
+
+Review the output in the ***Console*** area to see if any errors occurred.

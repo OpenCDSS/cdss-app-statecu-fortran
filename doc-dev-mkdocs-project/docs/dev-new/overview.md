@@ -6,9 +6,9 @@ The [standard development folder structure](../project-init/overview#development
 especially given the number of components and setup steps.
 
 The intent of this documentation is to completely document setup steps and allow new developers to comment on this documentation
-so that it can be improved for other developers. The following steps need to occur to set up a new developer's eenvironment.
-Links to other documentation or are included to provide more information and "see details below" is used to indicate that
-specific instructions are included below (rather than simply linking to other pages).
+so that it can be improved for other developers. The following steps need to occur to set up a new developer's environment.
+Links to other documentation are included to provide more information and "see details below" is used to indicate that
+specific instructions are included below (rather than linking to other pages from the following outline).
 
 1. [Create folder for development files](#create-folder-for-development-files) - where development will occur (**see details below**)
 2. Development Environment software install part 1
@@ -27,19 +27,18 @@ specific instructions are included below (rather than simply linking to other pa
 	+ [Development Environment / KDiff3](../dev-env/kdiff3/) - install software to facilitate comparing files
 6. Eclipse Workspace Setup
 	+ [Create Eclipse Workspace Folder](#create-eclipse-workspace-folder) - simple manual step (***see details below***)
-	+ [Import the Existing Eclipse/Maven Project from the Git Repository Folder](#import-the-existing-eclipsemaven-project-from-the-git-repository-folder) - import
+	+ [Import the Existing Eclipse StateCU Project from the Git Repository Folder](#import-the-existing-eclipse-statecu-project-from-the-git-repository-folder) - import
 	from Git repository working files (**see details below**)
-	+ [Configure Java Compiler for Java 8](#configure-java-compiler-for-java-8) - configure Java settings (***see details below***)
 7. [Next Steps - Development Tasks](#next-steps-development-tasks) - be productive!
 
 The following sections are new content that does not exist anywhere else and is linked to from above.
 
 ## Create Folder for Development Files
 
-[Create a development home folder consistent with the initial project setup](../project-init/home-folder/) - this
+Create a development home folder consistent with the [initial project setup](../project-init/home-folder/) - this
 is an umbrella folder for all StateCU development files,
 including software that is installed locally (as appropriate).
-After the folder is created, the following sections will install software and code into the development folder.
+After the folder is created, additional instructions will describe how to install development files into the folder.
 
 ### Linux
 
@@ -77,20 +76,20 @@ The repository will be imported into the Eclipse/Photran workspace as a Fortran 
 > cd \Users\user\cdss-dev\StateCU
 > mkdir git-repos
 > cd git-repos
-> git clone https://bitbucket.org/trilynxsystems/trilynx-ws-novastar.git
+> git clone https://github.com/OpenWaterFoundation/cdss-app-statecu-fortran.git
 ```
 
 ### Clone the repository files (Windows)
 
 ```bash
-$ cd ~/trilynx-dev/NovaStarREST
+$ cd ~/cdss-dev/StateCU
 $ mkdir git-repos
 $ cd git-repos
-$ git clone https://bitbucket.org/trilynxsystems/trilynx-ws-novastar.git
+> git clone https://github.com/OpenWaterFoundation/cdss-app-statecu-fortran.git
 ```
 
-If prompted, specify the Bitbucket account credentials.
-The repository will include the Java dynamic web project as a Maven project.
+If prompted, specify the GitHub account credentials.
+The repository will include the Fortran StateCU project.
 
 ## View Developer Documentation with MkDocs
 
@@ -147,43 +146,28 @@ $ ./run-eclipse-statecu.sh
 > .\run-eclipse-statecu.bat
 ```
 
-## Import the Existing Eclipse/Maven Project from the Git Repository Folder
+## Import the Existing Eclipse StateCU Project from the Git Repository Folder
 
 The [Initial Project Setup](../project-init/overview/) process performed by the software team leads
-did extensive work to get the Eclipse project set up
+did extensive work to set up the Eclipse project 
 and these files were saved to the Git repository as an Eclipse/Photran Fortran project.
 
 New developers need to import the project into the empty workspace as follows.
 
-Use ***File / Import...*** and then follow the sequence below.
+Use ***File / Import*** and then follow the sequence below.
 
-![Import Maven project](overview-images/eclipse-import-maven-project1.png)
+![Import project](overview-images/eclipse-import-project-1.png)
 
-The first step allows browsing to an existing project.
+The first step allows browsing to an existing project (the user name will be different).
 
-![Import Maven project](overview-images/eclipse-import-maven-project2.png)
+![Import project](overview-images/eclipse-import-project-2.png)
 
-Browse to and select the Git repository folder (same as for initial project setup),
-as shown below.
-
-![Import Maven project](overview-images/eclipse-import-maven-project3.png)
-
-Press ***OK*** and then press ***Finish*** in the initial import dialog.
+Press ***Finish*** in the initial import dialog.
 
 The resulting Eclipse workspace is shown as below.
 Note that Eclipse recognizes the associated Git repository indicated by the repository name/branch next to the Eclipse project.
 
-![Import Maven project](overview-images/eclipse-import-maven-project4.png)
-
-## Configure Java Compiler for Java 8
-
-This step is the same as the initial project setup, although less probably needs to be done
-because Maven project indicated Java version preference.
-
-* [Configure Java Compiler](../project-init/java-compiler/) - follow the documentation and confirm that the configuration is correct
-	+ There should be no need to create a folder for Java code and tests because this exists in the repository
-	+ Very little if anything needs to be done
-	+ **TODO smalers 2016-12-20 need to verify how Java compliance is determined - does execution environment name get saved in Git files?**
+![Import project](overview-images/eclipse-import-project-3.png)
 
 ## Next Steps - Development Tasks
 

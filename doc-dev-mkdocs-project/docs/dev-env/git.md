@@ -97,7 +97,7 @@ $ git config --global user.name "First Last"
 Set the email that should be used for the user, typically the company email if software development is done at work:
 
 ```bash
-$ git config --global user.email "first.last@trilynx.systems"
+$ git config --global user.email "first.last@some.domain"
 ```
 
 Set the editor to use when editing messages, etc. (replace `vim` with desired editor):

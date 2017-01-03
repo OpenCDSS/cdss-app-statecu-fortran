@@ -22,7 +22,9 @@ See the following resources:
 * [Binaries available for gfortran](https://gcc.gnu.org/wiki/GFortranBinaries) - access to various `gfortran` distributions
 * [mingw-w64](http://mingw-w64.org/doku.php) - newer MinGW for Windows 64-bit, can also compile 32-bit executables
 
-The following sections are included in this documentation:
+The following sections are included in this documentation.
+**The choice of development environment by the software developer will drive many other configuration steps.
+AGAIN, MinGW IS THE INITIAL FOCUS.**
 
 * [Linux](#linux)
 * [Windows](#windows)
@@ -151,7 +153,8 @@ It is also called by the `run-eclipse-statecu-mingw.bat` batch file to facilitat
 
 #### Confirm Compiler Version
 
-Once the `PATH` has been configured as described in the previous section, the compiler versions can be confirmed, as followed,
+Once the `PATH` has been configured as described in the previous section (by running the `setup-mingw-env.bat` batch file),
+the compiler versions can be confirmed, as followed,
 from a Windows command shell.  Or, alternatively, start a Windows command shell and then run `bash` to start a Linux Bash shell.
 Both will allow running the following commands.
 
