@@ -8,7 +8,7 @@ being led by the [Open Water Foundation](http://openwaterfoundation.org).
 
 See the following developer documentation to get started as a StateCU developer:
 
-* [Learn StateCU (for Developers)](http://learn.openwaterfoundation.org/owf-learn-statecu-dev/index.html)
+* [Learn StateCU (for Developers)](http://learn.openwaterfoundation.org/owf-learn-cdss-statecu-dev/index.html)
 
 The developer documentation and guidelines will be updated as the development environment is proven out.
 

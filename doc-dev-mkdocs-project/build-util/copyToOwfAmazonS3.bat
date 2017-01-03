@@ -27,7 +27,7 @@ rem - "mkdocs serve" does not do this
 
 cd ..
 mkdocs build --clean
-cd ../build-util
+cd build-util
 
 rem Now sync the local files up to Amazon S3
 rem - apparently can't pass an empty argument so comment out %dryrun%
