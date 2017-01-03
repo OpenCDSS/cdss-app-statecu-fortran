@@ -1,5 +1,0 @@
-The CDSS StateCU model source code.
-
-Initially it will be only be the FORTRAN code of the model.
-
-Eventually I will add the VB.NET code of the StateCU GUI.

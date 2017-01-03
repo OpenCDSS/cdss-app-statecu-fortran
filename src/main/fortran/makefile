@@ -198,8 +198,8 @@ statecu: \
 .PHONY: clean veryclean
 
 clean:
-	rm -f bin/*.o *.mod *.MOD
+	rm -f bin/*.o *.mod *.MOD *.o
 
 veryclean: clean
-	rm -f *~ $(PROGRAMS)
+	rm -f *~ $(PROGRAMS) *.exe
 
