@@ -17,11 +17,11 @@ follow conventions of the open source StateCU project.
 This documentation includes the following sections:
 
 * [Colorado's Decision Support Systems](#colorados-decision-support-systems) - the system under which the software is maintained
-* [Open Water Foundation](#open-water-foundation) - 
-* [How to Use this Documentation](#how-to-use-this-documentation)
-* [License](#license)
-* [Source Repository on GitHub](#source-repository-on-github)
-* [MkDocs](#mkdocs)
+* [Open Water Foundation](#open-water-foundation) - lead organization for moving StateCU to open source project
+* [How to Use this Documentation](#how-to-use-this-documentation) - guidance and list of main documentation sections
+* [License](#license) - license for software and this documentation
+* [Source Repository on GitHub](#source-repository-on-github) - location of StateCU repository in GitHub
+* [MkDocs](#mkdocs) - the tool used to create this documentation
 
 ## Colorado's Decision Support Systems
 
