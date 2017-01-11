@@ -2,10 +2,9 @@
 
 Eclipse is used for the integrated development environment (IDE) and Eclipse requires Java to run.
 The Eclipse Photran plugin is used to provide a Fortran IDE.
-The following Eclipse/Photran download page indicates that Eclipse Mars is required
-(**don't download it yet - that is described in a later step**).
+The following Eclipse/Photran download page indicates that Eclipse Mars is required:
 
-* [Downloading Photran](https://eclipse.org/photran/download.php)
+* [Downloading Photran](https://eclipse.org/photran/download.php) - **however, don't download Photran yet - that is described in a later step**
 
 Mars requires at least Java 7 but Java 8 is being phased in with other CDSS tools.
 Therefore, Java 8 will be used with Eclipse/Photran.
@@ -66,7 +65,9 @@ C:\Program Files\
         jre1.8.0_112\  
 ```
 
-The paths can be specified in software like Eclipse, as needed.
+#### Create Symbolic Links
+
+The paths with detailed version numbers can be specified in software like Eclipse, as needed.
 However, it is also helpful to create symbolic links to generalize scripts and configurations that use Java.
 To do so, run a Windows Command Shell as administrator and run the following.
 In the future the symbolic links can be recreated to point to newer versions of Java.

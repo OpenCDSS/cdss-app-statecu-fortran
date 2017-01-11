@@ -10,7 +10,7 @@ This documentation includes the following sections:
 
 * [Build Utility Script Location](#build-utility-script-location)
 * [Script to Configure MinGW Environment - `setup-mingw-env`](#script-to-configure-mingw-environment-setup-mingw-env)
-* [Script to Run Eclipse - `run-eclipse-statecu`](#script-to-run-eclipse-run-eclipse-statecu)
+* [Script to Run Eclipse - `run-eclipse-statecu`](#script-to-run-eclipse-run-eclipse-statecu-mingw)
 
 ## Build Utility Script Location
 

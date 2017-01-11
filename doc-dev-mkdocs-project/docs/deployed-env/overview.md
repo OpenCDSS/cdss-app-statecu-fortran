@@ -4,9 +4,47 @@ This documentation discusses how StateCU should be deployed into an operational 
 
 This documentation contains the following sections:
 
-* [StateCU 32 and 64 Bit Executable Considerations](#statecu-32-and-64-bit-executable-considerations)
 * [Location of Installed StateCU Software](#location-of-installed-statecu-software)
 * [Relationship of StateCU Executable with StateCU GUI](#relationship-of-statecu-executable-with-statecu-gui)
+* [StateCU 32 and 64 Bit Executable Considerations](#statecu-32-and-64-bit-executable-considerations)
+
+## Location of Installed StateCU Software
+
+The legacy approach for distributing the StateCU executable (as of version 13.03) has been to package the `statecu.exe` file
+with the StateCU GUI.  For examaple, see the [CDSS StateCU Download](http://cdss.state.co.us/software/Pages/StateCU.aspx).
+For Windows, the software defaults to an installation folder: 
+
+```
+C:\CDSS\StateCU\bin\
+    statecu.exe                             (StateCU model executable)
+    statecui.exe                            (StateCU GUI executable)
+    other files                             (Many other files are used by the GUI)
+```
+
+**TODO smalers 2016-12-31 Need to work with WWG to confirm where StateCU should be installed going forward.
+Perhaps should have a default location under C:\CDSS but also recommend copying to dataset folder to ensure compatibility.
+Other issues to be considered include the following:**
+
+* Should the software install into a versioned folder like CDSS TSTool, Python, and other software?
+For example:  `C:\CDSS\StateCU-13.03\bin\statecu.exe`.
+This would be more flexible when new features are added.
+The downside is that it would complicate simple use where "statecu" is entered in a command window,
+although the latest install could always update the `PATH` environment variable.
+An intelligent StateCU runner script could be developed (similar to Python `py` program)
+to look for StateCU in normal locations.
+This program could be installed in a common location such as `C:\CDSS\bin`.
+* Should a version number be included in the StateCU executable filename?
+This is less of an issue if the StateCU install folder is versioned.
+`statecu -v` can be run to print the version when in doubt.
+
+## Relationship of StateCU Executable with StateCU GUI
+
+The legacy approach for distributing the StateCU executable (as of version 13.03) has been to package the `statecu.exe` file
+with the StateCU GUI.  For examaple, see the [CDSS StateCU Download](http://cdss.state.co.us/software/Pages/StateCU.aspx).
+
+**TODO smalers 2016-12-31 Need to decide how the StateCU executable should continue to be packaged only with the GUI,
+and perhaps also be distributed separately, especially Linux versions.
+Also, the StateCU GUI is out of date and needs updated.  Need to prioritize within the OpenCDSS effort.**
 
 ## StateCU 32 and 64 Bit Executable Considerations
 
@@ -86,12 +124,3 @@ Search for the characters `PE` at the top of the file.
 * If these characters are followed closely by `L`, then the executable is 32-bit.
 * If these characters are followed closely by a `d`, then the executable is 64-bit.
 
-## Location of Installed StateCU Software
-
-**TODO smalers 2016-12-31 Need to work with WWG to confirm where StateCU should be installed going forward.
-Perhaps should have a default location under C:\CDSS but also recommend copying to dataset folder to ensure compatibility.**
-
-## Relationship of StateCU Executable with StateCU GUI
-
-**TODO smalers 2016-12-31 Need to understand how the StateCU executable should be packaged with the GUI,
-and perhaps also be distributed separately, especially Linux versions.**

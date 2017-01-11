@@ -1,6 +1,7 @@
 # Development Tasks / Overview
 
-Development tasks are all of the day-to-day work that a software developer does to move a software project forward.
+Development tasks are the day-to-day work that a software developer does to enhance StateCU software
+to add new functionality, fix bugs, etc.
 This documentation describes common tasks, roughly in the order from design to deployment
 
 * [Run Eclipse](run-eclipse) - how to start Eclipse

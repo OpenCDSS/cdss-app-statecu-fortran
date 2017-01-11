@@ -3,7 +3,8 @@
 This Development Environment documentation is intended to be used as a reference by the developer that
 sets up the project for the first time or initializes a new development environment to contribute to the project.
 Specific sections are referenced by the [Initial Project Setup](../project-init/overview/),
-[New Developer](../dev-new/overview/) and [Deployed Environment](../deployed-env/overview/) sections.
+[Deployed Environment](../deployed-env/overview/), and
+[New Developer](../dev-new/overview/) sections.
 
 This documentation includes the following sections:
 
@@ -13,7 +14,8 @@ This documentation includes the following sections:
 
 ## Development Environment Software Requirements
 
-The following software are needed in the StateCU development environment and should be installed before doing [Initial Project Setup](../project-init/overview/).
+The following software are needed in the StateCU development environment and should be installed before doing [Initial Project Setup](../project-init/overview/),
+although the Initial Project Setup documentation generally indicates prerequisites for software that needs to be installed.
 Steps can be skipped if they have been completed previously as part of operating system setup or on other software development projects.
 Some additional software may be installed in the development files and is described in project initialization.
 
@@ -41,12 +43,13 @@ The following software are required for StateCU development:
 The software development environment must be appropriately configured to effectively develop StateCU and support collaboration.
 Development environment setup is actually a major effort before any code can be written
 and is typically done the first time by someone that has a good grasp of the technologies.
-Failing to understand how to set up the development environment will likely lead to wasted time,
+Failing to understand how to set up the development environment will likely lead to wasted time
 and possibly back-tracking on previous software development work.
 Using a consistent development environment for all developers ensures that documentation is applicable and troubleshooting is consistent.
 Therefore, the software installation locations described in this documentation are highly recommended to avoid issues.
 
-See the discussion of [Initial Project Setup](../project-init/overview/) for a folder structure that is assumed in this documentation.
+See the discussion of [Initial Project Setup / Development Folder Structure](../project-init/overview#development-folder-structure)
+for a folder structure that is assumed in this documentation.
 It is important for software developers to understand the software tools and configuration so that they can troubleshoot configuration issues.
 
 ## Portability Considerations

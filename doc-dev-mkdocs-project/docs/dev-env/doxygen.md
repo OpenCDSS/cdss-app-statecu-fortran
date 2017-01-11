@@ -1,8 +1,8 @@
 # Development Environment / Doxygen
 
 Doxygen is a software tool for generating documentation from code comments.
-This eliminates the need to create code documentation outside of code.
-Doxygen also creates diagrams that illustrates how code modules call each other.
+This minimizes the need to create code documentation outside of code.
+Doxygen also creates diagrams that illustrate how code modules call each other.
 See the following resources:
 
 * [Doxygen website](http://www.stack.nl/~dimitri/doxygen/)
@@ -60,4 +60,4 @@ After downloading, run the installer program as follows.
 
 ## Configure Doxygen Project
 
-A Doxygen project is configured as part of the [Initial Project Setup / Doxygen](../project-init/doc-doxygen/) - do not do now.
+A Doxygen project is configured as part of the [Initial Project Setup / Doxygen](../project-init/doc-doxygen/) - **do not do now**.

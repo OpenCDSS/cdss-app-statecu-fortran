@@ -2,7 +2,7 @@
 
 Doxygen software processes code comments to create API documentation that is useful for developers.
 Doxygen can also be used to create graphs showing how code modules are connected.
-The output of Doxygen are not intended to be saved in the repository but might be distributed and archived,
+The output of Doxygen is not intended to be saved in the repository but might be distributed and archived,
 similar to model executables.
 
 This documentation includes the following sections:
@@ -22,12 +22,12 @@ including the GraphViz software.
 
 Run the Doxywizard interactively from the ***Start*** menu.  Fill out the project settings as shown below.
 
-* Working directory: `doc-doxygen-project` in the repository
+* Working directory: `doc-doxygen-project` - in the repository
 * Project name: `StateCU` - will be shown in HTML output
 * Project synopsis: `CDSS consumptive use model` - will be shown in HTML output
 * Project version or id: `13` - corresponds to StateCU version - will be shown in output
 * Source code directory: `src/main/fortran` in repository
-* Destination directory: `doc-doxygen-project/output` - will use .gitignore
+* Destination directory: `doc-doxygen-project/output` - use `.gitignore` to ignore in repository
 
 ![doxywizard setup](doc-doxygen-images/doxywizard-project-1.png)
 

@@ -4,11 +4,16 @@ It is helpful to run Eclipse with a script to ensure that proper versions of Ecl
 
 The following sections are included in this documentation:
 
+* [Prerequisites](#prerequisites)
 * [Default Eclipse Run Script](#default-eclipse-run-script) - run script provided in repository for standard project configuration
 	+ [Linux](#linux)
 	+ [Windows](#windows)
 * [Developer-specific Run Script](#developer-specific-run-script) - modify the default for a specific user
 * [Next Step](#next-step)
+
+## Prerequisites
+
+This step requites that Eclipse/Photran was previously installed as per the [Developer Environment / Eclipse and Photran](../dev-env/eclipse/) documentation.
 
 ## Default Eclipse Run Script
 
@@ -24,7 +29,7 @@ It is recommended that developers use the script as is if possible to run from a
 been initialized with the proper MinGW environment variables.
 
 ```text
-C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\eclipse\run-eclipse-statecu.sh
+C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\eclipse\run-eclipse-statecu.bat
 ```
 
 A snapshot of the script contents is as follows (see the repository for current version):

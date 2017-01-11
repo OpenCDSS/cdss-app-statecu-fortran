@@ -12,6 +12,8 @@ The following sections are included in this documentation:
 ## Prerequisites
 
 All setup for the project should occur as a normal user (not root or other special user) in the software developer's home folder.
+Most of the contents of this folder will be backed up during GitHub repository comments.
+Additional backups can be made by periodically copying files to a backup device or configuring automated backups of the folder.
 
 ## Create Home Folder for Development Files
 

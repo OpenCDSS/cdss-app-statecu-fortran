@@ -1,20 +1,22 @@
 # New Developer Setup / Overview
 
-A new developer that will contribute to StateCU must configure a development environment
+This documentation is for software developers that have an interest in contributing to the StateCU software project.
+It is recommended that the StateCU development environment should follow these setup instructions, which are
 consistent with the [Development Environment](../dev-env/overview/) and [Initial Project Setup](../project-init/overview/) documentation.
 The [standard development folder structure](../project-init/overview#development-folder-structure) should be followed to minimize potential for issues,
 especially given the number of components and setup steps.
+All of this documentation is consistent with the recommended development environment.
 
 The intent of this documentation is to completely document setup steps and allow new developers to comment on this documentation
 so that it can be improved for other developers. The following steps need to occur to set up a new developer's environment.
 Links to other documentation are included to provide more information and "see details below" is used to indicate that
 specific instructions are included below (rather than linking to other pages from the following outline).
+After reading instructions for a step, use "back" to return to this outline so that setup is done in logical order.
 
 1. [Create folder for development files](#create-folder-for-development-files) - where development will occur (**see details below**)
 2. Development Environment software install part 1
 	+ [Development Environment / Git](../dev-env/git/) - install Git software so can clone the repository
 	+ [Development Environment / Python and pip](../dev-env/python/) - install Python, which is needed by MkDocs
-	+ [Development Environment / pytest](../dev-env/pytest/) - install to facilitate automated testing
 	+ [Development Environment / MkDocs](../dev-env/mkdocs/) - install MkDocs so can view/edit full documentation locally
 3. [Clone Git Repository](#clone-git-repository) - clone the repository to get access to all files (**see details below**)
 4. [View Developer Documentation with MkDocs](#view-developer-documentation-with-mkdocs) - view full developer documentation locally (**see details below**)
@@ -24,6 +26,7 @@ specific instructions are included below (rather than linking to other pages fro
 	+ [Development Environment / gfortran](../dev-env/gfortran/) - install `gfortran` Fortran compiler
 	+ [Development Environment / Eclipse and Photran](../dev-env/eclipse/) - install Eclipse for use as IDE
 	+ [Development Environment / Doxygen](../dev-env/doxygen/) - install Doxygen to auto-generate code API documentation
+	+ [Development Environment / pytest](../dev-env/pytest/) - install to facilitate automated testing (being evaluated)
 	+ [Development Environment / KDiff3](../dev-env/kdiff3/) - install software to facilitate comparing files
 6. Eclipse Workspace Setup
 	+ [Create Eclipse Workspace Folder](#create-eclipse-workspace-folder) - simple manual step (***see details below***)
@@ -172,4 +175,8 @@ Note that Eclipse recognizes the associated Git repository indicated by the repo
 ## Next Steps - Development Tasks
 
 At this point it should be possible to compile and run StateCU within the Eclipse interface.
-See the documentation for [Development Tasks / Overview](../dev-tasks/overview/).
+See also:
+
+* [Deployed Environment / Overview](../deployed-env/overview/) - for an overview of the deployed software
+* [Software Design / Overview](../software-design/overview/) - to understand software structure and logic
+* [Development Tasks / Overview](../dev-tasks/overview/) - common development tasks

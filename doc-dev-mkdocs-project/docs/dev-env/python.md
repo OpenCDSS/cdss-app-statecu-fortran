@@ -1,8 +1,9 @@
-# Development Environment / Python
+# Development Environment / Python and pip
 
 Python is used by the MkDocs documentation software.
 Python is also used by the `pytest` automated test framework, which may be used for functional testing.
 Python is also a useful program for creating data processing scripts, including processing spatial data.
+`pip` is a tool used to install Python packages.
 
 This documentation contains the following sections:
 

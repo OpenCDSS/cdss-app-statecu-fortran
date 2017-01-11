@@ -12,6 +12,7 @@ Answers to the following questions are provided in this documentation:
 
 As part of the MinGW setup, it is recommended that a batch file is created to set environment variables,
 in particular the `PATH`, in order to find MinGW and MSYS software executables.
+A default script is available in the repository:  `~/cdss-dev/StateCU/git-repos/cdss-app-statecu-fortran/build-util/mingw/setup-mingw-env.bat`.
 If this script is run, then opening a Windows Command Shell should show the modified path:
 
 ```text
@@ -21,5 +22,3 @@ C:\MinGW\bin;C:\MinGW\MSYS\1.0\local\bin;C:\MinGW\MSYS\1.0\bin;C:\Program Files\
 ```
 
 Then programs like `make` and `gfortran` can be run from the Windows command line.
-
-**TODO smalers 2016-12-31 need to circle around and provide link to the environment setup script once saved to the repository.**

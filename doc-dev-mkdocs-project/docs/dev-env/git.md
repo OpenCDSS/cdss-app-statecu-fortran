@@ -5,7 +5,8 @@ Git software is used for version control and all developers are expected to foll
 Git software must be installed and configured on the Windows computer in order to use Git for version control.
 The [Eclipse IDE](eclipse/) provides Git integration;
 however, Git command line tools can also be used independent of Eclipse.
-The Git tools described below are recommended, although developers may use other Git software.
+The Git tools described below are recommended, although developers may use other Git software if they have preferences.
+Many of the examples in this documentation use command line Git for clarity.
 
 The following resources are helpful:
 

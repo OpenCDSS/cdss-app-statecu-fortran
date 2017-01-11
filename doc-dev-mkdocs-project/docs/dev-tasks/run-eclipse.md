@@ -1,6 +1,9 @@
 # Development Tasks / Run Eclipse
 
 The Eclipse/Photran IDE is useful for interactive code development, debugging, and testing.
+Currently, the Eclipse/Photran IDE is the only IDE that is described in this documentation.
+It is not necessary to use Eclipse/Photran or another IDE to compile the software,
+but the IDE does provide an integrated interface to the code and development tasks.
 
 This documentation contains the following sections:
 
@@ -17,7 +20,7 @@ The development environment must be configured properly in order for Eclipse to 
 
 ### Windows
 
-**This step is included by default if the Eclipse run script is used.**
+**This step is included by default if the Eclipse run script is used, as described in the next section.**
 
 Assuming that the development environment is consistent with this documentation, run the script from a Windows command shell:
 `C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\mingw\setup-mingw-env.bat`.

@@ -13,6 +13,7 @@ This documentation includes the following sections:
 * [Install Eclipse and Photran](#install-eclipse-and-photran)
 	+ [Linux](#linux)
 	+ [Windows](#windows)
+* [Next Steps](#next-steps)
 
 ## Prerequisites
 
@@ -69,16 +70,10 @@ C:\Program Files\
 ```
 
 It is possible to create a desktop shortcut to Eclipse.
-However, before doing so, it is recommended to create a batch file to run eclipse, for example:
-
-```bat
-rem Run Eclipse with Java 8, to make sure the right versions are used
-rem This assumes that Java 8 and Eclipse have been installed as per the StateCU developer documentation.
-
-rem Specify the VM to use and the maximum memory
-"C:\Program Files\Eclipse\eclipse-parallel-mars-64\eclipse" -vm "C:\Program Files\Java\jre8\bin\java" -vmargs -Xmx700M
-
-```
+However, before doing so, it is recommended to create a batch file to run eclipse,
+as per the [Initial Project Setup / Eclipse Run Script](../project-init/eclipse-run-script/).
+The batch file is the recommended way to start Eclipse for StateCU development;
+however, the desktop shortcut is a convenience for general Eclipse use.
 
 The above script can be double-clicked on or run from a Windows Command Shell.
 If necessary, the default script can be copied and modified for a specific developer.
@@ -91,10 +86,16 @@ and select ***Create shortcut***.  On Windows 10, the following warning may be s
 ![Eclipse shortcut warning](eclipse-images/eclipse-shortcut-warning.png)
 
 Press ***Yes***.  A shortcut labeled ***eclipse.exe Shortcut*** will be shown on the desktop.
-Right-click on the icon and select ***Properties***.  Then change the properties as follows:
+Right-click on the icon and select ***Properties***.  Then change the properties as follows,
+**consistent with the Eclipse run script**:
 
 * Change the name to something like ***Eclipse Parallel Mars 64***.
 * Change the ***Shortcut*** tab ***Target*** to be similar to the batch file above:
 `"C:\Program Files\Eclipse\eclipse-parallel-mars-64\eclipse" -vm "C:\Program Files\Java\jre8\bin\java" -vmargs -Xmx700M`
 
 Double-clicking on the shortcut desktop icon should then run the desired Eclipse.
+
+## Next Steps
+
+Additional Eclipse configuration will be performed after finishing development environment setup, as per the
+[Initial Project Setup](../project-init/overview/) documentation - **do not do now**.

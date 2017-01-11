@@ -10,7 +10,7 @@ pages:
   - 'Machine': dev-env/machine.md
   - 'Git': dev-env/git.md
   - 'Python and pip': dev-env/python.md
-  - 'Pytest': dev-env/pytest.md
+  - 'pytest': dev-env/pytest.md
   - 'MkDocs': dev-env/mkdocs.md
   - 'Java 8': dev-env/java8.md
   - 'gfortran': dev-env/gfortran.md
@@ -20,7 +20,7 @@ pages:
 - 'Initial Project Setup':
   - Overview: project-init/overview.md
   - 'Create Development Home Folder': project-init/home-folder.md
-  - 'Create GitHub Repository': project-init/github.md
+  - 'GitHub Git Repository': project-init/github.md
   - 'Eclipse Run Script': project-init/eclipse-run-script.md
   - 'Eclipse Workspace': project-init/eclipse-workspace.md
   - 'Eclipse StateCU Project': project-init/eclipse-statecu-project.md
@@ -32,7 +32,7 @@ pages:
   - 'Documentation, API (Doxygen)': project-init/doc-doxygen.md
 - 'Deployed Environment':
   - 'Overview': deployed-env/overview.md
-- 'New Developer':
+- 'New Developer Setup':
   - 'Overview': dev-new/overview.md
 - 'Software Design':
   - 'Overview': software-design/overview.md

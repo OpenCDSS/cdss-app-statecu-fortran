@@ -1,4 +1,4 @@
-# Initial Project Setup / GitHub
+# Initial Project Setup / GitHub Git Repository
 
 The initial StateCU code for OpenCDSS was originally loaded into a private GitHub repository maintained by Jim Brannon in 2011 and was never made public.
 The repository had minimal structure and was mainly a home for the StateCU source code for a single developer.
@@ -14,12 +14,17 @@ The following resources are helpful:
 
 This documentation contains the following sections:
 
+* [Prerequisites](#prerequisites)
 * [Create a New StateCU Repository on GitHub](#create-a-new-statecu-repository-on-github)
 * [Clone Legacy GitHub StateCU Repository](#clone-legacy-github-statecu-repository)
 * [Rename Legacy GitHub StateCU Repository](#rename-legacy-github-statecu-repository)
 * [Change the Remote Git Repository to the New Empty GitHub Repository](#change-the-remote-git-repository-to-the-new-empty-github-repository)
 * [Push the Legacy GitHub StateCU Repository to New GitHub Repository](#push-the-legacy-github-statecu-repository-to-new-github-repository)
 * [Tag Repository as LegacyCDSS and 13.10](#tag-repository-as-legacycdss-and-statecu-1310)
+
+## Prerequisites
+
+This step requires that the Git software was previously installed as per [Development Environment / Git](../dev-env/git/) documentation.
 
 ## Create a New StateCU Repository on GitHub
 
@@ -58,7 +63,7 @@ so that changes are saved there, rather than the legacy GitHub repository.
 First, list the current remote repositories:
 
 ```
-$ cd ~/cdss-dev/StateCU/git-repos/cdss-app-statecu-fortrank
+$ cd ~/cdss-dev/StateCU/git-repos/cdss-app-statecu-fortran
 $ git remote -v
 
 origin  https://github.com/jimbrannon/statecu-project.git (fetch)
@@ -112,7 +117,7 @@ with date and committer information:
 
 The repository is now ready to move forward with new modifications, including changes to be consistent with this documentation.
 However, before making any changes, it is useful to tag the current version so that it is easy to check out the version later if necessary.
-Create two tags as follows and then push all the tags:
+Create two annotated tags as follows and then push all the tags:
 
 ```
 $ git tag -a LegacyCDSS -m "Version of StateCU code prior to starting OpenCDSS, same as StateCU-13.10 tag"

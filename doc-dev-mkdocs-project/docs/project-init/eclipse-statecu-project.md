@@ -28,6 +28,8 @@ This documentation contains the following sections:
 The important prerequisites for this step are:
 
 * [GitHub Git Repository](github/) should have been set up because it will be imported as a project
+* Windows:
+	+ [MinGW](../dev-env/machine/) should have been set up to provide compilers and `make` program
 
 ## Create a Git Branch
 
