@@ -2,7 +2,13 @@
 
 MkDocs is a Python add-on package that creates static website content from Markdown input.
 This documentation was created with MkDocs.
-See the installation instructions on the [MkDocs website](http://www.mkdocs.org/).
+Although the latest published version of this documentation can be viewed on the web,
+MkDocs must be installed and run locally if the documentation is to be viewed locally
+and changes to documentation are made by developers.
+See the installation instructions on the [MkDocs website](http://www.mkdocs.org/),
+which are summarized below.
+MkDocs installation can be skipped if the developer will never look at the developer documentation locally
+or make edits to the documentation.
 
 This documentation includes the following sections:
 
@@ -72,3 +78,5 @@ Commands:
   serve      Run the builtin development server
 
 ```
+
+See the [Development Tasks / Documenting](../dev-tasks/documenting#developer-documentation-using-mkdocs) documentation for instructions on using MkDocs.

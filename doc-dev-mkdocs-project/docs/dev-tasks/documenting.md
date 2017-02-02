@@ -24,6 +24,46 @@ See the following resources for information on MkDocs and Markdown:
 * [Markdown on Wikipedia](https://en.wikipedia.org/wiki/Markdown)
 * [commonmark.org Markdown reference](http://commonmark.org/help/)
 
+### Run MkDocs Server to View Documentation
+
+MkDocs runs a local Python web server that allows the browser to view the documentation.
+To start the server, change to the folder where the documentation configuration file exists and start the server.
+This should work for Windows command shell, Git Bash running on Windows or Linux, and Linux command shell,
+depending on the development environment.
+
+```
+> cd \Users\userName\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\doc-dev-mkdocs-project
+> mkdocs serve
+```
+
+The following indicates that the server is running.  If an error is shown, it is usually because the
+`mkdocs.yml` file lists a file that does not yet exist or the file has a syntax problem such as mis-matched quotes.
+If a problem occurs, fix the problem and try restarting the server.
+
+![mkdocs serve](documenting-images/mkdocs-serve.png)
+
+Then view the documentation in a web browser using the address `http://localhost:8000`.
+The MkDocs server will generally auto-detect changes to files and the browser will refresh.
+When auto-refresh does not happen, manually refresh to see changes.
+
+Stop the server with `Ctrl-C` in the command shell window.
+
+### Publish the documentation.
+
+Currently the StateCU developer documentation is published to the
+[Learn StateCU (for Developers) static website](http://learn.openwaterfoundation.org/owf-learn-cdss-statecu-dev/)
+hosted by the Open Water Foundation.
+This may continue or may evolve into a website hosted by the State of Colorado or open source project page.
+
+The `site` folder under the MkDocs project is copied to an Amazon S3 bucket using the following batch file (Windows example).
+The developer must have the proper credentials to copy the files.
+
+```
+> C:
+> cd \Users\user\cdss-dev\StateCU\cdss-app-statecu-fortran\doc-dev-mkdocs-project\build-util
+> copyToOwfAmazonS3.bat
+```
+
 ## User Documentation Using MkDocs
 
 The user documentation for StateCU currently uses Microsoft Word and is distributed as PDF.

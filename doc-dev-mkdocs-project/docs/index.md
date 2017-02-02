@@ -14,7 +14,7 @@ to streamline understanding of the StateCU code and developer environment.
 It is expected that software developers are technically competant and
 follow conventions of the open source StateCU project.
 
-This documentation includes the following sections:
+This documentation page includes the following sections:
 
 * [Colorado's Decision Support Systems](#colorados-decision-support-systems) - the system under which the software is maintained
 * [Open Water Foundation](#open-water-foundation) - lead organization for moving StateCU to open source project
@@ -49,18 +49,19 @@ See also other [OWF learning resources](http://learn.openwaterfoundation.org).
 
 ## How to Use this Documentation
 
-This website is intended as a companion to the StateCU source code and is the source of
-information for software developers that support and enhance StateCU.
+This website is a companion to the StateCU source code and is the source of
+information for software developers that modify and support StateCU.
 
-The documentation is organized somewhat chronologically for creating and maintaining the StateCU software, as follows,
-with later sections referring to earlier sections as appropriate:
+The documentation is organized for new developers and existing developers.
+The reference sections at the end explain initial development environment and project setup steps that were completed chronologically
+and are useful as a reference to explain.  Specific setup steps are referenced as needed.
 
-* [Development Environment](dev-env/overview/) - describes development environment software installation (some tools are shared between CDSS software projects)
-* [Initial Project Setup](project-init/overview/) - describes how the StateCU software project was initially configured
 * [Deployed Environment](deployed-env/overview/) - describes the deployed environment after software is installed
 * [New Developer Setup](dev-new/overview/) - **new StateCU software developers should start here**
 * [Software Design](software-design/overview/) - provides details about the software code design
 * [Development Tasks](dev-tasks/overview/) - describes comment development tasks - **refer to this after new development environment is configured**
+* [REFERENCE: Development Environment](dev-env/overview/) - describes development environment software installation (some tools are shared between CDSS software projects)
+* [REFERENCE: Initial Project Setup](project-init/overview/) - describes how the StateCU software project was initially configured
 
 ## License
 

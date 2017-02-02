@@ -1,6 +1,11 @@
 # Deployed Environment / Overview
 
 This documentation discusses how StateCU should be deployed into an operational environment.
+It is important to keep this target in sight as the end result of software development.
+However, software development will occur using a version-controlled copy of files that is different than the deployed environment
+(see [New Developer Setup](../dev-new/overview) documentation for how to set up a new developer environment).
+Files from the developer environment can be installed to the deployed environment for local testing,
+and StateCU users that are not developers will only be working in the deployed environment.
 
 This documentation contains the following sections:
 

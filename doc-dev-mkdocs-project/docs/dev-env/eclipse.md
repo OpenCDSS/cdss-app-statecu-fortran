@@ -1,7 +1,7 @@
 # Development Environment / Eclipse and Photran
 
 Eclipse is used for the integrated development environment (IDE).
-The Eclipse Photran plugin is used to provide a Fortran IDE.
+The Eclipse Photran plugin is used to provide a Fortran IDE, which can facilitate editing code, debugging, etc.
 The following Eclipse/Photran download page indicates that Eclipse Mars is required.
 
 * [Downloading Photran](https://eclipse.org/photran/download.php) - indicates Eclipse version and provides other information links

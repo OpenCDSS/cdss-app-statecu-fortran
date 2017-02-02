@@ -3,10 +3,10 @@
 Git software is used for version control and all developers are expected to follow Git best practices.
 
 Git software must be installed and configured on the Windows computer in order to use Git for version control.
-The [Eclipse IDE](eclipse/) provides Git integration;
+The [Eclipse IDE](eclipse/), which is recommended for interactive development, provides Git integration;
 however, Git command line tools can also be used independent of Eclipse.
 The Git tools described below are recommended, although developers may use other Git software if they have preferences.
-Many of the examples in this documentation use command line Git for clarity.
+Many of the examples in this documentation use command line Git (Git Bash) for clarity.
 
 The following resources are helpful:
 
@@ -29,6 +29,7 @@ This documentation includes the following sections:
 ### Windows
 
 Determine whether Git for Windows is installed by looking for Git in the ***Windows Start*** menu.
+If it has previously been installed, then it does not need to be reinstalled.
 
 The following is the installer for Git for Windows, which will install
 the command-line Git Bash shell and interactive Git GUI.
@@ -73,7 +74,8 @@ Verify that a Git Bash window will display by using the ***Start / Git / Git Bas
 A window similar to the following should display.
 Note that the title indicates that Git Bash uses a MinGW environment, although this MinGW is separate software
 files from the MinGW used with the compilers.
-The Git Bash title icon is distinctive and can be used to differentiate from other Bash/MinGW environments.
+The Git Bash title icon is distinctive and can be used to differentiate from other Bash/MinGW environments, such as Cygwin
+(not covered in this documentation) and the MinGW environment used for compiling Fortran (covered in this documentation).
 
 ![git bash](git-images/git-bash.png)
 
@@ -101,7 +103,8 @@ Set the email that should be used for the user, typically the company email if s
 $ git config --global user.email "first.last@some.domain"
 ```
 
-Set the editor to use when editing messages, etc. (replace `vim` with desired editor):
+Set the editor to use when editing messages, etc. (replace `vim` with desired editor program,
+specifying a program found in the `PATH` or provide the full path):
 
 ```bash
 $ git config --global core.editor vim
@@ -125,13 +128,18 @@ This can be inefficient and irritating.  The Git for Windows installer turns on 
 The following are important to keep in mind:
 
 * If you do not feel comfortable with Git, spend time on online training and talk to other developers.
-Understanding branches, merging, and overall Git workflow is important.
+Understanding branches, merging, and overall Git workflow is important.  A helpful free online tutorial is
+[Udacity: How to Use Git and GitHub](https://www.udacity.com/course/how-to-use-git-and-github--ud775) and
+the Open Water Foundation [Learn Git](http://learn.openwaterfoundation.org/owf-learn-git/index.html)
+documentation is being developed to provide general learning resources.
 
 * Text file end-of-line characters can be a problem because they are different on different operating systems.
 A `.gitattributes` file has been created for the project to enforce end-of-line handling in the repository.
 
-* Do not commit dynamic files to the repository.
+* Do not commit dynamic files to the repository that can be recreated from source.
+Examples are compiled object files, libraries, and executables, and test results.
 Use `.gitignore` files at the top level and strategically within folders, as appropriate.
+Initial `.gitignore` files are generally added to the Git repository by the maintainers of the repository.
 
-* Avoid relying on global Git configuration across developers because this is prone to inconsistency.
+* Avoid relying on global Git configuration per each developer (`git config` command) because this is prone to inconsistency.
 Instead, rely on `.gitattributes` and other repository-stored configuration files that persist across developers.

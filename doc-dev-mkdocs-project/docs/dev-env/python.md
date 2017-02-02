@@ -1,8 +1,9 @@
 # Development Environment / Python and pip
 
-Python is used by the MkDocs documentation software.
+Python is used by the MkDocs documentation software, which formats this static website documentation from Markdown files.
 Python is also used by the `pytest` automated test framework, which may be used for functional testing.
-Python is also a useful program for creating data processing scripts, including processing spatial data.
+Python is also a useful program for creating data processing scripts, including processing spatial data using Geographic Information System
+software.
 `pip` is a tool used to install Python packages.
 
 This documentation contains the following sections:
@@ -30,7 +31,8 @@ selecting the ***Windows x86-64 executable installer***,
 and save in the `Downloads` folder for the user.
 
 Run the installer as administrator (will be prompted for authorization as the process continues).
-If the following indicates that the 32-bit version is being installed, then the wrong installer was downloaded.
+If the following indicates that the 32-bit version is being installed, then the wrong installer was downloaded
+because it is assumed that a 64-bit development environment will be used.
 
 ![Run installer](python-images/install-python1.png)
 

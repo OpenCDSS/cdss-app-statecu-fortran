@@ -17,22 +17,27 @@ This documentation contains the following sections:
 
 ### Windows - MinGW
 
-To compile StateCU on the command line, open a Windows command prompt window.
-Then run the following batch file to configure the MinGW environment:
+To compile StateCU on the command line it is first necessary to configure the environment to run the compiler.
+Open a Windows command prompt window and change to the folder where the setup script exists.
+Then run the `setup-mingw-env.bat` batch file to configure the MinGW environment (note that setting up the environment in the window only needs
+to be done once after the window is opened).
 
 ```
-> C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\mingw\setup-mingw-env.bat`
+> C:
+> cd \Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\mingw
+> setup-mingw-env.bat
 ```
 
 Then change to the code location and run the makefile:
 
 ```
-> C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\src\main\fortran
+> C:
+> cd \Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\src\main\fortran
 > make clean
 > make statecu
 ```
 
-The executable is created in the same folder.
+The executable `statecu.exe` is created in the same folder and can be run with model input (in a test folder separate from the code).
 
 ## Compile StateCU in Eclipse
 
@@ -40,10 +45,15 @@ The executable is created in the same folder.
 
 ### Windows - MinGW
 
-To compile StateCU in Eclipse, start Eclipse with the run script:
+To compile StateCU in Eclipse, start Eclipse with the run script `run-eclipse-statecu-mingw.bat` as shown below.
+This script automatically runs the MinGW setup script described in the previous section,
+which will configure the compiler environment if necessary.
+
 
 ```
-> C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\eclipse\run-eclipse-statecu-mingw.bat`
+> C:
+> cd \Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\eclipse
+> run-eclipse-statecu-mingw.bat
 ```
 
 Then right-click in the ***Project Explorer*** area and select ***Make / Targets***.  Then select ***Build...***.  Then select a target and press the ***Build*** button.

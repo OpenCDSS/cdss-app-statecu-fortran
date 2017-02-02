@@ -5,31 +5,6 @@
 site_name: Learn StateCU (for Software Developers)
 pages:
 - Home: index.md
-- 'Development Environment':
-  - 'Overview': dev-env/overview.md
-  - 'Machine': dev-env/machine.md
-  - 'Git': dev-env/git.md
-  - 'Python and pip': dev-env/python.md
-  - 'pytest': dev-env/pytest.md
-  - 'MkDocs': dev-env/mkdocs.md
-  - 'Java 8': dev-env/java8.md
-  - 'gfortran': dev-env/gfortran.md
-  - 'Eclipse and Photran': dev-env/eclipse.md
-  - 'Doxygen': dev-env/doxygen.md
-  - 'KDiff3': dev-env/kdiff3.md
-- 'Initial Project Setup':
-  - Overview: project-init/overview.md
-  - 'Create Development Home Folder': project-init/home-folder.md
-  - 'GitHub Git Repository': project-init/github.md
-  - 'Eclipse Run Script': project-init/eclipse-run-script.md
-  - 'Eclipse Workspace': project-init/eclipse-workspace.md
-  - 'Eclipse StateCU Project': project-init/eclipse-statecu-project.md
-  - 'Eclipse Folder Structure': project-init/eclipse-folder-structure.md
-  - 'Eclipse Make Targets': project-init/eclipse-make-targets.md
-  - 'Build Utility Scripts': project-init/build-util.md
-  - 'Documentation, Developer (MkDocs)': project-init/doc-dev.md
-  - 'Documentation, User (MkDocs)': project-init/doc-user.md
-  - 'Documentation, API (Doxygen)': project-init/doc-doxygen.md
 - 'Deployed Environment':
   - 'Overview': deployed-env/overview.md
 - 'New Developer Setup':
@@ -49,6 +24,31 @@ pages:
   - 'FAQ for Cygwin': dev-tasks/faq-cygwin.md
   - 'FAQ for Linux': dev-tasks/faq-linux.md
   - 'FAQ for MinGW': dev-tasks/faq-mingw.md
+- 'REFERENCE: Development Environment':
+  - 'Overview': dev-env/overview.md
+  - 'Machine': dev-env/machine.md
+  - 'Git': dev-env/git.md
+  - 'Python and pip': dev-env/python.md
+  - 'pytest': dev-env/pytest.md
+  - 'MkDocs': dev-env/mkdocs.md
+  - 'Java 8': dev-env/java8.md
+  - 'gfortran': dev-env/gfortran.md
+  - 'Eclipse and Photran': dev-env/eclipse.md
+  - 'Doxygen': dev-env/doxygen.md
+  - 'KDiff3': dev-env/kdiff3.md
+- 'REFERENCE: Initial Project Setup':
+  - Overview: project-init/overview.md
+  - 'Create Development Home Folder': project-init/home-folder.md
+  - 'GitHub Git Repository': project-init/github.md
+  - 'Eclipse Run Script': project-init/eclipse-run-script.md
+  - 'Eclipse Workspace': project-init/eclipse-workspace.md
+  - 'Eclipse StateCU Project': project-init/eclipse-statecu-project.md
+  - 'Eclipse Folder Structure': project-init/eclipse-folder-structure.md
+  - 'Eclipse Make Targets': project-init/eclipse-make-targets.md
+  - 'Build Utility Scripts': project-init/build-util.md
+  - 'Documentation, Developer (MkDocs)': project-init/doc-dev.md
+  - 'Documentation, User (MkDocs)': project-init/doc-user.md
+  - 'Documentation, API (Doxygen)': project-init/doc-doxygen.md
 theme: readthedocs
 repo_url:  https://github.com/OpenWaterFoundation/owf-learn-cdss-statecu-dev
 site_description:  Colorado's Decision Support Systems StateCU software developer documentation

@@ -1,14 +1,13 @@
 # Development Environment / pytest
 
 The `pytest` software is a useful tool that provides enhanced unit test features,
-which can can also be used for functional testing of Python and other software (in this case StateCU).
+which can can also be used for functional testing of Python and other software (in this case StateCU).  See also:
+
+* [pytest documentation](http://doc.pytest.org/en/latest/)
+* [Comparison of Python testing frameworks](http://pythontesting.net/podcast/pytest-vs-unittest-vs-nose-pt002/)
 
 **TODO smalers 2017-01-09 need to evaluate pytest as useful functional testing tool using OWF python functions such as file comparison.
 May also try to use Fortran unit test tool, but Fortran tools seem limited.**
-
-See the [pytest documentation](http://doc.pytest.org/en/latest/).
-
-See also a [comparison of Python testing frameworks](http://pythontesting.net/podcast/pytest-vs-unittest-vs-nose-pt002/).
 
 This documentation contains the following sections:
 
