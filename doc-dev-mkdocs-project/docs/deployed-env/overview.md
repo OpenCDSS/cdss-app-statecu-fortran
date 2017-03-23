@@ -51,6 +51,13 @@ with the StateCU GUI.  For examaple, see the [CDSS StateCU Download](http://cdss
 and perhaps also be distributed separately, especially Linux versions.
 Also, the StateCU GUI is out of date and needs updated.  Need to prioritize within the OpenCDSS effort.**
 
+
+>_[JHB] The current StateCU GUI is VB code, rewritten __ only where it had to be__ from the original VB6. In other words, a lot of the original VB6 code is still in there - but it compiled, so it was left alone.  It is not modern era VB.NET at all. Therefore it can't be compiled __except__ on the LRE computer given to DWR. Kelley T or Mary H has it._
+
+>_[JHB] When I started working on StateCU, we (LRE) moved both the FORTRAN and VB6 code into the Visual Studio environment and begn using Intel FORTRAN.  Later I separated the FORTRAN StateCU code from Visual Studio, and modified it to be amenable to other compilers like gfortran. At that time at LRE, we were not using a version control system, so complete sets of StateCU code for each version were kept in carefully named folders.  StateCU FORTRAN code was finally added to a version control system (git) much later, but StateCU code was changing infrequently by that time._
+
+>_[JHB] Here is my 2 cents re: the GUI.  It's too late to still be considering fixing/rebuilding a platform specific GUI. The next generation should be a web based GUI with the FORTRAN StateCU code batch/shell executable at it's core.  A generic web based GUI for legacy FORTRAN batch models could be built first and then reused/leveraged as a starting point for specific GUI applications like a StateCU GUI._
+
 ## StateCU 32 and 64 Bit Executable Considerations
 
 The StateCU software is a Fortran program that is compiled to a 32-bit static executable using the `gfortran` compiler.
@@ -58,6 +65,8 @@ The 32-bit Windows executable will run on 64-bit Windows 7 and 10 computers simi
 Although creating a 64-bit executable may be desirable or necessary in the future, it is currently not the focus of development,
 and will require an evaluation of code memory logic and binary output file structure.
 See the following resources to understand whether a program has been compiled as a 32-bit or 64-bit executable:
+
+>_[JHB] I think we have already passed the 32/64 bit watershed in a general way because StateMod has already started running into memory limit issues because of 32 bit code._
 
 * [10 Ways to Determine if Application is Compiled for 32-bit or 64-bit](https://www.raymond.cc/blog/determine-application-compiled-32-64-bit/)
 

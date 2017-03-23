@@ -8,6 +8,8 @@ This documentation is a useful reference in case the project needs to be reiniti
 Sections of this documentation are also referenced by the [New Developer](../dev-new/overview/) documentation,
 such as configuring the Eclipse workspace.
 
+>_[JHB] I think most developers who are reading this will be savvy enough to know that with FORTRAN, any decent editor along with a compiler and make system should be sufficient, so they will be wondering "why eclipse and photran?".  This does not have to be addressed here, but somewhere.  Essentially, for me Ecipse provides the capability to have a graphical debugging environment integrated with the editor.  Photran adds FORTRAN language syntax intelligence to Eclipse.  But some users (including me some days and on small projects) will not be willing to deal with Eclipse issues in order to get integrated debugging, so we should probably say Eclipse is optional __for advanced users__._
+
 This documentation includes the following sections:
 
 * [Background on Code Versions](#background-on-code-versions) - recent code history
@@ -31,6 +33,8 @@ located in the main repository folder.
 The repository does not contain any Eclipse files, although Eclipse/Photran was used for recent development.
 Several code changes occurred on a limited number of files since that time,
 mainly to support compiling on Linux with `gfortran`.
+
+>_[JHB] at the time, I recall that various StateCU FORTRAN development environments were still in use on a number of platforms by multiple people, so any IDE project files were carefully kept separate from the StateCU code_
 
 The Open Water Foundation (OWF) compared the repository code with the latest code provided by Erin Wilson of Wilson Water Group (WWG),
 as of Nov 18, 2016, and found only minor differences due to end-of-line characters.
@@ -95,6 +99,7 @@ The following folder structure is similar to the Windows version other than diff
                             python/                (Envisioned for pytest functional tests)
                                 *.py
 ```
+>_[JHB] what files would be in the eclipse_workspace and not the git repo?_
 
 ### Windows
 

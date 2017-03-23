@@ -17,6 +17,10 @@ This documentation contains the following sections:
 
 ### Windows - MinGW
 
+>_[JHB] Rather than deal with DOS shell environment issues, I found myself always using the special mingw shell where everything (git, make, gfortran, etc.) just works like it does in linux bash shells.  The problem is that it puts your "home" in a deep dark path somewhere hard to find.  And path separators are the linux style.  Which brings up another issue...there are some Windows only and Linux only coding situations...which can be handled with custom make files, or code that you have to adjust internally or compiler level instructions.  None of these are happy solutions to me.  In statemod, I have linux only and windows only .for files, and let the make file handle it.  In other words, in windows, USE THE WINDOWS SPECIFIC MAKE FILE!_
+
+>_[JHB] And I generally used the command line compile method, rather than the built in Eclipse features.  Since I have only been compiling StateMod in recent years, this is the example I am talking mostly about in my comments here._ 
+
 To compile StateCU on the command line it is first necessary to configure the environment to run the compiler.
 Open a Windows command prompt window and change to the folder where the setup script exists.
 Then run the `setup-mingw-env.bat` batch file to configure the MinGW environment (note that setting up the environment in the window only needs

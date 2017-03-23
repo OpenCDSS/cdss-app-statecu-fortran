@@ -4,6 +4,8 @@ Documenting software for developers and users is one of the most important softw
 in particular for open source projects that rely on collaboration to ensure a sustainable project.
 Without documentation, software can be confusing to understand and code may be rewritten when it does not need to be.
 
+>_[JHB] Here here! Love this section.  Never used Doxygen, but after I finish this review I will take the steps on my little AUG3 task for DWR to make the internal FORTRAN comments Doxygen compatible and test this out and learn a new skill. It is probably similar to the Drupal PHP internal commenting style, but we'll see._
+
 This documentation includes the following documentation:
 
 * [Developer Documentation Using MkDocs](#developer-documentation-using-mkdocs)

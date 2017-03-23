@@ -110,6 +110,8 @@ The resulting files should match the [Development Files Structure](../project-in
 
 ## Create Eclipse Workspace Folder
 
+>_[JHB] Although I used most of these tools, I didn't use precisely these same steps.  I will attempt to test these when setting up DWR with the Aug3 and the tools (mostly these same ones) they need for maintaining it._
+
 This step is the same as the [Initial Project Setup](../project-init/eclipse-workspace/) so follow those instructions with the following input:
 
 * Linux:  the workspace folder is `~/cdss-dev/StateCU/eclipse-workspace`

@@ -10,6 +10,8 @@ Answers to the following questions are provided in this documentation:
 
 ## How do I access MinGW/MSYS programs from the Windows Command Shell?
 
+>_[JHB] Rather than deal with DOS shell environment issues, I found myself always using the special mingw shell where everything (git, make, gfortran, etc.) just works like it does in linux bash shells.  The problem is that it puts your "home" in a deep dark path somewhere hard to find.  And path separators are the linux style._
+
 As part of the MinGW setup, it is recommended that a batch file is created to set environment variables,
 in particular the `PATH`, in order to find MinGW and MSYS software executables.
 A default script is available in the repository:  `~/cdss-dev/StateCU/git-repos/cdss-app-statecu-fortran/build-util/mingw/setup-mingw-env.bat`.

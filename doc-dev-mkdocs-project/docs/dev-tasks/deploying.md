@@ -1,5 +1,7 @@
 # Development Tasks / Deploying
 
+>_[JHB] Long ago memory here, but I am pretty sure the latest (and only) StateCU install packages that CDSS distributes came from me creating a setup package using the OLD Visual Studio on that OLD laptop that DWR has.  Very dated stuff. For Willem for RGDSS, I just sent him the open source version of the source code.  He didn't want the GUI.  There were some special features we (LRE) added just for RGDSS and he may have added some more himself._
+
 Deploying the software consists of compiling StateCU into an executable and packaging into an installer that can be distributed.
 
 **TODO smalers 2017-01-02 Need to coordinate with Erin Wilson on how StateCU should be deployed... with the GUI, separate, etc.

@@ -2,6 +2,7 @@
 
 The StateCU Fortran code is divided into separate files with .for extension.
 Each subroutine is in a separate file and the name of the file matches the subroutine (is this globally true?).
+>This is my observation as the rule that seems to have been followed through-out time, though there might be some exceptions. We could caveat the statement with 99% to be safe. I might have put couple of tiny subroutines into one file somewhere in StateCU or StateMod.
 
 Need to describe code modules at a high level:
 

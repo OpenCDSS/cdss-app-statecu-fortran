@@ -35,6 +35,8 @@ The following software are required for StateCU development:
 6. [Java 8](java8/) - used to run Eclipse, and can be used to write utility programs
 7. [gfortran](gfortran/) - compiler for the StateCU Fortran software
 8. [Eclipse/Photran](eclipse/) - IDE used for interactive Fortran software development
+>_[JHB] I think most developers who are reading this will be savvy enough to know that with FORTRAN, any decent editor along with a compiler and make system should be sufficient, so they will be wondering "why eclipse and photran?".  This should be addressed somewhere.  Essentially, for me Eclipse provides the capability to have a graphical FORTRAN debugging environment integrated with the editor.  Photran adds FORTRAN language syntax intelligence to Eclipse.  But some users (including me some days, especially on small programming projects) will not want to deal with the massive and resource hungry Eclipse system when integrated debugging is not required.  Maybe Eclipse/Photran is optional __for advanced users who need a full fledged IDE with integrated debugging capabilities__? Or maybe define the minimal required set of tools, and then offer a recommended set, too?_
+
 9. [Doxygen](doxygen/) - documentation tool
 10. [KDiff3](kdiff3/) - tool for comparing files
 

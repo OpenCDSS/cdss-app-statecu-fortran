@@ -13,10 +13,17 @@ This documentation is intended to provide sufficient information to software dev
 to streamline understanding of the StateCU code and developer environment.
 It is expected that software developers are technically competant and
 follow conventions of the open source StateCU project.
+>_[JHB] I like this opening paragraph. perhaps use __"facilitate"__ instead of __"streamline"__ or else "streamline __the process of__ understanding the StateCU code ..."_
 
-This documentation page includes the following sections:
+>_[JHB] I like the high level organizational design.  It felt overwhelming at first (complicated), but after living with it a while, it makes sense, and the consistency is wonderful._
 
-* [Colorado's Decision Support Systems](#colorados-decision-support-systems) - the system under which the software is maintained
+>_[JHB] And I really like the way you organized and designed this documentation "system" that surrounds the code.  Without too much work, I am able to fork the documentation git repo, and make edits like this in a branch.  And using Markdown with mkdocs is great - never used it before, but only after a couple of hours I am already using "mkdocs serve" so I can watch my edits appear realtime in a browser window while I edit in Sublime in Ubuntu Linux on my notebook computer.  NICE!_
+
+>_[JHB] My approach: the questions and requests for additional information and perspective through out the documents are appropriate and well thought out.  But on the first pass through all this, I struggled both with chasing technical details down rabbit holes (time sinks), and with adding reliable information that could be written extemporaneously from memory.  It has been too many years since I worked with the StateCU code.  So on a second pass through this, I'll keep at a high level and leave notes in this git branch (jim_comments).  Then I'll come back later for more work where needed._
+
+This documentation page includes the following sections:__
+
+* [Colorado'__s Decision Support Systems](#colorad-decision-support-systems) - the system under which the software is maintained
 * [Open Water Foundation](#open-water-foundation) - lead organization for moving StateCU to open source project
 * [How to Use this Documentation](#how-to-use-this-documentation) - guidance and list of main documentation sections
 * [License](#license) - license for software and this documentation
@@ -33,7 +40,11 @@ and [Colorado Division of Water Resources (DWR)](http://water.state.co.us).
 ![CDSS Website](images/CDSS-website.png)
 
 One component of CDSS is the StateCU consumptive use model, which estimates irrigation water requirements and other demands.
-StateCU results are used as input to the StateMod water allocation model.
+>_[JHB] ...using one of multiple available standard engineering methods.  It was originally (1980's) coded in FORTRAN, and later a Windows PC GUI was added using VB6._
+
+StateCU results are usfd as input to the StateMod water allocation model.
+
+>_[JHB] ...are frequently used as part of a water resources or water rights analysis, and can also be used as an input to other engineering models, such as the CDSS StateMod..._
 
 In late 2016, the Open Water Foundation began the effort to move StateCU and other CDSS software to open source licensing
 and establish open source software projects, referred to as "OpenCDSS", and this documentation is one project outcome.
