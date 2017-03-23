@@ -24,7 +24,7 @@ Need to describe code modules at a high level:
 * Integration with StateCU GUI
 >_[JHB] As we discussed the GUI is VB code, rewritten __only where it had to be__ from VB6. In other words, a lot of the original VB6 code is still in there - but it compiled, so it was left alone.  It is not modern era VB.NET at all. Therefore it can't be compiled __except__ on the LRE computer given to DWR. Kelley T or Mary H has it._
 
->>_[JHB] When I started working on StateCU, we moved both the FORTRAN and VB code into the Visual Studio environment using Intel FORTRAN.  Later I separated the FORTRAN StateCU code from Visual Studio, and modified it to be amenable to other compilers like gfortran. At that time at LRE, we were not using a version control system, so complete sets of StateCU code for each version were kept in carefully named folders.  StateCU FORTRAN code was finally added to a version control system (git) much later, but StateCU code was changing infrequently by that time._
+>_[JHB] When I started working on StateCU, we moved both the FORTRAN and VB code into the Visual Studio environment using Intel FORTRAN.  Later I separated the FORTRAN StateCU code from Visual Studio, and modified it to be amenable to other compilers like gfortran. At that time at LRE, we were not using a version control system, so complete sets of StateCU code for each version were kept in carefully named folders.  StateCU FORTRAN code was finally added to a version control system (git) much later, but StateCU code was changing infrequently by that time._
 
 * [StateMod 13.10 code documentation](http://software.openwaterfoundation.org/cdss/statecu/13.10/doc-api/index.html)
 
