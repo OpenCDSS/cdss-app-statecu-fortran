@@ -2,6 +2,8 @@
 
 >_[JHB] this is a good description of what you did once to set up the OWF repo for StateCU, and good historical documentation for you, but no user will ever have to do this.  The process they will do, cloning the OWF repo, is much simpler._
 
+>_[JHB] ok on a second pass through - i think this page is a reference page, not something a developer would probably ever open.  in which case it makes perfect sense why it is documented like this. if so, please ignore this comment!_
+
 The initial StateCU code for OpenCDSS was originally loaded into a private GitHub repository maintained by Jim Brannon in 2011 and was never made public.
 The repository had minimal structure and was mainly a home for the StateCU source code for a single developer.
 The repository had a master branch but no other branches or tags.
