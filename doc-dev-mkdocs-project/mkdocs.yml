@@ -5,12 +5,8 @@
 site_name: Learn StateCU (for Software Developers)
 pages:
 - Home: index.md
-- 'Deployed Environment':
-  - 'Overview': deployed-env/overview.md
 - 'New Developer Setup':
   - 'Overview': dev-new/overview.md
-- 'Software Design':
-  - 'Overview': software-design/overview.md
 - 'Development Tasks':
   - 'Overview': dev-tasks/overview.md
   - 'Run Eclipse': dev-tasks/run-eclipse.md
@@ -24,6 +20,10 @@ pages:
   - 'FAQ for Cygwin': dev-tasks/faq-cygwin.md
   - 'FAQ for Linux': dev-tasks/faq-linux.md
   - 'FAQ for MinGW': dev-tasks/faq-mingw.md
+- 'REFERENCE: Software Design':
+  - 'Overview': software-design/overview.md
+- 'REFERENCE: Deployed Environment':
+  - 'Overview': deployed-env/overview.md
 - 'REFERENCE: Development Environment':
   - 'Overview': dev-env/overview.md
   - 'Machine': dev-env/machine.md

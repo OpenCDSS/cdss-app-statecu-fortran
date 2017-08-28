@@ -1,11 +1,11 @@
-# Development Environment / Git
+# Development Environment / Git #
 
-Git software is used for version control and all developers are expected to follow Git best practices.
+Git software is used for version control and software developers are expected to follow Git best practices.
 
-Git software must be installed and configured on the Windows computer in order to use Git for version control.
-The [Eclipse IDE](eclipse/), which is recommended for interactive development, provides Git integration;
+Git software must be installed and configured on the computer in order to use Git for version control.
+The [Eclipse IDE](eclipse/), which is recommended as an option for interactive development, provides Git integration;
 however, Git command line tools can also be used independent of Eclipse.
-The Git tools described below are recommended, although developers may use other Git software if they have preferences.
+The Git tools described below are recommended, although developers may use other Git client software if they have preferences.
 Many of the examples in this documentation use command line Git (Git Bash) for clarity.
 
 The following resources are helpful:
@@ -20,13 +20,13 @@ This documentation includes the following sections:
 	+ [Windows](#windows)
 * [Configure Git](#configure-git)
 
-## Install Git
+## Install Git ##
 
-### Linux
+### Linux ###
 
 **TODO smalers 2016-12-31 Linux instructions will be added after Windows version is comlete.**
 
-### Windows
+### Windows ###
 
 Determine whether Git for Windows is installed by looking for Git in the ***Windows Start*** menu.
 If it has previously been installed, then it does not need to be reinstalled.
@@ -79,7 +79,7 @@ The Git Bash title icon is distinctive and can be used to differentiate from oth
 
 ![git bash](git-images/git-bash.png)
 
-## Configure Git
+## Configure Git ##
 
 See [Git Pro / Getting Started / First-Time Git Setup](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
 
@@ -103,7 +103,7 @@ Set the email that should be used for the user, typically the company email if s
 $ git config --global user.email "first.last@some.domain"
 ```
 
-Set the editor to use when editing messages, etc. (replace `vim` with desired editor program,
+Set the editor to use when editing commit messages, etc. (replace `vim` with desired editor program,
 specifying a program found in the `PATH` or provide the full path):
 
 ```bash
@@ -123,7 +123,7 @@ See the next section for issues to be aware of.
 Git commands that interact with the remote repository will prompt for authentication.
 This can be inefficient and irritating.  The Git for Windows installer turns on a feature to cache the credentials.
 
-## Git Issues to be Aware of
+## Git Issues to be Aware of ##
 
 The following are important to keep in mind:
 
