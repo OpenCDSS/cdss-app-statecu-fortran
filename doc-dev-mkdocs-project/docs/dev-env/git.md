@@ -130,8 +130,8 @@ The following are important to keep in mind:
 * If you do not feel comfortable with Git, spend time on online training and talk to other developers.
 Understanding branches, merging, and overall Git workflow is important.  A helpful free online tutorial is
 [Udacity: How to Use Git and GitHub](https://www.udacity.com/course/how-to-use-git-and-github--ud775) and
-the Open Water Foundation [Learn Git](http://learn.openwaterfoundation.org/owf-learn-git/index.html)
-documentation is being developed to provide general learning resources.
+the [CDSS Learn Git](http://learn.openwaterfoundation.org/cdss-learn-git/index.html)
+provides general learning resources.
 
 * Text file end-of-line characters can be a problem because they are different on different operating systems.
 A `.gitattributes` file has been created for the project to enforce end-of-line handling in the repository.

@@ -2,7 +2,7 @@
 # Use hash-comments to comment out pages have not been written
 # Reference: http://www.mkdocs.org/user-guide/configuration/
 #
-site_name: Learn StateCU (for Software Developers)
+site_name: 'Learn StateCU (for Software Developers)'
 pages:
 - Home: index.md
 - 'New Developer Setup':
@@ -49,13 +49,18 @@ pages:
   - 'Documentation, Developer (MkDocs)': project-init/doc-dev.md
   - 'Documentation, User (MkDocs)': project-init/doc-user.md
   - 'Documentation, API (Doxygen)': project-init/doc-doxygen.md
-theme: readthedocs
-repo_url:  https://github.com/OpenWaterFoundation/owf-learn-cdss-statecu-dev
-site_description:  Colorado's Decision Support Systems StateCU software developer documentation
-site_author:  Open Water Foundation
-site_favicon:  StateCU-favicon.png
+# ------- configuration properties ---------------
+# Use Material theme
+# - installation notes:  https://github.com/squidfunk/mkdocs-material
+theme: material
+#theme: readthedocs
+# Don't indicate the repo because Edit will be shown on every page (don't want that in deployed mode)
+# - Also see edit_uri if repo_url is specified
+#repo_url:  https://github.com/OpenWaterFoundation/owf-learn-cdss-statecu-dev
+site_description:  'CDSS StateCU software developer documentation'
+site_author:  'Open Water Foundation'
+site_favicon:  images/StateCU-favicon.png
 #copyright:  Copyright Open Water Foundation
-#extra_css:
-#- css/extra.css
-# Defaults to all JavaScript in the docs folder
-# extra_javascript:
+extra:
+  # Use extra CSS to customize styles, based on theme
+  extra_css: 'css/extra-material-theme.css'
