@@ -1,14 +1,13 @@
 @echo off
 rem
-rem
-rem Copy the site/* contents to the software.openwaterfoundation.org website.
+rem Copy the site/* contents to the learn.openwaterfoundation.org website.
 rem - replace all the files on the web with local files
-rem - location is lear.openwaterfoundation.org/owf-learn-cdss-statecu-dev
+rem - location is learn.openwaterfoundation.org/cdss-learn-statecu-dev
 
 rem Set --dryrun to test before actually doing
 set dryrun=""
 rem dryrun="--dryrun"
-set s3Folder="s3://learn.openwaterfoundation.org/owf-learn-cdss-statecu-dev"
+set s3Folder="s3://learn.openwaterfoundation.org/cdss-learn-statecu-dev"
 
 rem Make sure that this batch file is being run from the build-util folder
 rem Get current folder, see: https://superuser.com/questions/160702/get-current-folder-name-by-a-dos-command
