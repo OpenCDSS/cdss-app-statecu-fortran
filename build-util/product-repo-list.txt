@@ -1,0 +1,6 @@
+# Repositories that comprise StateCU
+# - assumes that local folder name will match the repository name
+cdss-app-statecu-fortran
+#cdss-app-statecu-fortran-doc-dev
+#cdss-app-statecu-fortran-doc-user
+#cdss-app-statecu-fortran-test
