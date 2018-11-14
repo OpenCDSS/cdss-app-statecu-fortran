@@ -1,3 +1,23 @@
+c gcommon.inc
+c_________________________________________________________________NoticeStart_
+c StateCU Consumptive Use Model
+c StateCU is a part of Colorado's Decision Support Systems (CDSS)
+c Copyright (C) 1994-2018 Colorado Department of Natural Resources
+c 
+c StateCU is free software:  you can redistribute it and/or modify
+c     it under the terms of the GNU General Public License as published by
+c     the Free Software Foundation, either version 3 of the License, or
+c     (at your option) any later version.
+c 
+c     StateCU is distributed in the hope that it will be useful,
+c     but WITHOUT ANY WARRANTY; without even the implied warranty of
+c     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c     GNU General Public License for more details.
+c 
+c     You should have received a copy of the GNU General Public License
+c     along with StateCU.  If not, see <https://www.gnu.org/licenses/>.
+c_________________________________________________________________NoticeEnd___
+
 !***************************************************************************
 !
 !   Include File    : gcommon.inc
@@ -104,6 +124,9 @@
 !                  changed output (DWB, SWB) header labeling to farm headgate deliv instead of river div by priority
 !                  changed output (DWB, SWB) "total" output to farm headgate deliv total, allf(), instead of river div total
 !                  changed output (binary) labeling of farm headgate deliv by priority outputs
+! smalers 2018-11-14   version 13.11
+!                Add GPLv3+ license copyright notice comments to all source files.
+!                Still need to ensure that -v prints the notice.
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
@@ -127,8 +150,8 @@
       CHARACTER*16 RDATE
       REAL VERS
 ! grb new version number 
-      PARAMETER (VERS = 13.10)
-      PARAMETER (RDATE = '06/15/12 06:00PM')
+      PARAMETER (VERS = 13.11)
+      PARAMETER (RDATE = '11/14/18 06:00PM')
 !     jhb 07/10
 !     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)

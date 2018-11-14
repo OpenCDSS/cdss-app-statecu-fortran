@@ -6,6 +6,8 @@
 # ======================================================================
 # The compiler
 FC = gfortran
+# Determine the StateCU version, to use in the executable
+STATECU_VERSION := $(shell cat gcommon.inc | grep 'PARAMETER' | grep 'VERS' | cut -d '(' -f 2 | cut -d '=' -f 2 | tr -d ' ' | tr -d ')')
 # The flags for debugging or for maximum performance, comment as necessary
 #FCFLAGS = -g -fbounds-check -fno-align-commons
 # use -static especially for windows compiling 
@@ -16,7 +18,7 @@ FCFLAGS = -g -cpp -fno-align-commons -static -fbounds-check -fno-automatic -fini
 FCFLAGS += -I/usr/include
 # The libraries needed for linking
 #LDFLAGS = -li_need_this_lib
-# The ist of executables to be built within the package
+# The list of executables to be built within the package
 PROGRAMS = statecu
 
 # ======================================================================
@@ -152,7 +154,13 @@ statecu: \
 			wbuildall.o \
 			wbuild.o \
 			xcrain.o
-	$(FC) $(FCFLAGS) -o statecu $^ $(LDFLAGS)
+ifdef OS
+	# Windows...
+	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION).exe $^ $(LDFLAGS)
+else
+	# Linux...
+	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION) $^ $(LDFLAGS)
+endif
 
 # Using Fortran MODULES: prog4.f90 USEs a Fortran module defined
 # inside mod.f90, this is similar to the include case (prog2), but,
@@ -200,6 +208,28 @@ statecu: \
 clean:
 	rm -f bin/*.o *.mod *.MOD *.o
 
+# help: print the targets that are available
+help:
+	@echo "--------------------------------------------------------------------------------"
+	@echo "StateCU makefile targets:"
+	@echo ""
+	@echo "clean      Remove dynamically created files (but not final executable)."
+	@echo "help       Print this message."
+	@echo "statecu    Compile the StateCU executable, recompiling any .o if .for modified."
+	@echo "veryclean  Make the 'clean' target, and also remove the final executable."
+	@echo ""
+	@echo "file.o     Compile the source file.for file into object file file.o,"
+	@echo "           useful to check syntax for a single file."
+	@echo "--------------------------------------------------------------------------------"
+	@echo "Important makefile variables that are used:"
+	@echo ""
+	@echo "FC (compiler) = $(FC)"
+	@echo "STATECU_VERSION (from gcommon.inc) = $(STATECU_VERSION)"
+	@echo "--------------------------------------------------------------------------------"
+	@echo "Important environment variables that are used:"
+	@echo ""
+	@echo "OS (to determine operating system) = $(OS)"
+	@echo "--------------------------------------------------------------------------------"
+
 veryclean: clean
 	rm -f *~ $(PROGRAMS) *.exe
-
