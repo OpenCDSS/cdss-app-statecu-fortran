@@ -100,8 +100,8 @@ code review before committing the pull request.
 
 ## Contact ##
 
-The lead developers/maintainers for StateCU that actively monitor repository issues are listed below.
-Questions can be posed using the GitHub issues feature.
+The developers/maintainers for StateCU that actively monitor repository issues are listed below.
+Questions can be posted using the GitHub issues feature.
 
 * @kelleythompson, Kelley Thompson, Colorado Division of Water Resources
 * @macphersonbr, Brian Macpherson, Colorado Water Conservation Board
