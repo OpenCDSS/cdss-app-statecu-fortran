@@ -1,3 +1,12 @@
-# Ignore the Doxygen output folder
-
-output/
+# Ignore everything in this folder except:
+#
+# Doxyfile-template
+# README.md
+# .gitignore
+#
+# All other files are dynamic.
+# Use the repository build-util/run-doxygen.sh script to run the software.
+/*
+!.gitignore
+!Doxyfile-template
+!README.md

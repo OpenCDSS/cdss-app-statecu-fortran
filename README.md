@@ -1,74 +1,92 @@
-# cdss-app-statecu-fortran
+# cdss-app-statecu-fortran #
 
-This repository contains the source code for the StateCU consumptive use model,
-which is part of [Colorado's Decision Support Systems (CDSS)](http://cdss.state.co.us).
+This repository contains the source code and source files for developer and user documentation
+for the StateCU consumptive use model.
+StateCU is part of [Colorado's Decision Support Systems (CDSS)](http://cdss.state.co.us).
+Open source CDSS is referred to as OpenCDSS.
 CDSS is supported by the [Colorado Water Conservation Board](http://cwcb.state.co.us) and
 [Colorado Division of Water Resources](http://water.state.co.us).
 
-The StateCU software is being migrated to an open source software project as part of the OpenCDSS project
-led by the [Open Water Foundation](http://openwaterfoundation.org).
+The developer documentation and guidelines will be updated as the development environment is used.
 
-See the following online developer documentation to get started as a StateCU developer:
-
-* [Learn StateCU (for Developers)](http://learn.openwaterfoundation.org/owf-learn-cdss-statecu-dev/index.html)
-
-The developer documentation and guidelines will be updated as the development environment is proven out.
-
-* [StateCU Repository Folder Structure](#statecu-repository-folder-structure)
-* [Cloning this Repository](#cloning-this-repository)
-* [Contributing](#contributing)
+* [Background](#background)
+* [Repository Folder Structure](#repository-folder-structure)
+* [Development Environment](#development-environment)
+* [Compiling](#compiling)
 * [License](#license)
+* [Contributing](#contributing)
 * [Contact](#contact)
+* [Release Notes](#release-notes)
 
 -----
 
-<a name="statecu-repository-folder-structure"></a>
-## StateCU Repository Folder Structure ##
+## Background ##
 
-The following folder structure is recommended for StateCU development including this documentation.
+The StateCU software estimates crop consumptive use.
+Input for StateCU consists of locations (stations or structures), crop characteristics,
+crop acreage, irrigation method, climate data, and other data.
+Output is irrigation water requirement and other information,
+which can be used as input to the StateMod water allocation model and other analysis tools.
+
+## Repository Folder Structure ##
+
+The following folder structure is used for repository files.
+It is assumed that the repository folder name is the same as the repository name.
+
+```
+cdss-app-statecu-fortran/           Repository folder.
+  build-util/                       Useful utility scripts for software developers.
+  doc-dev-mkdocs-project/           Markdown/MkDocs project for developer documentation.
+  doc-doxygen-project/              Doxygen project to auto-generate code documentation.
+  doc-user-mkdocs-project/          Markdown/MkDocs project for user documentation.
+  .git                              Git repository internal files (do not modify directly!).
+  .gitattributes                    Standard Git configuration file for repository properties.
+  .gitignore                        Standard Git configuration file for ignoring files.
+  .github                           Files used by GitHub, such as issues template.
+  LICENSE.md                        Software license.
+  README.md                         This file.
+  resources/                        Various resources used by this project.
+  src/                              StateCU source code.
+    main/                           Source code for main program.
+      fortran/                      Fortran source code for main program.
+```
+
+The following folder structure is recommended for top-level folders to organize OpenCDSS software projects
+and is consistent with other OpenCDSS projects.
 Top-level folders should be created as necessary.
 
-### Linux ###
-
-```
-/home/user/                                 (user's home folder)
-    cdss-dev/                               (work done for Colorado's Decision Support Systems)
-        StateCU/                            (work related to the StateCU product)
-           git-repos/                       (Git repositories for StateCU)
-               cdss-app-statemod-fortran/   (the StateCU code and documentation repository)
 ```
 
-### Windows ####
-
-```
-C:\Users\user\                              (user's home folder)
-    cdss-dev\                               (work done for Colorado's Decision Support Systems)
-        StateCU\                            (work related to the StateCU product)
-           git-repos\                       (Git repositories for StateCU)
-               cdss-app-statemod-fortran\   (the StateCU code and documentation repository)
+C:\User\users\                       Windows user files.
+/home/user/                          Linux user files.
+  cdss-dev/                          Software for Colorado's Decision Support Systems.
+    StateCU/                         Work related to the StateCU product.
+      git-repos/                     Git repositories for StateCU.
+        cdss-app-statecu-fortran/    The StateCU code and documentation repository (see above).
 ```
 
-<a name="cloning-this-repository"></a>
-## Cloning this Repository ##
+## Development Environment ##
 
-Clone this repository using a Git software client, for example using Git command line:
+Software for the development environment should be installed and configured as per the
+[StateCU Developer Documentation](http://learn.openwaterfoundation.org/owf-learn-cdss-statecu-dev/index.html).
 
-### Linux ###
+## Compiling ##
 
-```sh
-> cd /home/user/cdss-dev/StateCU/git-repos
-> git clone https://github.com/OpenWaterFoundation/owf-learn-cdss-statecu-dev.git
-```
+The Eclipse Photran integrated development environment can be used to develop StateCU.
+However, the basic instructions to compile StateCU on the command line are as follows:
 
-### Windows ###
+1. Open a Windows command prompt window.
+2. In that window cd to `build-util\mingw` and run `setup-mingw-env.bat`.
+3. In that window, change to the source code folder `src\main\fortran`.
+4. View `make` command targets:  `make help`
+5. Compile StateCU using the `make` command:  `make statecu`
+6. The executable program will have a name `statecu-version.exe` on Windows and `statecu-version` on Linux, where `version` is a numeric version.
+7. Use the executable in testing.
 
-```sh
-> C:
-> cd \Users\user\cdss-dev\StateCU\git-repos
-> git clone https://github.com/OpenWaterFoundation/owf-learn-cdss-statecu-dev.git
-```
+## License ##
 
-<a name="contributing"></a>
+The software is licensed under GPL v3+.  See the [LICENSE.md](LICENSE.md) file.
+
 ## Contributing ##
 
 Contributions to this project can be submitted using the following options:
@@ -76,21 +94,20 @@ Contributions to this project can be submitted using the following options:
 1. StateCU software developers with commit privileges can write to this repository
 as per normal CDSS development protocols.
 2. Post an issue on GitHub with suggested change (preferred for small changes).
-3. Email the contact.
-4. Fork the repository, make changes, and do a pull request (preferred for large changes).
+3. Fork the repository, make changes, and do a pull request (preferred for large changes).
 Contents of the current master branch should be merged with the fork to minimize
 code review before committing the pull request.
 
-<a name="license"></a>
-## License ##
-
-A license for the software is being determined as part of the OpenCDSS project.
-
-<a name="contact"></a>
 ## Contact ##
 
-The lead developers/maintainers for StateCU are:
+The developers/maintainers for StateCU that actively monitor repository issues are listed below.
+Questions can be posted using the GitHub issues feature.
 
-* Erin Wilson, Wilson Water Group, [erin.wilson@wilsonwatergroup.com](mailto:erin.wilson@wilsonwatergroup.com) (StateCU subject matter expert during transition to open source project)
-* Steve Malers, Open Water Foundation, [steve.malers@wilsonwatergroup.com](mailto:steve.malers@openwaterfoundation.org) (initial author of developer documentation and architect of development/test environment)
-* Andy Moore, Colorado Water Conservation Board, [andy.moore@state.co.us](mailto:andy.moore@state.co.us) (CDSS lead at the CWCB)
+* @kelleythompson, Kelley Thompson, Colorado Division of Water Resources
+* @macphersonbr, Brian Macpherson, Colorado Water Conservation Board
+* Erin Wilson, Wilson Water Group (StateCU modeler)
+* @smalers, Steve Malers, Open Water Foundation
+
+## Release Notes ##
+
+Release note comments are currently included in the `gcommon.inc` source file.
