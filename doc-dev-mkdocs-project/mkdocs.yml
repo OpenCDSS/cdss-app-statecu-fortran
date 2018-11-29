@@ -2,7 +2,7 @@
 # Use hash-comments to comment out pages have not been written
 # Reference: http://www.mkdocs.org/user-guide/configuration/
 #
-site_name: 'Learn StateCU (for Software Developers)'
+site_name: 'StateCU (Develop)'
 pages:
 - Home: index.md
 - 'New Developer Setup':
@@ -56,11 +56,11 @@ theme: material
 #theme: readthedocs
 # Don't indicate the repo because Edit will be shown on every page (don't want that in deployed mode)
 # - Also see edit_uri if repo_url is specified
-#repo_url:  https://github.com/OpenWaterFoundation/owf-learn-cdss-statecu-dev
+#repo_url:  https://github.com/OpenCDSS/cdss-app-statecu-fortran
 site_description:  'CDSS StateCU software developer documentation'
-site_author:  'Open Water Foundation'
+site_author:  'Colorado Department of Natural Resources'
 site_favicon:  images/StateCU-favicon.png
-#copyright:  Copyright Open Water Foundation
-extra:
-  # Use extra CSS to customize styles, based on theme
-  extra_css: 'css/extra-material-theme.css'
+copyright:  Colorado Department of Natural Resources
+# Use extra CSS to customize styles, based on theme
+extra_css:
+  - 'css/extra-material-theme.css'

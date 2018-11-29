@@ -67,7 +67,7 @@ echo "The version will be used for the Doxygen output."
 
 # In order for the Doxygen configuration to allow relative path,
 # change to the Doxygen project folder and then start the software.
-doxygenProjectFolder="${mainRepoFolder}/doc-doxygen-project"
+doxygenProjectFolder="${mainRepoFolder}/doc-dev-doxygen-project"
 if [ ! -d "${doxygenProjectFolder}" ]; then
 	echo ""
 	echo "The Doxygen project folder does not exist:"
@@ -149,9 +149,12 @@ $echo2 "${okColor}Use the File / Open to open the file:${endColor}"
 $echo2 "${okColor}  ${doxyfile}${endColor}"
 $echo2 "${okColor}Then use the Run tab / Run doxygen button to run the software.${endColor}"
 $echo2 "${okColor}Then use the Show HTML Output button to show documentation in a browser.${endColor}"
+$echo2 "${okColor}Closing Doxygen will exit this script.${endColor}"
 doxywizard
 if [ "$?" -ne 0 ]; then
 	echo ""
 	echo "Error running Doxygen. Is software installed correctly?"
 	exit 1
 fi
+
+exit 0

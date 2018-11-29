@@ -36,8 +36,8 @@ It is assumed that the repository folder name is the same as the repository name
 ```
 cdss-app-statecu-fortran/           Repository folder.
   build-util/                       Useful utility scripts for software developers.
+  doc-dev-doxygen-project/          Doxygen project to auto-generate code documentation.
   doc-dev-mkdocs-project/           Markdown/MkDocs project for developer documentation.
-  doc-doxygen-project/              Doxygen project to auto-generate code documentation.
   doc-user-mkdocs-project/          Markdown/MkDocs project for user documentation.
   .git                              Git repository internal files (do not modify directly!).
   .gitattributes                    Standard Git configuration file for repository properties.

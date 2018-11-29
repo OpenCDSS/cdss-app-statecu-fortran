@@ -1,6 +1,9 @@
 # Repositories that comprise StateCU
 # - assumes that local folder name will match the repository name
 cdss-app-statecu-fortran
+# Developer documentation is currently in the main repo, may split out later
 #cdss-app-statecu-fortran-doc-dev
+# User documentation is currently in the main repo, may split out later
 #cdss-app-statecu-fortran-doc-user
+# Tests need to be developed
 #cdss-app-statecu-fortran-test
