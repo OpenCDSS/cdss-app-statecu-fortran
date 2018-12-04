@@ -45,3 +45,10 @@ As indicated above, there is currently no installer. Therefore the executable ca
 To do so, run the `build-util/copy-to-co-dnr-gcp.sh` script from Git Bash.
 This will copy the latest compiled executable to the State's Google Cloud Platform storage location,
 for the detected and latest version.  Run the script with `-h` to see usage.
+
+From Jim Brannon:
+
+* Long ago memory here, but I am pretty sure the latest (and only) StateCU install packages that CDSS distributes
+came from me creating a setup package using the OLD Visual Studio on that OLD laptop that DWR has.
+Very dated stuff. For Willem for RGDSS, I just sent him the open source version of the source code.
+He didn't want the GUI.  There were some special features we (LRE) added just for RGDSS and he may have added some more himself.

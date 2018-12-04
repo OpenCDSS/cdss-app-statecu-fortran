@@ -6,7 +6,7 @@ If you are reading this documentation, you have an interest in learning how Stat
 are a member of the software development team,
 or perhaps wish to contribute software code enhancements or otherwise provide input to the project.
 This documentation is intended to provide sufficient information to software developers
-to streamline understanding of the StateCU code and developer environment.
+to facilitate understanding of the StateCU code and developer environment.
 It is expected that software developers are technically competent and
 follow conventions of the open source StateCU project.
 
@@ -47,7 +47,11 @@ and [Colorado Division of Water Resources (DWR)](http://water.state.co.us).
 
 ![CDSS Website](index-images/CDSS-website.png)
 
-One component of CDSS is the StateCU consumptive use model, which estimates irrigation water requirements and other demands.
+One component of CDSS is the StateCU consumptive use model, which estimates irrigation water requirements and other demands
+using one of multiple available standard engineering methods.
+It was originally (1980s) coded in Fortran, and later a Windows Graphical User Interface (GUI) was added using Visual Basic 6 (VB6).
+
+StateCU is frequently used as aprt of a water resources or water rights analysis.
 StateCU results are used as input to the StateMod water allocation model.
 
 In late 2016, the CWCB funded the OpenCDSS project to move StateCU and other CDSS software to open source licensing
