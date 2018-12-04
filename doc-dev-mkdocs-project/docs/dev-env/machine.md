@@ -31,30 +31,35 @@ AGAIN, MinGW IS THE INITIAL FOCUS.**
 	+ [Install MinGW - Native Windows 32-bit](#install-mingw-native-windows-32-bit) - for 32-bit StateCU executables
 	+ [Install Cygwin](#install-cygwin) - seems to be more current than above Native Windows build
 
+--------------------
+
 ## Linux
 
-**TODO smalers 2016-12-31 will fill this in after initial Windows development environment is fully deployed.**
+This section will be completed when resources are available to focus on Linux development and testing.
 
 ## Windows
 
 The use of `gfortran` somewhat constrains the development environment, especially on Windows,
 requiring that either MinGW or Cygwin are used for development,
 each of which mimic Linux functionality but will result in Windows-compatible binary StateCU executable.
-Developers will be isolated from these environments by the Eclipse/Photran IDE,
-but will be more effective if they understand basic Linux commands.
+Using Eclipse/Photran IDE provides some isolation from the command line environment,
+but developers will be more effective if they understand command line programs
+and some developers may choose to use text editor and command line tools.
 
 MinGW or Cygwin are the recommended compiler environments.
 MinGW will be the focus as it has been previously used to compile StateCU.
 
 ### Install MinGW - Native Windows 32-bit
 
-**TODO smalers 2016-12-31 Need to document how to update the version.
+This documentation needs to be updated to use newer versions of MINGW.
 There seem to be newer versions of gcc/gfortran available but the MinGW documentation is somewhat old, 2013?.
-Installing the MinGW as shown below seems to install recent compilers?**
+Installing the MinGW as shown below seems to install recent compilers.
 
 The Minimalist GNU for Windows (MinGW) environment provides a minimal Linux implementation on Windows.
 MinGW provides an environment in which the `gcc` and `gfortran` compilers will run.
-Note that various software tools are shipped to run inside a MinGW environment, including Git for Windows.
+
+Note that various software tools are shipped to run inside a MinGW environment, including Git for Windows,
+separate from the MinGW implementation that is used to compile code.
 It is OK to have multiple MinGW environments installed, as long as the software developer understands why each was installed
 and does not get confused.  For example, if a Bash shell is used, the title bar usually indicates what environment is being used.
 See the following installation instructions:
@@ -110,9 +115,10 @@ See below for confirmation of the version.
 
 ![install MinGW 10](machine-images/install-mingw-10.png)
 
-**TODO smalers 2016-12-31 need to understand the implications of 32-bit and 64-bit.
+**This documentation needs to be updated to describe the implications of 32-bit and 64-bit.
 StateCU has traditionally been compiled as a 32-bit application,
-which seems consistent with the MinGW install, but need to understand how 64-bit comes into play.**
+which seems consistent with the MinGW install, but need to understand how 64-bit MinGW can
+be used and whether both 32-bit and 64-bit can be installed on the same computer.**
 
 The MinGW files should have been installed in `C:\MinGW` and can be confirmed by inspection.
 
@@ -148,8 +154,8 @@ rem See:  http://www.mingw.org/wiki/Getting_Started
 rem Update PATH to find the MinGW bin folder and also the MSYS folders (Unix utilities).
 set PATH=C:\MinGW\bin;C:\MinGW\MSYS\1.0\local\bin;C:\MinGW\MSYS\1.0\bin;%PATH%
 ```
-This script is included in the repository in a `build-util` folder for use by developers.
-It is also called by the `run-eclipse-statecu-mingw.bat` batch file to facilitate running Eclipse with the correct environment.
+This script is included in the repository in a `build-util/mingw` folder for use by developers.
+It is also called by the `eclipse/run-eclipse-statecu-mingw.bat` batch file to facilitate running Eclipse with the correct environment.
 
 #### Confirm Compiler Version
 
@@ -176,4 +182,5 @@ For more information about these matters, see the file named COPYING
 
 ### Install Cygwin
 
-**TODO smalers 2016-12-31 will fill this in after initial Native Windows MinGW development environment is tested.**
+This section can be completed if necessary.  The Native Windows MinGW development environment is currently the focus.
+Cygwin can be useful in cases where software is not available in Git Bash or Windows.

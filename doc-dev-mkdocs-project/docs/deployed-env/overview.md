@@ -13,10 +13,12 @@ This documentation contains the following sections:
 * [Relationship of StateCU Executable with StateCU GUI](#relationship-of-statecu-executable-with-statecu-gui)
 * [StateCU 32 and 64 Bit Executable Considerations](#statecu-32-and-64-bit-executable-considerations)
 
+-----------------
+
 ## Location of Installed StateCU Software
 
 The legacy approach for distributing the StateCU executable (as of version 13.03) has been to package the `statecu.exe` file
-with the StateCU GUI.  For examaple, see the [CDSS StateCU Download](http://cdss.state.co.us/software/Pages/StateCU.aspx).
+with the StateCU GUI.  For examaple, see the [CDSS StateCU Download](http://www.colorado.gov/pacific/cdss/statecu).
 For Windows, the software defaults to an installation folder: 
 
 ```
@@ -26,7 +28,7 @@ C:\CDSS\StateCU\bin\
     other files                             (Many other files are used by the GUI)
 ```
 
-**TODO smalers 2016-12-31 Need to work with WWG to confirm where StateCU should be installed going forward.
+**Need to confirm where StateCU should be installed going forward.
 Perhaps should have a default location under C:\CDSS but also recommend copying to dataset folder to ensure compatibility.
 Other issues to be considered include the following:**
 
@@ -47,7 +49,7 @@ This is less of an issue if the StateCU install folder is versioned.
 The legacy approach for distributing the StateCU executable (as of version 13.03) has been to package the `statecu.exe` file
 with the StateCU GUI.  For examaple, see the [CDSS StateCU Download](http://cdss.state.co.us/software/Pages/StateCU.aspx).
 
-**TODO smalers 2016-12-31 Need to decide how the StateCU executable should continue to be packaged only with the GUI,
+**Need to decide how the StateCU executable should continue to be packaged only with the GUI,
 and perhaps also be distributed separately, especially Linux versions.
 Also, the StateCU GUI is out of date and needs updated.  Need to prioritize within the OpenCDSS effort.**
 

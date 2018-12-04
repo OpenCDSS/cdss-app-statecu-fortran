@@ -11,6 +11,8 @@ This documentation includes the following documentation:
 * [Fortran Code API Documentation Using Doxygen](#fortran-code-api-documentation-using-doxygen)
 * [Fortran Code Internal Documentation Using Comments](#fortran-code-internal-documentation-using-comments)
 
+-----------------
+
 ## Developer Documentation Using MkDocs
 
 This developer documentation uses MkDocs and should be updated appropriately to keep the documentation current.
@@ -50,19 +52,9 @@ Stop the server with `Ctrl-C` in the command shell window.
 
 ### Publish the documentation.
 
-Currently the StateCU developer documentation is published to the
-[Learn StateCU (for Developers) static website](http://learn.openwaterfoundation.org/owf-learn-cdss-statecu-dev/)
-hosted by the Open Water Foundation.
-This may continue or may evolve into a website hosted by the State of Colorado or open source project page.
-
-The `site` folder under the MkDocs project is copied to an Amazon S3 bucket using the following batch file (Windows example).
-The developer must have the proper credentials to copy the files.
-
-```
-> C:
-> cd \Users\user\cdss-dev\StateCU\cdss-app-statecu-fortran\doc-dev-mkdocs-project\build-util
-> copyToOwfAmazonS3.bat
-```
+Run the `doc-dev-mkdocs-project\build-util\copy-to-co-dnr-gcp.sh` script to publish the documentation
+to the State of Colorado's Google Cloud Platform website.
+The documentation will be installed into a folder corresponding to the software version.
 
 ## User Documentation Using MkDocs
 
@@ -87,18 +79,15 @@ See the following resources:
 * [Doxygen - Comment blocks in Fortran](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html#fortranblocks)
 * [NASA Modeling Guru:  Using Doxygen with Fortran soruce code](https://modelingguru.nasa.gov/docs/DOC-1811)
 
-**TODO smalers 2017-01-10 need to discuss with the team how agressively to add new comments to StateCU code as part of OpenCDSS project,
-in order to make it easier for new developers to understand the code.**
+Doxygen is currently used mainly to graph the calling sequence of functions.
 
 Refer to the [Initial Project Setup / Documentation, API (Doxygen)](../project-init/doc-doxygen/) documentation for how to run Doxygen.
 
-Currently, Doxygen is intended as a local developer tool.
-If StateCU code is packaged into a library, then the Doxygen-generated API code can be published for developers that use the library.
+Doxygen output can be copied to the State of Colorado's Google Cloud Platform storage site for public access using the
+`doc-dev-doxygen-project/copy-to-co-dnr-gcp.sh` script.
 
 ## Fortran Code Internal Documentation Using Comments
 
 The Fortran code files that comprise the StateCU software should be documented with in-line comments
 using Fortran conventions to facilitate understanding of variables, data structures, modules, functions,
 subroutines, etc.
-
-**TODO smalers 2017-01-10 need to provide some specific examples for guidance.**

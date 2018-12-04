@@ -15,6 +15,8 @@ This documentation contains the following sections:
 	+ [Linux](#linux)
 	+ [Windows](#windows)
 
+----------------------
+
 ## Install Python
 
 It is recommended that Mkdocs is installed with Python 3.5 (or latest stable version), as described below.
@@ -22,7 +24,7 @@ This will ensure that it is up to date and will not interfere with Python that m
 
 ### Linux
 
-**TODO smalers 2016-12-31 fill this out after Windows documentation is complete**
+This section will be filled out when resources are available for Linux development and testing.
 
 ### Windows
 
@@ -37,6 +39,8 @@ because it is assumed that a 64-bit development environment will be used.
 ![Run installer](python-images/install-python1.png)
 
 Select ***Customize installation*** to ensure that the installation will be for all users.
+Note that it is also possible to install for a single user if the developer desires
+but these instructions will need to be interpreted appropriately.
 
 ![Run installer](python-images/install-python2.png)
 
@@ -119,7 +123,7 @@ See the examples below for specific operating systems.
 
 ### Linux
 
-**TODO smalers 2016-12-31 fill this out after Windows documentation is complete**
+This section can be filled out when resources are available for Linux development and testing.
 
 ### Windows
 

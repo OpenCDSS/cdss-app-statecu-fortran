@@ -16,11 +16,13 @@ This documentation includes the following sections:
 * [Install GraphViz](#install-graphviz)
 * [Configure Doxygen Project](#configure-doxygen-project)
 
+--------------------------
+
 ## Install Doxygen
 
 ### Linux
 
-**TODO smalers 2016-12-31 this documentation will be completed once the Windows documentation is complete.**
+This documentation will be completed when resources are available for Linux development and testing.
 
 ### Windows
 
@@ -60,4 +62,5 @@ After downloading, run the installer program as follows.
 
 ## Configure Doxygen Project
 
-A Doxygen project is configured as part of the [Initial Project Setup / Doxygen](../project-init/doc-doxygen/) - **do not do now**.
+A Doxygen project is configured as part of the [Initial Project Setup / Doxygen](../project-init/doc-doxygen/) -
+**do not do now since it has previously been completed and saved in the repository**.

@@ -5,7 +5,7 @@ Each subroutine is in a separate file and the name of the file matches the subro
 
 Need to describe code modules at a high level:
 
-* Main entry point (see: [`statecu.for` main program documentation](http://software.openwaterfoundation.org/cdss/statecu/13.10/doc-api/statecu_8for.html))
+* Main entry point (see: [`statecu.for` main program documentation](https://github.com/OpenCDSS/cdss-app-statecu-fortran/blob/master/src/main/fortran/statecu.for).
 * Input
 * Initialization
 * Calculations
@@ -16,8 +16,7 @@ Need to describe code modules at a high level:
 
 The StateCU code has been processed with Doxygen software to produce HTML documentation.
 Additional code formatting will occur to enable more complete documentation.
-
-* [StateMod 13.10 code documentation](http://software.openwaterfoundation.org/cdss/statecu/13.10/doc-api/index.html)
+**A link can be added here once the GCP website URLs are finalized.**
 
 ## Fortran Conventions
 

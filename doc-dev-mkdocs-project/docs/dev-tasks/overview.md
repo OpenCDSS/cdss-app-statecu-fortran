@@ -11,7 +11,7 @@ This documentation describes common tasks, roughly in the order from design to d
 * [Troubleshooting Eclipse](troubleshooting-eclipse) - figuring out why Eclipse is not working, and responding to Eclipse errors (beyond code syntax errors)
 * [Compiling](compiling) - compiling the software
 * [Testing](testing) - how to automate StateCU code testing
-* [Deploying](deploying) - building an installer and deploying an operational StateCU
+* [Releasing](releasing) - building an installer and releasing an operational StateCU
 * [FAQ for Cygwin](faq-cygwin) - frequently asked questions about Cygwin
 * [FAQ for Linux](faq-linux) - frequently asked questions about Linux
 * [FAQ for MinGW](faq-mingw) - frequently asked questions about MinGW

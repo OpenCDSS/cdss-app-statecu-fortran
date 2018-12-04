@@ -17,6 +17,8 @@ The following sections are included in this documentation:
 * [Workspace Configuration](#workspace-configuration)
 * [Next Step](#next-step)
 
+--------------
+
 ## Prerequisites
 
 Creating an Eclipse workspace requires that Eclipse is installed and it is recommended that Eclipse
@@ -32,8 +34,9 @@ Each project has a folder with name matching the eclipse project name and under 
 indicates the location of the project files on the file system (will match repository after configuration).
 2. Plugin files that contain dynamic content generated during the Eclipse session.
 
-Although it is possible to create one workspace and manage multiple development efforts under one workspace,
-it can become confusing.
+Although it is possible to create one workspace and manage multiple development efforts
+(e.g., StateCU and additional software) under one workspace,
+this can become confusing.
 The following assumes that a new workspace is created specifically for the StateCU project
 consistent with the [development project folder structure](overview#development-folder-structure).
 
@@ -79,8 +82,7 @@ Instead, the files in the git repository folder will be linked to the workspace 
 ## Workspace Configuration
 
 Additional configuration of the workspace may be desirable.
-
-**TODO smalers 2016-11-20 evaluate whether more configuration is needed or not, such as code format preference.**
+This will be evaluated as Eclipse is used in development.
 
 ## Next Step
 

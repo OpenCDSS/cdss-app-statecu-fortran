@@ -4,7 +4,8 @@ The initial StateCU code for OpenCDSS was originally loaded into a private GitHu
 The repository had minimal structure and was mainly a home for the StateCU source code for a single developer.
 The repository had a master branch but no other branches or tags.
 The code in this repository was migrated to a new Open Water Foundation repository suitable for collaboration as part of the OpenCDSS effort.
-The OWF repository can be migrated to a State of Colorado organizational account at some point.
+The OWF repository was later migrated to the
+[OpenCDSS account StateCU repository](https://github.com/OpenCDSS/cdss-app-statecu-fortran) using GitHub transfer tool.
 
 The following resources are helpful:
 
@@ -22,14 +23,18 @@ This documentation contains the following sections:
 * [Push the Legacy GitHub StateCU Repository to New GitHub Repository](#push-the-legacy-github-statecu-repository-to-new-github-repository)
 * [Tag Repository as LegacyCDSS and 13.10](#tag-repository-as-legacycdss-and-statecu-1310)
 
+--------------------
+
 ## Prerequisites
 
 This step requires that the Git software was previously installed as per [Development Environment / Git](../dev-env/git/) documentation.
 
 ## Create a New StateCU Repository on GitHub
 
-Steve Malers created the private repository [cdss-app-statecu-fortran](https://github.com/OpenWaterFoundation/cdss-app-statecu-fortran) using the
-GitHub website and Open Water Foundation organization account.  This establishes an empty "remote" repository.
+The private repository [cdss-app-statecu-fortran](https://github.com/OpenWaterFoundation/cdss-app-statecu-fortran)
+was created using the GitHub website and Open Water Foundation organization account.
+This established an empty "remote" repository.
+Following the above link will currently go to the OpenCDSS version of the repository.
 
 ## Clone Legacy GitHub StateCU Repository
 

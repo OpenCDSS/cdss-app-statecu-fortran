@@ -7,11 +7,16 @@ Cygwin provides an extensive environment with many software packages.
 
 Answers to the following questions are provided in this documentation:
 
-* [How do I open a Cygwin Terminal?](#how-do-i-open a Cygwin Terminal?)
+* [How do I open a Cygwin Terminal?](#how-do-i-open-a-cygwin-terminal)
 * [How do I navigate Windows folders in Cygwin?](#how-do-i-navigate-windows-folders-in-cygwin)
 * [How do I access Cygwin programs from the Windows Command Shell?](#how-do-i-access-cygwin-programs-from-the-windows-command-shell)
 
-## How do I open a Cygwin Terminal?]
+-----------------
+
+## How do I open a Cygwin Terminal?
+
+Cygwin may be useful as an alternative to the the Windows MinGW environment.
+However, it is currently not supported.
 
 Cygwin, when installed, typically creates a desktop shortcut to create a Cygwin terminal.
 Running the program opens a terminal window that runs Bash and provides command-line access.
