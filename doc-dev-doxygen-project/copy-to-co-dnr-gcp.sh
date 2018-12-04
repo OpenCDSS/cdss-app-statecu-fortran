@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copy the executable to the CO DNR GCP website
+# Copy the doxygen-statecu-version/html contents to the CO DNR GCP website
 # - replace all the files on the web with local files
 
 # Supporting functions
@@ -10,8 +10,8 @@ printUsage() {
 	echo ""
 	echo "Usage:  $0"
 	echo ""
-	echo "Copy the StateCu executable file to the latest website folder if -l specified:  $gsFolderLatest"
-	echo "Copy the StateCu executable file to the versioned website folder:  $gsFolderVersion"
+	echo "Copy the Doxygen output files to the latest website folder if -l specified:  $gsFolderLatest"
+	echo "Copy the Doxygen output files to the versioned website folder:  $gsFolderVersion"
 	echo ""
 	echo "-d dry run (print actions but don't execute upload)"
 	echo "-h print usage"
@@ -22,10 +22,11 @@ printUsage() {
 # Entry point for the script
 
 # Get the location where this script is located since it may have been run from any folder
-scriptFolder=`cd $(dirname "$0") && pwd`
-repoFolder=$(dirname "$scriptFolder")
-srcFolder="$repoFolder/src"
-srcMainFolder="${srcFolder}/main/fortran"
+doxygenProjectFolder=`cd $(dirname "$0") && pwd`
+repoFolder=$(dirname "$doxygenProjectFolder")
+gitReposFolder=$(dirname "$repoFolder")
+productFolder=$(dirname "$gitReposFolder")
+srcMainFolder="${productFolder}/git-repos/cdss-app-statecu-fortran/src/main/fortran"
 gcommonFile="${srcMainFolder}/gcommon.inc"
 if [ -f "${gcommonFile}" ]; then
 	statecuVersion=$(cat ${gcommonFile} | grep 'PARAMETER' | grep 'VERS' | cut -d '(' -f 2 | cut -d '=' -f 2 | tr -d ' ' | tr -d ')')
@@ -33,27 +34,24 @@ else
 	echo "Cannot determine StateCU version because file not found:  ${gcommonFile}"
 	exit 1
 fi
-exeFileGfortran32="${srcMainFolder}/statecu-${statecuVersion}-gfortran-32bit.exe"
-echo "scriptFolder=$scriptFolder"
-echo "repoFolder=$repoFolder"
-echo "srcFolder=$srcFolder"
+htmlFolder=$doxygenProjectFolder/doxygen-statecu-$statecuVersion/html
+echo "doxygenProjectFolder=$doxygenProjectFolder"
+echo "productFolder=$productFolder"
+echo "htmlFolder=$htmlFolder"
 echo "srcMainFolder=$srcMainFolder"
 echo "gcommonFile=$gcommonFile"
 echo "statecuVersion=$statecuVersion"
-echo "exeFileGfortran32=$exeFileGfortran32"
 
 dryrun=""
-gsFolderLatest="gs://static-cdss-state-co-us/statecu/latest/software"
-gsFileLatestGfortran32="$gsFolderLatest/statecu-${statecuVersion}-gfortran-32bit.exe"
-gsFolderVersion="gs://static-cdss-state-co-us/statecu/${statecuVersion}/software"
-gsFileVersionGfortran32="$gsFolderVersion/statecu-${statecuVersion}-gfortran-32bit.exe"
+gsFolderLatest="gs://static-cdss-state-co-us/statecu/latest/doc-api"
+gsFolderVersion="gs://static-cdss-state-co-us/statecu/${statecuVersion}/doc-api"
 
 # Whether to copy to latest in addition to the specific version
 # - default to no because the script can be run on any version, and can't assume latest
 copyToLatest="no"
 
 # Parse the command parameters
-while getopts :dhl opt; do
+while getopts ":dhl" opt; do
 	#echo "Command line option is ${opt}"
 	case $opt in
 		d) # Indicate that this should be copied to the latest release and version
@@ -77,22 +75,30 @@ while getopts :dhl opt; do
 	esac
 done
 
-# Make sure that this is being run from the build-util folder
+# Make sure that this is being run from the doc-dev-doxygen-project folder
 pwd=`pwd`
 dirname=`basename ${pwd}`
-if [ ! ${dirname} = "build-util" ]; then
-	echo "Must run from build-util folder"
+if [ ! ${dirname} = "doc-dev-doxygen-project" ]; then
+	echo ""
+	echo "Must run from doc-dev-doxygen-project folder"
 	exit 1
 fi
 
-# Copy the local files up to Google Cloud
+if [ ! -d "$htmlFolder" ]; then
+	echo ""
+	echo "html folder does not exist:  $htmlFolder"
+	echo "Make sure to run main build-util/run-doxygen.sh script."
+	exit 1
+fi
+
+# Sync the local files up to Google Cloud
 # - the -m option causes operations to run in parallel, which can be much faster
 # - the -d option means delete extra files in destination
 # - the -r option means recursive to sync the whole folder tree
 if [ ${copyToLatest} = "yes" ]; then
-	gsutil.cmd cp ${dryrun} $exeFileGfortran32 ${gsFileLatestGfortran32}
+	gsutil.cmd -m rsync -d -r ${dryrun} $htmlFolder ${gsFolderLatest}
 fi
 # For now always upload to the versioned copy
-gsutil.cmd cp ${dryrun} $exeFileGfortran32 ${gsFileVersionGfortran32}
+gsutil.cmd -m rsync -d -r ${dryrun} $htmlFolder ${gsFolderVersion}
 
 exit $?

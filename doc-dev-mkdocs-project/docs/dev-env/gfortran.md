@@ -13,6 +13,8 @@ This documentation contains the following sections:
 	+ [Windows - Cygwin](#windows-cygwin)
 	+ [Windows - MinGW](#windows-mingw)
 
+--------------------
+
 ## Prerequisites
 
 On Windows, either [MinGW](machine#install-mingw-native-windows-32-bit) or [Cygwin](machine#install-cygwin) must have been installed.
@@ -24,11 +26,11 @@ The `gfortran` compiler is installed differently depending on the operating syst
 
 ### Linux
 
-**TODO smalers 2016-12-31 fill this out when there is time - focus on Windows MinGW first.**
+This section will be completed when resources are available for Linux development and testing.
 
 ### Windows - Cygwin
 
-**TODO smalers 2016-12-31 fill this out when there is time - focus on Windows MinGW first.**
+This section will be completed when resources are available for Cygwin development and testing.
 
 ### Windows - MinGW
 

@@ -14,7 +14,6 @@ This documentation page includes the following sections:
 
 * [How to Use this Documentation](#how-to-use-this-documentation) - guidance and list of main documentation sections
 * [Colorado's Decision Support Systems](#colorados-decision-support-systems) - the system under which the software is maintained
-* [Open Water Foundation](#open-water-foundation) - lead organization for moving StateCU to open source project
 * [License](#license) - license for software and this documentation
 * [Source Repository on GitHub](#source-repository-on-github) - location of StateCU repository in GitHub
 * [MkDocs](#mkdocs) - the tool used to create this documentation
@@ -35,9 +34,13 @@ Use the search feature of this website to find specific information.
 * [REFERENCE: Development Environment](dev-env/overview/) - describes development environment software installation (some tools are shared between CDSS software projects)
 * [REFERENCE: Initial Project Setup](project-init/overview/) - describes how the StateCU software project was initially configured
 
+The navigation menu on the left provides access to pages in the documentation.
+The navigation menu on the right provides access to sections on the page.
+If the page is viewed in a narrow window the navigation menus may be compressed into an icon.
+
 ## Colorado's Decision Support Systems ##
 
-Colorado's Decision Support Systems ([CDSS, cdss.state.co.us](http://cdss.state.co.us))
+Colorado's Decision Support Systems ([CDSS, cdss.state.co.us](https://www.colorado.gov/cdss))
 has been developed to answer important questions about Colorado's water resources.
 CDSS efforts are led by the [Colorado Water Conservation Board (CWCB)](http://cwcb.state.co.us)
 and [Colorado Division of Water Resources (DWR)](http://water.state.co.us).
@@ -47,19 +50,20 @@ and [Colorado Division of Water Resources (DWR)](http://water.state.co.us).
 One component of CDSS is the StateCU consumptive use model, which estimates irrigation water requirements and other demands.
 StateCU results are used as input to the StateMod water allocation model.
 
-In late 2016, the OpenCDSS project funded by the CWCB began the effort
-to move StateCU and other CDSS software to open source licensing
-and establish open source software projects, referred to as "OpenCDSS",
-and the StateCU open source software project is one outcome.
+In late 2016, the CWCB funded the OpenCDSS project to move StateCU and other CDSS software to open source licensing
+and establish open source software projects.
+The [Open Water Foundation](http://openwaterfoundation.org) was contracted to lead the OpenCDSS project.
 
 ## License ##
 
-This documentation is distributed with [CC-BY 4.0 license](https://creativecommons.org/licenses/by/4.0/) license.
+The license for this documentation is the [Creative Commons CC-BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
+
+The StateCU software is licensed using the GPL v3 license.
 
 ## Source Repository on GitHub ##
 
 The source files for this documentation are maintained in the
-[StateCU GitHub repository](https://github.com/OpenCDSS/cdss-app-statecu-fortran/doc-dev-mkdocs-project).
+[StateCU GitHub repository](https://github.com/OpenCDSS/cdss-app-statecu-fortran/tree/master/doc-dev-mkdocs-project/).
 
 ## MkDocs ##
 

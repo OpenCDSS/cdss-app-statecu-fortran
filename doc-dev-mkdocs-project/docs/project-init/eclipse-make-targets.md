@@ -10,6 +10,8 @@ This documentation includes the following sections:
 * [Makefile Changes](#makefile-changes) - description of changes to makefile for initial project setup
 * [Define Eclipse Make Targets](#define-eclipse-make-targets) - define make targets to work within Eclipse
 
+------------------
+
 ## Makefile Changes
 
 The initial makefile included in the legacy code files assumed a certain build environment that is different from the current environment.
@@ -17,10 +19,13 @@ The following changes to the makefile were made to get it to work within the cur
 and are needed for the make targets described below to be functional.
 
 * modified the `clean` and `veryclean` targets to work with the current folder structure
-
-**TODO smalers 2017-01-02 need to modify makefile more to make it more robuest.**
+* add `help` target to print available targets
+* name the resulting executable based on software version
+* other changes may be made to improve the build process
 
 ## Define Eclipse Make Targets
+
+Eclipse/Photran is configured in case developers choose to use Eclipse/Photran.
 
 A "make target" provides a way for developers to interactively select a makefile target from within the Eclipse environment.
 It is assumed that the makefile is named `makefile`, which will allow it to run with the default build tool configuration.

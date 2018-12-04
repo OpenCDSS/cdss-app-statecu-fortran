@@ -15,6 +15,8 @@ This documentation includes the following sections:
 	+ [Windows](#windows)
 * [Next Steps](#next-steps)
 
+---------------------
+
 ## Prerequisites
 
 The prerequisites for installing Eclipse are:
@@ -45,7 +47,7 @@ Select the ***Eclipse for Parallel Application Developers*** link for the approp
 
 ### Linux
 
-**TODO smalers 2016-12-31 add this documentation after Windows envioronment has been fully documented.**
+This documentation will be completed when resources are available for Linux development and testing.
 
 ### Windows
 
@@ -77,8 +79,6 @@ however, the desktop shortcut is a convenience for general Eclipse use.
 
 The above script can be double-clicked on or run from a Windows Command Shell.
 If necessary, the default script can be copied and modified for a specific developer.
-
-**TODO smalers 2017-01-01 need to circle around to describe this in the repository and also other setup, such as MinGW environment variable setup.**
 
 To create a shortcut, use Windows File Explorer and right-click on the `C:\Program Files\Eclipse\eclipse-parallel-mars-64\eclipse.exe` file
 and select ***Create shortcut***.  On Windows 10, the following warning may be shown:

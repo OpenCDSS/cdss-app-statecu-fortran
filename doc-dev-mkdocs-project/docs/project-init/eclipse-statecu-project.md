@@ -2,7 +2,8 @@
 
 The Eclipse workspace is a container for one or more Eclipse projects.
 Each project in a workspace can have multiple characteristics, for example the programming language, whether managed in a repository, etc.
-Eclipse responds to the characteristics of each project (when a project is selected in Eclipse) by displaying appropriate software features.
+Eclipse responds to the characteristics of each project (when a project is selected in Eclipse)
+by displaying appropriate software features such as Eclipse development tools.
 
 The initial StateCU workspace will only contain a single Eclipse project, focusing on the StateCU code and related documentation and tests.
 Multiple projects may be used in cases where software or other files are separated into separate projects, for example shared libraries,
@@ -36,7 +37,6 @@ The important prerequisites for this step are:
 The initial Git repository contains only the code from the legacy StateCU, prior to the OpenCDSS project.
 New development should use branches to isolate changes.
 Therefore, create a branch as follows, using Git Bash, to track implementing the new file structure.
-Note that naming convention for branches has not been decided.
 
 ```bash
 $ cd ~/cdss-dev/StateCU/git-repos/cdss-app-statecu-fortran
@@ -112,9 +112,8 @@ nothing added to commit but untracked files present (use "git add" to track)
 ```
 
 Including the above files in the repository facilitates project setup for new developers.
-
-**TODO smalers 2017-01-02 Evaluate whether there are any issues including in the repository.
-Steve will check with OTS to get their input**.
+However, the files may be ignored from the repository in the future,
+in which case each new environment setup will require setting up the Eclipse project.
 
 ## Eclipse Project Properties
 
@@ -122,6 +121,8 @@ Eclipse must be made aware of where `gfortran`, `make`, etc. are located.
 Project properties are one way to do this.
 
 ### Linux 
+
+Need to complete this section, but should be similar to Windows.
 
 ### Windows
 

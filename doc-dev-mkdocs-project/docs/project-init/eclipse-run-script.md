@@ -11,6 +11,8 @@ The following sections are included in this documentation:
 * [Developer-specific Run Script](#developer-specific-run-script) - modify the default for a specific user
 * [Next Step](#next-step)
 
+----------------
+
 ## Prerequisites
 
 This step requites that Eclipse/Photran was previously installed as per the [Developer Environment / Eclipse and Photran](../dev-env/eclipse/) documentation.
@@ -19,29 +21,21 @@ This step requites that Eclipse/Photran was previously installed as per the [Dev
 
 ### Linux
 
-**TODO smalers 2016-12-31 need to complete this.**
+A run script for Linux Eclipse has not yet been created.
 
 ### Windows
 
 The following batch file was created in the repository to run Eclipse and is suitable if the project
 is configured as per this documentation.
-It is recommended that developers use the script as is if possible to run from a Windows command shell that has
+It is recommended that developers use the script if possible to run from a Windows command shell that has
 been initialized with the proper MinGW environment variables.
+Additional scripts can be created as Eclipse is updated in the future.
 
 ```text
 C:\Users\user\cdss-dev\StateCU\git-repos\cdss-app-statecu-fortran\build-util\eclipse\run-eclipse-statecu.bat
 ```
 
-A snapshot of the script contents is as follows (see the repository for current version):
-
-```bat
-rem Run Eclipse with Java 8, to make sure the right versions are used
-rem This assumes that Java 8 and Eclipse have been installed as per the StateCU developer documentation.
-
-rem Specify the VM to use and the maximum memory
-"C:\Program Files\Eclipse\eclipse-parallel-mars-64\eclipse" -vm "C:\Program Files\Java\jre8\bin\java" -vmargs -Xmx700M
-
-```
+See the [script in the repository](https://github.com/OpenCDSS/cdss-app-statecu-fortran/blob/master/build-util/eclipse/run-eclipse-statecu-mingw.bat).
 
 Note that the command line parameters passed to Eclipse are an alternative to changing the `eclipse.ini` file 
 distributed with the Eclipse software.

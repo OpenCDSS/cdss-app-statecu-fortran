@@ -1,10 +1,8 @@
 # Initial Project Setup / Build Utility Scripts
 
-This documentation has references a number of build utility scripts.
-The default versions of these scripts have been saved in the repository to allow a new developer to directly use the scripts,
+This documentation references a number of build utility scripts.
+These scripts are saved in the repository to help developers be efficient,
 assuming that they have set up the development environment as per this documentation.
-Copies of the scripts can be modified for specific developers and saved to a location specific to the user,
-for example `~/cdss-dev/StateCU/build-util` (not in the repository).
 
 This documentation includes the following sections:
 
@@ -12,9 +10,11 @@ This documentation includes the following sections:
 * [Script to Configure MinGW Environment - `setup-mingw-env`](#script-to-configure-mingw-environment-setup-mingw-env)
 * [Script to Run Eclipse - `run-eclipse-statecu`](#script-to-run-eclipse-run-eclipse-statecu-mingw)
 
+-------------------
+
 ## Build Utility Script Location
 
-The build utilities are located in the `build-util` folder in the repository.
+The build utilities are located in the `build-util` folder in the repository, for example:
 
 For Linux:  `~/cdss-dev/StateCU/git-repos/cdss-app-statecu-fortran/build-util`.
 

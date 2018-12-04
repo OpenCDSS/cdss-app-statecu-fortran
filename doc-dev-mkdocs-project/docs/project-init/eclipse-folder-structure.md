@@ -18,6 +18,8 @@ This documentation includes the following sections:
 * [Add Standard Git Repository Files](#add-standard-git-repository-files) 
 * [Next Steps](#next-steps)
 
+-------------------
+
 ## Reorganize Code into Development Folder Structure
 
 The initial folder structure is as shown below:
@@ -56,24 +58,23 @@ Consistent with GitHub, rename to `README.md` and add Markdown text explaining t
 A Git repository generally includes several standard files at the top level to configure the repository.
 The legacy repository did not include these files so they have been added, as described below.
 
-### README.md
+### `README.md`
 
-This file was described in a previous section.
-The file will be updated as work on the StateCU open source software project advances.
+The `README.md` file is a standard file to describe the repository.
 
-### .gitignore
+### `.gitignore`
 
 The `.gitignore` file is used to globally ignore certain files, such as products of compiling code,
-which should not be saved to the repository because they are transitory files that can be recreated.
+which should not be saved to the repository because they are dynamic files that can be recreated.
 
 Note that a `.gitignore` file can be created in any repository folder to provide more fine-grained control
 over ignored files.
 
-A `.gitignore` file (or a README) can also be used to ensure that an empty file is not deleted.
+A `.gitignore` file (or a `README.md`) can also be used to ensure that an empty file is not deleted.
 If used for this purpose and no other files in the folder are committed to the reposiotry,
 add `!.gitignore` to ensure that the file itself is not ignored.
 
-### .gitattributes
+### `.gitattributes`
 
 The `.gitattributes` file indicates repository properties.
 This is a newer Git feature that allows settings to travel with the repository rather than depending
@@ -82,11 +83,9 @@ In particular the `* text=auto` notation is used to control how end-of-line char
 
 See the GitHub article [Dealing with line endings](https://help.github.com/articles/dealing-with-line-endings/).
 
-### LICENSE.md
+### `LICENSE.md`
 
-A simple file was created as a place-holder as the license is finalized in the OpenCDSS project.
-
-**TODO smalers 2017-01-02 update as the license is determined.**
+The license file indicates the software license.  GPL v3 is used for OpenCDSS software.
 
 ## Next Steps
 

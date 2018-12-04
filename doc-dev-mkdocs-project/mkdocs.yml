@@ -16,7 +16,7 @@ pages:
   - 'Troubleshooting Eclipse': dev-tasks/troubleshooting-eclipse.md
   - 'Compiling': dev-tasks/compiling.md
   - 'Testing': dev-tasks/testing.md
-  - 'Deploying': dev-tasks/deploying.md
+  - 'Releasing': dev-tasks/releasing.md
   - 'FAQ for Cygwin': dev-tasks/faq-cygwin.md
   - 'FAQ for Linux': dev-tasks/faq-linux.md
   - 'FAQ for MinGW': dev-tasks/faq-mingw.md
@@ -33,6 +33,7 @@ pages:
   - 'MkDocs': dev-env/mkdocs.md
   - 'Java 8': dev-env/java8.md
   - 'gfortran': dev-env/gfortran.md
+  - 'Text Editor': dev-env/text-editor.md
   - 'Eclipse and Photran': dev-env/eclipse.md
   - 'Doxygen': dev-env/doxygen.md
   - 'KDiff3': dev-env/kdiff3.md

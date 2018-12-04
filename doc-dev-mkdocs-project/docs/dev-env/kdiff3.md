@@ -8,11 +8,13 @@ This documentation includes the following sections:
 	+ [Linux](#linux)
 	+ [Windows](#windows)
 
+------------------
+
 ## Install KDiff3
 
 ### Linux
 
-**TODO smalers 2016-12-31 this documentation will be added after the Windows documentation is complete.**
+This documentation will be completed when resources are available for Linux development and testing.
 
 ### Windows
 

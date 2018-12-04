@@ -8,6 +8,8 @@ Answers to the following questions are provided in this documentation:
 
 * [How do I access MinGW/MSYS programs from the Windows Command Shell?](#how-do-i-access-mingwmsys-programs-from-the-windows-command-shell)
 
+-----------------
+
 ## How do I access MinGW/MSYS programs from the Windows Command Shell?
 
 As part of the MinGW setup, it is recommended that a batch file is created to set environment variables,

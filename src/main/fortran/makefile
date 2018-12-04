@@ -156,10 +156,17 @@ statecu: \
 			xcrain.o
 ifdef OS
 	# Windows...
-	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION).exe $^ $(LDFLAGS)
+	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION)-gfortran-32bit.exe $^ $(LDFLAGS)
+	@echo "-----------------------------------------------------------------------"
+	@echo "Executable is statecu-$(STATECU_VERSION)-gfortran-32bit.exe"
+	@echo "-----------------------------------------------------------------------"
+
 else
 	# Linux...
 	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION) $^ $(LDFLAGS)
+	@echo "-----------------------------------------------------------------------"
+	@echo "Executable is statecu-$(STATECU_VERSION)-gfortran-32bit"
+	@echo "-----------------------------------------------------------------------"
 endif
 
 # Using Fortran MODULES: prog4.f90 USEs a Fortran module defined

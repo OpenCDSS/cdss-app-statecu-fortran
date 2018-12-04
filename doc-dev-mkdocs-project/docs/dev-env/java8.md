@@ -15,11 +15,13 @@ This documentation includes the following sections:
 	+ [Linux](#linux)
 	+ [Windows](#windows)
 
+------------------
+
 ## Install Java 8
 
 ### Linux
 
-**TODO smalers 2016-12-31 complete this after Windows environment has been fully documented**
+This section will be completed when resources are available for Linux development and testing.
 
 ### Windows
 
@@ -37,7 +39,9 @@ then installing Java 8 from Oracle is recommended:
 * [Java SE Development Kit 8 Downloads](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 Select the Windows x64 download for Windows 7 and 10.
-The specific update is generally not important.  Select the most recent stable version, for example `jdk-8u112-windows-x64.exe`.
+The specific update is generally not important and the latest version should generally be used because
+it includes security and performance enhancements.
+Select the most recent stable version, for example `jdk-8u112-windows-x64.exe`.
 Accept the license agreement and download.
 
 Run the installer program as administrator.
@@ -97,3 +101,11 @@ symbolic link created for jre8 <<===>> jre1.8.0_112
 
 ```
 
+If an error is shown using `mklink` because the link already exists,
+remove the existing symbolic link first and then repeat creating the link.
+Use the `rmdir` command:
+
+```
+C:\Program Files\Java>rmdir jdk8
+C:\Program Files\Java>rmdir jre8
+```

@@ -1,13 +1,13 @@
 # Software Design / Overview
 
-**TODO smalers 2016-12-31 This is a very rough outline and needs work to educate developers about the StateCU code organization.**
+**This is a very rough outline and needs work to educate developers about the StateCU code organization.**
 
 The StateCU Fortran code is divided into separate files with .for extension.
 Each subroutine is in a separate file and the name of the file matches the subroutine (is this globally true? a grep on code seemed to indicate so).
 
 Need to describe code modules at a high level:
 
-* Main entry point (see: [`statecu.for` main program documentation](http://software.openwaterfoundation.org/cdss/statecu/13.10/doc-api/statecu_8for.html))
+* Main entry point (see: [`statecu.for` main program documentation](https://github.com/OpenCDSS/cdss-app-statecu-fortran/blob/master/src/main/fortran/statecu.for).
 * Code organization:  include files, parameter data, etc.
 * Input
 * Initialization
@@ -20,12 +20,14 @@ Need to describe code modules at a high level:
 * Clean-up
 * Integration with StateCU GUI
 
+-------------
+
 ## StateCU Code API
 
 The StateCU code has been processed with Doxygen software to produce HTML documentation.
-Additional code formatting will occur to enable more complete documentation.
-
-* [StateMod 13.10 code documentation](http://software.openwaterfoundation.org/cdss/statecu/13.10/doc-api/index.html)
+Additional code formatting can occur to enable more complete documentation.
+See the [Development Tasks / Documenation section](../dev-tasks/documenting)
+for information on using Doxygen to generate code documentation.
 
 ## Fortran Conventions
 
