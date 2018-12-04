@@ -53,6 +53,17 @@ with the StateCU GUI.  For examaple, see the [CDSS StateCU Download](http://cdss
 and perhaps also be distributed separately, especially Linux versions.
 Also, the StateCU GUI is out of date and needs updated.  Need to prioritize within the OpenCDSS effort.**
 
+Information from Jim Brannon:
+
+* The current StateCU GUI is VB code, rewritten only where it had to be from the original VB6.
+In other words, a lot of the original VB6 code is still in there - but it compiled, so it was left alone.
+It is not modern era VB.NET at all. Therefore it can't be compiled except on the LRE computer given to DWR. Kelley T or Mary H has it.
+
+* When I started working on StateCU, we (LRE) moved both the FORTRAN and VB6 code into the Visual Studio environment and begn using Intel FORTRAN.
+Later I separated the FORTRAN StateCU code from Visual Studio, and modified it to be amenable to other compilers like gfortran.
+At that time at LRE, we were not using a version control system, so complete sets of StateCU code for each version were kept in carefully named folders.
+StateCU FORTRAN code was finally added to a version control system (git) much later, but StateCU code was changing infrequently by that time.
+
 ## StateCU 32 and 64 Bit Executable Considerations
 
 The StateCU software is a Fortran program that is compiled to a 32-bit static executable using the `gfortran` compiler.

@@ -3,7 +3,7 @@
 **This is a very rough outline and needs work to educate developers about the StateCU code organization.**
 
 The StateCU Fortran code is divided into separate files with .for extension.
-Each subroutine is in a separate file and the name of the file matches the subroutine (is this globally true? a grep on code seemed to indicate so).
+Each subroutine is in a separate file and the name of the file matches the subroutine.
 
 Need to describe code modules at a high level:
 
@@ -46,3 +46,18 @@ and other data are shared between subroutines via common blocks.
 Need to list common blocks and explain purpose.
 
 Need to explain global/static data, dimensions, etc.
+
+## Integration with StateCU GUI
+
+The following was provided by Jim Brannon.
+
+The StateCU GUI is Visual Basic (VB) code, rewritten only where it had to be from VB6.
+Much of the VB6 code is still included, and it was included because it compiled.
+It cannot be compiled except on the Leonard Rice computer provided to Kelly Thompson or Mary Halstead.
+
+Early StateCU Fortran and VB code were moved into the Visual Studio environment using Intel FORTRAN.
+Later the Fortran StateCU code was separated from Visual Studio and modified it to be amenable to other compilers like gfortran.
+At that time at Leonard Rice, a version control system was not used,
+so complete sets of StateCU code for each version were kept in named folders.
+StateCU Fortran code was finally added to a version control system (Git) much later,
+but StateCU code was changing infrequently by that time.
