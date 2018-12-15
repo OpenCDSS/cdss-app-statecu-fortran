@@ -52,7 +52,7 @@ a text editor and command line compiler.
 	**optional, install to auto-generate code API documentation and graphs from code and code comments**
 	* [Development Environment / KDiff3](../dev-env/kdiff3/) - install software to facilitate comparing files -
 	**optional - highly useful and can be used with Git**
-6. [Next Steps - Development Tasks](#next-steps-development-tasks) - compile software
+6. [Next Steps - Development Tasks](../dev-tasks/compiling) - compile software
 
 
 ## Full Development Environment Setup (for interactive development environment) ##
@@ -227,7 +227,7 @@ Note that Eclipse recognizes the associated Git repository indicated by the repo
 
 ## Next Steps - Development Tasks
 
-At this point it should be possible to [compile and run StateCU within the Eclipse interface](../dev-tasks/compiling).
+At this point it should be possible to [compile and run StateCU](../dev-tasks/compiling) in Eclipse or on the command line.
 See also:
 
 * [Deployed Environment / Overview](../deployed-env/overview/) - for an overview of the deployed software

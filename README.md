@@ -38,7 +38,6 @@ cdss-app-statecu-fortran/           Repository folder.
   build-util/                       Useful utility scripts for software developers.
   doc-dev-doxygen-project/          Doxygen project to auto-generate code documentation.
   doc-dev-mkdocs-project/           Markdown/MkDocs project for developer documentation.
-  doc-user-mkdocs-project/          Markdown/MkDocs project for user documentation.
   .git                              Git repository internal files (do not modify directly!).
   .gitattributes                    Standard Git configuration file for repository properties.
   .gitignore                        Standard Git configuration file for ignoring files.
@@ -57,12 +56,14 @@ Top-level folders should be created as necessary.
 
 ```
 
-C:\User\users\                       Windows user files.
-/home/user/                          Linux user files.
-  cdss-dev/                          Software for Colorado's Decision Support Systems.
-    StateCU/                         Work related to the StateCU product.
-      git-repos/                     Git repositories for StateCU.
-        cdss-app-statecu-fortran/    The StateCU code and documentation repository (see above).
+C:\User\users\                              Windows user files.
+/home/user/                                 Linux user files.
+  cdss-dev/                                 Software for Colorado's Decision Support Systems.
+    StateCU/                                Work related to the StateCU product.
+      git-repos/                            Git repositories for StateCU.
+        cdss-app-statecu-fortran/           StateCU code and documentation repository (see above).
+        cdss-app-statecu-fortran-doc-user/  StateCU user documentation.
+        cdss-app-statecu-fortran-test/      StateCU tests.
 ```
 
 ## Development Environment ##
