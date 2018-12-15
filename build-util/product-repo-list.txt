@@ -6,7 +6,6 @@ cdss-app-statecu-fortran
 # - currently in the main repo, may split into a separate repo later
 #cdss-app-statecu-fortran-doc-dev
 # User documentation
-# - currently in the main repo, may split into a separate repo later
-#cdss-app-statecu-fortran-doc-user
+cdss-app-statecu-fortran-doc-user
 # Tests need to be developed
 cdss-app-statecu-fortran-test
