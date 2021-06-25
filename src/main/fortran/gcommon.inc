@@ -150,8 +150,8 @@ c_________________________________________________________________NoticeEnd___
       CHARACTER*16 RDATE
       REAL VERS
 ! grb new version number 
-      PARAMETER (VERS = 13.11)
-      PARAMETER (RDATE = '11/14/18 06:00PM')
+      PARAMETER (VERS = 13.12)
+      PARAMETER (RDATE = '05/31/19 06:00PM')
 !     jhb 07/10
 !     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)

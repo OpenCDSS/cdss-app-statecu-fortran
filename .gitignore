@@ -8,13 +8,19 @@
 # Temporary Windows files
 ~$*
 
+# Junk files for temporary files.
+junk*
+
 # Products of compiling software (but need to be careful if library dependencies are included)
 *.o
+*.obj
 *.exe
 *.lib
 *.a
 *.so
 *.log
+# Many additional artifact files from 64-bit Fortran compiler.
+*.for.*r.*
 
 # Top-level bin folder and distribution folder
 /bin

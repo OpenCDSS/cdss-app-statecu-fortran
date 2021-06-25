@@ -1,23 +1,79 @@
-# A simple hand-made makefile for a package including applications
-# built from Fortran 90 sources, taking into account the usual
-# dependency cases.
+# Makefile for compiling StateCU using gfortran
+#
 # ======================================================================
-# the declarations
+# Use 'make' or 'make help' to see usage.
+# ======================================================================
+#
+# - initial version taken from Jim Brannon's work
+# - significant updates to add documentation, help target, make portable
+# - tested with gfortran
+# - operating system is determined by checking for OS environment variable,
+#   which indicates Windows, otherwise Linux variant is assumed
+#
+# ======================================================================
+# Declarations
 # ======================================================================
 # The compiler
 FC = gfortran
-# Determine the StateCU version, to use in the executable
+
+# Determine the StateCU version
+# - used in the executable name
+# - also used for installer upload folder, etc.
+# - "dev" at the end of the version (e.g., 15.00.14.dev) indicates the software is under development
 STATECU_VERSION := $(shell cat gcommon.inc | grep 'PARAMETER' | grep 'VERS' | cut -d '(' -f 2 | cut -d '=' -f 2 | tr -d ' ' | tr -d ')')
-# The flags for debugging or for maximum performance, comment as necessary
+
+# Number of bytes for executable
+# - used because executable has been 32-bit until 2021
+# - use in filename to clearly differentiate between 32-bit and 64-bit versions until transition to 64-bit is complete
+# - TODO smalers 2021-03-11 focus on Windows and deal with Linux when there is time
+ifdef OS
+	# Windows
+	EXE_BITS = 32
+	ifeq ($(MSYSTEM),MINGW32)
+		EXE_BITS = 32
+		FFLAGS_ARCH =
+		# String to check for in 'file *.o'
+		OBJ_FILE_TYPE = 80386
+		OBJ_WRONG_FILE_TYPE = amd64
+	endif
+	ifeq ($(MSYSTEM),MINGW64)
+		EXE_BITS = 64
+		# The following is needed for 64-bit
+		# - see: https://github.com/actions/virtual-environments/issues/2721
+		FFLAGS_ARCH = -Wl,--default-image-base-low
+		# String to check for in 'file *.o'
+		OBJ_FILE_TYPE = amd64
+		OBJ_WRONG_FILE_TYPE = 80386
+	endif
+else
+	# Linux
+	# - always compile 64-bit version
+	EXE_BITS = 64
+endif
+
+BAD_OBJ_COUNT := $(shell file *.o | grep $(OBJ_WRONG_FILE_TYPE) | wc -l)
+
+# Below are the flags for debugging or for maximum performance, commented to explain use.
+
+# The flags for debugging or for maximum performance, comment as necessary.
 #FCFLAGS = -g -fbounds-check -fno-align-commons
 # use -static especially for windows compiling 
 #FCFLAGS = -g -cpp -fbounds-check -fno-align-commons -static
-FCFLAGS = -g -cpp -fno-align-commons -static -fbounds-check -fno-automatic -finit-local-zero
+# Original flgs
+#FCFLAGS = -g -cpp -fno-align-commons -static -fbounds-check -fno-automatic -finit-local-zero
+# The following is used to track down an IEEE_INVALID_FLAG message in gdb
+#FCFLAGS = -g -cpp -fno-align-commons -static -fbounds-check -fno-automatic -finit-local-zero -fbacktrace -ffpe-trap=zero,overflow,underflow
+FFLAGS_EXTRA_CHECKS = -fbacktrace -ffpe-trap=invalid,zero,overflow,underflow,denormal
+# The following works but unfortunately uses -fno-automatic and -finit-local-zero.
+# FCFLAGS = -g -cpp -DCOMPILER=$(COMPILER_ENUM) -fno-align-commons -static -fbounds-check -fno-automatic -finit-local-zero $(FFLAGS_ARCH) $(FFLAGS_EXTRA_CHECKS)
+# The following removes -fno-automatic and -finit-local-zero and turns on all warnings
+FCFLAGS = -g -O1 -Wall -cpp -DCOMPILER=$(COMPILER_ENUM) -fno-align-commons -static -fbounds-check $(FFLAGS_ARCH) $(FFLAGS_EXTRA_CHECKS)
 #FCFLAGS = -O2
 # The flags for all cases (e.g. look for system .mod files, required in gfortran)
 FCFLAGS += -I/usr/include
 # The libraries needed for linking
 #LDFLAGS = -li_need_this_lib
+
 # The list of executables to be built within the package
 PROGRAMS = statecu
 
@@ -27,7 +83,8 @@ PROGRAMS = statecu
 # The rule for making "all"
 #   the default if make is called without arguments
 #   note it only has the dependency and no actions
-all: $(PROGRAMS)
+#all: $(PROGRAMS)
+all: help
 
 # The rule for object files that depend on more than
 #  the same named source (.for) file.  A general rule
@@ -91,10 +148,14 @@ wsupply.for: gcommon.inc
 wsupsum.for: gcommon.inc bindat.inc
 xcrain.for: gcommon.inc xccommon.inc
 
-# The rule for building the statemod executable
-#   The following is a carefully constructed list created by starting with statem.o
+# The rule for building the statecu executable
+#   The following is a carefully constructed list created by starting with statecu.o
 #   and adding files as needed to reconcile missing subroutine error messages.  
-statecu: \
+statecu: checkarch statecu_compile
+	echo "In statecu"
+
+# This target is used internally to allow 'checkarch' to be executed.
+statecu_compile: \
 	statecu.o \
 		dread.o \
 		dsum.o \
@@ -156,16 +217,16 @@ statecu: \
 			xcrain.o
 ifdef OS
 	# Windows...
-	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION)-gfortran-32bit.exe $^ $(LDFLAGS)
+	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION)-gfortran-win-$(EXE_BITS)bit.exe $^ $(LDFLAGS)
 	@echo "-----------------------------------------------------------------------"
-	@echo "Executable is statecu-$(STATECU_VERSION)-gfortran-32bit.exe"
+	@echo "Executable is statecu-$(STATECU_VERSION)-gfortran-win-$(EXE_BITS)bit.exe"
 	@echo "-----------------------------------------------------------------------"
 
 else
 	# Linux...
-	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION) $^ $(LDFLAGS)
+	$(FC) $(FCFLAGS) -o statecu-$(STATECU_VERSION)-gfortran-lin-$(EXE_BITS)bit $^ $(LDFLAGS)
 	@echo "-----------------------------------------------------------------------"
-	@echo "Executable is statecu-$(STATECU_VERSION)-gfortran-32bit"
+	@echo "Executable is statecu-$(STATECU_VERSION)-gfortran-lin-$(EXE_BITS)bit"
 	@echo "-----------------------------------------------------------------------"
 endif
 
@@ -212,16 +273,48 @@ endif
 # Utility targets
 .PHONY: clean veryclean
 
-clean:
+# Check the architecture to make sure are not trying to mix 32-bit and 64-bit object files.
+ifneq ($(BAD_OBJ_COUNT),0)
+ifdef OS
+checkarch:
+	@echo "Count of files compiled with wrong compiler: $(BAD_OBJ_COUNT)"
+	$(error Detected $(BAD_OBJ_COUNT) object files of wrong bit count.  Run 'make veryclean' and 'make statecu' to force recompile with correct compiler for current shell.)
+else
+checkarch:
+	@echo "Assuming 64-bit on Linux."
+endif
+else
+ifdef OS
+checkarch:
+	@echo "Count of files compiled with wrong compiler: $(BAD_OBJ_COUNT)"
+else
+checkarch:
+	@echo "Assuming 64-bit on Linux."
+endif
+endif
+
+# Remove intermediate files used when compiling:
+# - Do not remove *.obj because that is used with Lahey and want gfortran compile to be separate.
+# - normal artifacts are *.o, ec.
+# - additional artifacts may be created due to compiler problem, for example as listed below.
+clean: printenv
+	@echo "-----------------------------------------------------------------------"
+	@echo "clean"
+	@echo ""
+	@echo "Removing compile artifacts but not final executable."
+	@echo "-----------------------------------------------------------------------"
 	rm -f bin/*.o *.mod *.MOD *.o
+	rm -f *.for.*r.*
 
 # help: print the targets that are available
 help:
 	@echo "--------------------------------------------------------------------------------"
 	@echo "StateCU makefile targets:"
 	@echo ""
+	@echo "checkarch  Check that object files are consistent with shell 32 or 64 bits."
 	@echo "clean      Remove dynamically created files (but not final executable)."
 	@echo "help       Print this message."
+	@echo "printenv   Helper to print which operating system is used, controls configuration."
 	@echo "statecu    Compile the StateCU executable, recompiling any .o if .for modified."
 	@echo "veryclean  Make the 'clean' target, and also remove the final executable."
 	@echo ""
@@ -236,7 +329,45 @@ help:
 	@echo "Important environment variables that are used:"
 	@echo ""
 	@echo "OS (to determine operating system) = $(OS)"
+	@echo "MSYSTEM (to determine EXE_BITS on Windows) = $(MSYSTEM)"
+	@echo "--------------------------------------------------------------------------------"
+	@echo "To force compile of files even if errors:  make -k statecu"
+	@echo "To force compile and save output to file:  make -k statecu 2>&1 | tee somefile"
 	@echo "--------------------------------------------------------------------------------"
 
-veryclean: clean
-	rm -f *~ $(PROGRAMS) *.exe
+# Print important environment information to help understand setup.
+printenv:
+	@echo "-----------------------------------------------------------------------"
+	@echo "Environment information:"
+ifdef OS
+	@echo "Windows detected from OS environment variable:  yes"
+else
+	@echo "Windows detected from OS environment variable:  no"
+	@echo "...assuming Linux"
+endif
+ifdef MSYSTEM
+	@echo "MINGW (gfortran) detected from MSYSTEM environment variable:  yes"
+else
+	@echo "MINGW (gfortran) detected from MSYSTEM environment variable:  no"
+endif
+	@echo "-----------------------------------------------------------------------"
+
+# Remove all intermediate files and the final executable.
+# - only remove the executable for current architecture in case want to run both
+veryclean: printenv clean
+	@echo "-----------------------------------------------------------------------"
+	@echo "veryclean"
+	@echo ""
+	@echo "Removing compile artifacts (make clean) and final executable."
+	@echo "Only executable for current StateCU $(EXE_BITS)-bit version is removed."
+	@echo "-----------------------------------------------------------------------"
+ifdef OS
+	# Windows
+	# - only remove the executable for the OS architecture of interest
+	rm -f *~ $(PROGRAMS) statecu-$(STATECU_VERSION)-gfortran-win-$(EXE_BITS)bit.exe
+else
+	# Linux
+	# - only remove the executable for the OS architecture of interest
+	# - no file extension
+	rm -f *~ $(PROGRAMS) statecu-$(STATECU_VERSION)-gfortran-lin-$(EXE_BITS)bit
+endif
