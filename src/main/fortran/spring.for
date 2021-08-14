@@ -84,12 +84,12 @@ C-----Local Variable Declaration
             jdays=-999.0
             goto 600
          endif
-         idiff =30.5 * (tfrost-tmean(yr,I)) /(tmean(yr,I+1)-tmean(yr,I))
-     1 + 0.5    ! 0.5 is added for rounding
+         idiff =INT(30.5 * (tfrost-tmean(yr,I)) /(tmean(yr,I+1)-
+     1   tmean(yr,I)) + 0.5)      ! 0.5 is added for rounding
          IF (idiff .LE. 15) THEN
             Smonth = I
             kdays = idiff + 15
-	     ELSE IF( idiff .GT. 31) THEN
+         ELSE IF( idiff .GT. 31) THEN
          ELSE
             Smonth = I+1
             kdays = idiff - 15
@@ -98,5 +98,3 @@ C-----Local Variable Declaration
  400  Jdays = JULIAN(Smonth,kdays)
  600  RETURN
       END
-
-

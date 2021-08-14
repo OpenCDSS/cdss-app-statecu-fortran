@@ -65,7 +65,7 @@ C-----Include Global Variables and Data Defaults
       INCLUDE 'gcommon.inc'
 C-----Local Variable Declarations
       integer :: i,m,j,tmpt_cnt(dim_nw,12)
-      real :: tmpt_avg(dim_nw,12), sum
+      real :: sum
       do i=1,n_sta
         do j=1,12
           sum=0.0

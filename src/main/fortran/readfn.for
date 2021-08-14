@@ -112,10 +112,13 @@ C     without having a # - this is the old method
           go to 30
         end if
       end do
+      write(*,*) 'missing filenam in response (rcu) file'
+      write(999,*) 'missing filenam in response (rcu) file'
+      goto 40
       
 30    ext=fstring(j2:k2)
 
-      return
+40    return
 C####&|================================================================|jhb
 C####&| ...end existing code                                           |jhb
 C####&|================================================================|jhb
@@ -171,4 +174,3 @@ C####&|  save file name string                                         |jhb
 C####&|================================================================|jhb
       stop 
       END
-

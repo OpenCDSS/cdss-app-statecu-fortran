@@ -43,7 +43,7 @@ C-----Argument Variable Declaration
 C-----Include Global Variables and Data Defaults
       INCLUDE 'gcommon.inc'
 C-----Local Variable Declarations
-      integer :: i, j, j2, i2
+      integer :: i, j, i2
       write(IYOUNIT,*)' '
       write(IYOUNIT,*)' '
       write(IYOUNIT,'(A34)')'StateCU log file warning messages:'

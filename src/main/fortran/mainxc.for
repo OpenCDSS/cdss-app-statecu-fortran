@@ -45,9 +45,8 @@ Cjhb====================================================================
 
 C-----Local variable declaration
       INTEGER IY,IM
-      INTEGER nbegyr, nendyr
-      INTEGER IB, IDUM
-      real cugrass(12), tmpET, tmpEP, tmpIWR
+      INTEGER IB
+      real tmpET, tmpEP, tmpIWR
       CHARACTER*200 ofile1
 
      
@@ -122,7 +121,6 @@ c      do 506 k=1,n_crps
 c        crptyp(k)=0
 c506   continue
 c
-c      CALL READIN(nbegyr, nendyr)
       if(iflood .ge. 1) open(104,FILE="gtemp")
 c     initialize some arrays
       do iy=1,dim_ny
@@ -236,7 +234,7 @@ Cjhb=&==================================================================
 C        CALL WBUILD(2,IB)
 Cjhb=&==================================================================
 C-----main blaney-criddle calculations
-        CALL CALPCROP(IB,cugrass)
+        CALL CALPCROP(IB)
 Cjhb=&==================================================================
 C-----calculate carry-over soil moisture
 Cjhb=&==================================================================
@@ -483,15 +481,15 @@ Cjhb====================================================================
         if(sboutput) then
         DO I=0,SBCOUNT
           CHAR12_1=SBID(I)
-          CHAR12_2=SBNAME(I)
+          CHAR12_2=SBNAME(I)(13:24)
           WRITE(UNIT=IBD1UN)NBASIN+I+1,CHAR12_1,CHAR12_2
         END DO
-        CHAR12_1=BID
-        CHAR12_2=BNAME
-        WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
+C        CHAR12_1=BID
+C        CHAR12_2=BNAME
+C        WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
+         WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,BID,BNAME
         endif
 Cjhb=&==================================================================
-
       
 c create columnar output with et,efppt,iwr
 c      open(220,file='cu.dv')

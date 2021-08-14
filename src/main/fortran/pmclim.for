@@ -45,9 +45,8 @@ C-----Include Global Variables and Data Defaults
       INCLUDE 'pmcommon.inc'
 
 C-----Local Variable Declaration
-      CHARACTER*10 tcounty
       CHARACTER*12 tid
-      INTEGER TYR,TYMO,PTYR
+      INTEGER TYR,TYMO
 C
 C-----Open climate files - check years stamped in file
 C

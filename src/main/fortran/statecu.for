@@ -120,6 +120,7 @@ Cjhb=&==================================================================
       call GDATA_INIT !init constant variables (GDATA)
       rcrfile='xxx'
       pcrfile='xxx'
+      eprfile='xxx'
       INCH=0
       ITMP=100
       ISUPLY=0
@@ -180,7 +181,8 @@ C----------------------------------------------------------------------------
       logfile(fn_len:fn_len+4)='.log'
       idra=0
       ipdy=0
-      OPEN (UNIT=999,FILE=logfile)
+      OPEN (UNIT=999,FILE=logfile,STATUS='unknown',ACTION='write')
+      write(0,*) 'Opened log file: ', logfile
       ISTAT = GETCWD (theCWD)
       IF (ISTAT == 0) write (0,*) 'Current directory is ',theCWD
       open (unit=25,file=rcufile,status='old',err=945)
@@ -464,8 +466,8 @@ C add daily files
          select case (scu_debug)
          case (0)
          case (1)
-         write(999,*)'  RCR Input filename = ',trim(rcrfile)
-         write(999,*)'  RCR Input file type is only used by StateCU'
+         write(999,*)'  CIR Input filename (*.rcr)  = ',trim(rcrfile)
+C         write(999,*)'  RCR Input file type is only used by StateCU'
          case default
          end select
        case(Token31,Token71)
@@ -473,8 +475,19 @@ C add daily files
          select case (scu_debug)
          case (0)
          case (1)
-         write(999,*)'  PCR Partial Input filename = ',trim(pcrfile)
-         write(999,*)'  PCR Input file type is only used by StateCU'
+         write(999,*)'  Partial CIR  Input filename (*.pcr) = ',
+     &     trim(pcrfile)
+C         write(999,*)'  PCR Input file type is only used by StateCU'
+         case default
+         end select
+       case(Token32,Token72)
+         eprfile=trim(file2)
+         select case (scu_debug)
+         case (0)
+         case (1)
+         write(999,*)'  Excess Eff Precip filename (*.epr) = ',
+     &     trim(eprfile)
+C         write(999,*)'  EPR Input file type is only used by StateCU'
          case default
          end select
        case("comment_line")
@@ -1138,7 +1151,8 @@ c     now handle the normal typout value (has the 10 subtracted)
       end select
       
       do 455 i=1,nbasin
-455     typout(i)=ttypout 
+        typout(i)=ttypout 
+455   continue 
 c
 c ew - output detailed info for gw modeling (gw withdrawal for sprinkler, flood)
 c
@@ -1509,8 +1523,11 @@ Cjhb=&==================================================================
              do 535 j2=1,tncrop
                tcdssum=tcdssum+tcdsarea(j2)
 535          continue
+c    ew new 5/31/2019             	     
+             if(ttacre .ne. 0) then
              if(abs((ttacre-tcdssum)/ttacre).GT.0.02)then
                 call lw_update(60,bas_id(j1))
+             endif
              endif
              tyr1=tyr-nyr1+1
              do 536 j2=1,tncrop
@@ -1581,7 +1598,7 @@ c
       open(unit=33,file=fdfile,status='old',iostat=ierr)
       
       do 600 ib=1,nbasin
-        do 600 i = 1,nyrs
+        do 601 i = 1,nyrs
           t28(ib,i,1) = 0
           t28(ib,i,2) = 0
           t32(ib,i,1) = 0
@@ -1590,6 +1607,7 @@ c
          i2(ib,i)=0
          i3(ib,i)=0
          i4(ib,i)=0
+601     continue
 600   continue
       itempf=0
       write(*,*) 'Reading Frost Date File:  ', fdfile
@@ -1708,11 +1726,12 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
       endif
          
          do 625 i=1,nyrs
-         do 625 ib=1,nbasin
-           if(i1(ib,i) .eq. 1) T28(ib,i,1)=-999
-           if(i2(ib,i) .eq. 1) T28(ib,i,2)=-999
-           if(i3(ib,i) .eq. 1) T32(ib,i,1)=-999
-           if(i4(ib,i) .eq. 1) T32(ib,i,2)=-999
+           do 624 ib=1,nbasin
+             if(i1(ib,i) .eq. 1) T28(ib,i,1)=-999
+             if(i2(ib,i) .eq. 1) T28(ib,i,2)=-999
+             if(i3(ib,i) .eq. 1) T32(ib,i,1)=-999
+             if(i4(ib,i) .eq. 1) T32(ib,i,2)=-999
+624        continue
 625      continue
 
       if(climonfly.gt.0)then
@@ -1725,31 +1744,41 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
 C-----Calculate Total Area per Basin per Year - handy if
 C-----project summary are desired to be in inches rather than acre-ft
 700   do 705 I=1,DIM_NA
-      do 705 J=1,DIM_NY
-705      T_AREA(I,J) = 0.0
+        do 701 J=1,DIM_NY
+           T_AREA(I,J) = 0.0
+701     continue 
+705   continue  
       do 710 I=1,NBASIN
-      do 710 J=1,NYRS
-      do 710 K=1,NPARCE(I,j)
-        T_AREA(I,J) = T_AREA(I,J) + AREA(I,K,J)
+        do 709 J=1,NYRS
+          do 708 K=1,NPARCE(I,j)
+            T_AREA(I,J) = T_AREA(I,J) + AREA(I,K,J)
+708        continue
+709     continue
 710   continue
 C-----Calculate total area of project
       do 715 J=1,NYRS
-715      PJAREA(J) = 0.0
+        PJAREA(J) = 0.0
+715   continue
 
       do 720 I=1,NBASIN
-      do 720 J=1,NYRS
-720     PJAREA(J) = PJAREA(J) + T_AREA(I,J)
-
+        do 719 J=1,NYRS
+          PJAREA(J) = PJAREA(J) + T_AREA(I,J)
+719     continue
+720   continue
 
 C-----Calculate total area by crops
       do 725 J=1,DIM_NY
-      do 725 K=1,DIM_NC
-725      C_AREA(J,K) = 0.0
+        do 724 K=1,DIM_NC
+           C_AREA(J,K) = 0.0
+724     continue
+725   continue
       do 730 I=1,NBASIN
-      do 730 J=1,NYRS
-      do 730 K=1,NPARCE(I,j)
-         KK = N_CRP(BKEY(I,K,J))
-         C_AREA(J,KK) = C_AREA(J,KK) + AREA(I,K,J)
+        do 729 J=1,NYRS
+          do 728 K=1,NPARCE(I,j)
+            KK = N_CRP(BKEY(I,K,J))
+            C_AREA(J,KK) = C_AREA(J,KK) + AREA(I,K,J)
+728       continue
+729     continue
 730   continue
 
 
@@ -1812,7 +1841,6 @@ C-----Start Calculation
           CALL PROTO
         Case Default
       end select
-
 Cjhb &==================================================================
 Cjhb  12/07/2011 - add the RCR and PCR input file processing
 Cjhb  these files completely or partially replace the calculated IWR
@@ -1833,6 +1861,17 @@ c-------leave the reqt array unchanged (initflag=0) and
 c-------read the pcrfile and replace the reqt array entries as necessary
         initflag=0
         call readrcr(initflag,pcrfile)
+      endif
+C ew
+C ew - replace excess precipitation NOTE - all or nothing, no partial replace
+C ew
+      if(eprfile .eq. 'xxx') then
+c-------do nothing
+      else
+c-------init the exprec array to all -999 values (initflag=1) and
+c-------read the eprfile and replace the exprec array entries as necessary
+        initflag=1
+        call readepr(initflag,eprfile)
       endif
 Cjhb &==================================================================
 Cjhb  
@@ -1861,13 +1900,20 @@ c       operate a presimulation to initialize soil moisture  grb 5-04-00
 Cjhb &==================================================================
       write(0,*) 'Writing consumptive use summary: '
       write(999,*) 'Writing consumptive use summary '
+      write(0,*) 'Calling PROJ'
+      write(999,*) 'Calling PROJ'
       CALL PROJ
+      write(0,*) 'Back from PROJ'
+      write(999,*) 'Back from PROJ'
 
 C-----Include water supply in input summary file
+      write(999,*) 'Calling WSUPPLY'
        IF (ISUPLY.GE.1) THEN
          DO 740 I=1,NBASIN
-740        CALL WSUPPLY(I)
+           CALL WSUPPLY(I)
+740      continue
        ENDIF
+      write(999,*) 'Back from WSUPPLY'
 
 c rb- create statemod (.ddc) file of output
       if (ddcsw.ge.1) then           

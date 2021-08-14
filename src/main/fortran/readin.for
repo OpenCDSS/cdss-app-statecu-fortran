@@ -51,9 +51,7 @@ C-----Local variable declaration
       INTEGER IERR
       CHARACTER*10 FLAG
       CHARACTER*30 cropn
-      CHARACTER*40 NM
       CHARACTER*80 REMARK
-      CHARACTER*200 dfile1
 c grb 05-20-00 add variable to read in line
       character*80 line
       character*10 cnx
@@ -171,11 +169,13 @@ Cjhb=&==================================================================
         if (FLAG(1:1) .eq. 'D') then                     ! perennial
           crptyp(id)=1
           do 960 j=1,25
- 960        read(4,*,ERR=101) nckca(j), ckca(ID,j)
+            read(4,*,ERR=101) nckca(j), ckca(ID,j)
+ 960       continue
         elseif (FLAG(1:1) .eq. 'P') then
           crptyp(id)=2
           do 970 j=1,21
- 970        read(4,*,ERR=101) nckcp(j), ckcp(ID,j)
+            read(4,*,ERR=101) nckcp(j), ckcp(ID,j)
+ 970      continue
         else
           write(*,*) 'Stop: A crop listed in the *.kbc file does not'
           write(*,*) 'include Day or Percent designation'
@@ -187,7 +187,6 @@ Cjhb=&==================================================================
 
       close(4)
 
- 900  FORMAT(I2,A40)
  901  FORMAT(A80)
 
 

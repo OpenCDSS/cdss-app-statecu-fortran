@@ -49,10 +49,8 @@ C***************************************************************************
       INCLUDE 'pmcommon.inc'
 
 C-----Local Variable Declaration
-      character*12 etid
-      INTEGER NMO,NDAYS(DIM_NA),BDAYS,YR,MFLAG(DIM_NA),FIRSTDAY(DIM_NA)
-      REAL DOY
-      REAL DPT, TAVED
+      INTEGER NMO,NDAYS(DIM_NA),MFLAG(DIM_NA),FIRSTDAY(DIM_NA)
+      REAL TAVED
       REAL F,TAVE2
       REAL ETVAL
 
@@ -79,56 +77,6 @@ C     arrays (more dimensions) in proto before getting into this routine
 Cjhb====================================================================        
       DO 100 NMO=1,12
       DO 300 I=1,N_STA
-Cjhb====================================================================        
-C        READ(60,922) YR, MO, tid,(TMX(J),J=1,31)
-C        READ(61,922) YR, MO, tid,(TMN(J),J=1,31)
-C
-C        if(ipdy .eq. 1) then
-C          READ(62,922) YR, MO, tid,(RF(J),J=1,31)
-C        endif
-C
-C        READ(63,922) YR, MO, tid,(RS2(J),J=1,31)
-C
-C        if(flag1 .eq. 3 .or. flag1 .eq. 5) then
-C          READ(64,922) YR, MO, etid,(EDPT2(J),J=1,31)
-C        endif
-C
-C        READ(65,922) YR, MO, tid,(WD2(J),J=1,31)
-C
-Cjhb====================================================================        
-C---Check for missing values - send back -999 for entire year
-Cjhb====================================================================
-C     REMOVED THE FOLLOWING CODE
-C          Check for missing values for these parameters inside
-C          the day loop; if any are missing, then set ETVAL=-999
-C          and skip the calculations.  In that case, -999 will be stored
-C          in the ETR(I,NDAYS(I)) array
-C          Later, check the ETR(I,NDAYS(I)) array value before using it
-C          in case it is -999
-Cjhb====================================================================        
-c        do 150 j=1,month(nmo)
-c           if(tmx(I,IY_PM,nmo,j) .lt. -998) then
-c                mflag(i)=1
-c           endif
-c           if(tmn(I,IY_PM,nmo,j) .lt. -998) then
-c                mflag(i)=1
-c           endif     
-c           if(rf(I,IY_PM,nmo,j) .lt. -998) then
-c                mflag(i)=1
-c           endif     
-c           if(rs2(I,IY_PM,nmo,j) .lt. -998) then
-c                mflag(i)=1
-c           endif     
-c           if(edpt2(I,IY_PM,nmo,j) .lt. -998) then
-c                mflag(i)=1
-c           endif     
-c           if(wd2(I,IY_PM,nmo,j) .lt. -998) then
-c                mflag(i)=1
-c           endif
-c150     continue
-c        if(mflag(i) .eq. 1) then
-c           goto 300
-c        endif
 Cjhb====================================================================        
         APRM = 31.54 - .273 *wlat(I) + .00078 * welev(I)   ! eq. 6.66 p. 135
         BPRM = -.30 + .268 * wlat(I) + .00041 * welev(I)    ! eq. 6.66 p. 135
@@ -279,7 +227,6 @@ C             ETO(I,ID) = -999
          ENDIF
 600   CONTINUE
 
-922   FORMAT(i4,2x,i2,1x,a12,31F8.0)
 
       RETURN
       END

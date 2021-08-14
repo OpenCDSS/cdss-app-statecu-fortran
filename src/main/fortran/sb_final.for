@@ -59,7 +59,7 @@ C-----Argument Variable Declaration
 C-----Include Global Variables and Data Defaults
       INCLUDE 'gcommon.inc'
 C-----Local Variable Declarations
-      integer :: idistrict=0, i
+      integer :: idistrict=0
 
       select case (nbasin)
       case (0)

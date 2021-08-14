@@ -87,12 +87,13 @@ C***************************************************************************
       IF ( (LT .GT. 65.0) .OR. (LT .LT. 0.0)) CALL MYEXIT(59)
 
       L1 = NINT(LT) - MOD(NINT(LT),2) 
-      N1 = 0.5*L1+1
+      N1 = INT(0.5*L1+1)
       L2 = L1 + 2
       N2 = N1 + 1
 
       DO 10 II = 1,12
-10       DHRS(II)=HRS(II,N1)+0.5*(HRS(II,N1)-HRS(II,N2))*(L1 - LT)
+         DHRS(II)=HRS(II,N1)+0.5*(HRS(II,N1)-HRS(II,N2))*(L1 - LT)
+10    CONTINUE
       RETURN
       END
 

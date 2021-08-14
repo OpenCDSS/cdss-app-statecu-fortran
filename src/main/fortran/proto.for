@@ -61,32 +61,28 @@ Cjhb====================================================================
       INCLUDE 'bindat.inc'
 Cjhb====================================================================
 C-----Local Variable Declaration
-      CHARACTER*80 remark
-      CHARACTER*200 dfile1, dfile2, ofile1
       CHARACTER*200 ofile5
-      CHARACTER*10 tcounty
       CHARACTER*12 tid
-      INTEGER LEAP, IX, I, IY, IM, II, IP, IX1, IB
-      INTEGER ICROP, NBAS, L
-      INTEGER YR1, YR2, KEY, doy10, doyh, doym, doyc
-      INTEGER T1,T2,T3,T4,T5,T6,T7,T8,T28_1,T28_2,T32_1,T32_2
-      INTEGER JULIAN,TDAYS
-      INTEGER IYY, XTRADY,tyr
+      INTEGER I, IY, IM, IP, IB
+      INTEGER ICROP, L
+      INTEGER KEY, doy10, doyh, doym, doyc
+      INTEGER TDAYS
       INTEGER nbegmo(DIM_NP),nbegda(DIM_NP),nendmo(DIM_NP)
       INTEGER nendda(DIM_NP)
-      INTEGER IERR,THUC,NPART(DIM_NP)
+      INTEGER IERR,NPART(DIM_NP)
       REAL re(DIM_NP,13),cu(DIM_NP,13)
-      REAL AW,EFFPCP
-      REAL SMLAST, incrz, incst
-      REAL RQT(DIM_NP,DIM_NA,12),effp2(DIM_NP,DIM_NA,12)
-      CHARACTER*20 F_OUT
+      REAL EFFPCP
+      REAL incrz
+! Erin test
+!      REAL effp2(DIM_NP,DIM_NA,12)
+!      REAL effp2(50,1200,12)      
 Cjhb=&==================================================================
       CHARACTER*30 CROPN
 Cjhb=&==================================================================
       REAL D_VAL(31)
       INTEGER STA_NDX, yr, mo
       LOGICAL TMPMISS(12)
-      REAL :: tmpET=0.0, tmpEP=0.0, tempIWR=0.0
+      REAL :: tmpET=0.0, tmpEP=0.0
 Cjhb=&==================================================================
 
 
@@ -110,10 +106,11 @@ C-----Open Output File
 Cjhb====================================================================
 C     initialize some arrays and variables
 Cjhb====================================================================
-      do 506 k=1,n_crps
+      do 507 k=1,n_crps
         do 506 j=1,33
            kcb(k,j) = 0
 506     continue
+507   continue
       do i=1,dim_np
         do j=1,dim_na
           do k=1,12
@@ -285,14 +282,18 @@ C-----Initialize mean temperature
 
       NUMYR=0
       DO 5 IY=1,NYRS
-      DO 5 IM=1,12
+      DO 4 IM=1,12
         reftot(iy,im)=0.0
         rntot(iy,im)=0.0
- 5      TMEAN(IY,IM) = 0.0
-      DO 6 IY=1,NYRS
-      DO 6 IJ=1,366
- 6      TRAIN(IY,IJ) = 0.0
-
+        TMEAN(IY,IM) = 0.0
+ 4    continue
+ 5    continue
+ 
+      DO 7 IY=1,NYRS
+        DO 6 IJ=1,366
+         TRAIN(IY,IJ) = 0.0
+ 6      Continue       
+ 7    Continue 
 Cjhb====================================================================
 c     initialize some arrays
 Cjhb====================================================================
@@ -381,9 +382,12 @@ C         loop through all the climate stations
 C         use the rainfall weighting factors, wrs(ib,i), to
 C         figure out a weighted daily precip value for the structure
 Cjhb====================================================================        
-          DO 41 I=1,N_STA
+          DO 411 I=1,N_STA
             DO 41 IJ=1,366
-  41          TRAIN(IY,IJ) = TRAIN(IY,IJ) + WRS(IB,I) * PCP(I,IJ)
+              TRAIN(IY,IJ) = TRAIN(IY,IJ) + WRS(IB,I) * PCP(I,IJ)
+41          Continue
+411       Continue
+
 Cjhb====================================================================        
 C         if any missing data temperature values were used
 C         (tave(I,IM) = -999)  then the TMEAN value will
@@ -393,12 +397,12 @@ Cjhb====================================================================
             if(TMPMISS(IM)) TMEAN(IY,IM)=-999.0
   42      continue
 Cjhb=&==================================================================
-C         renamed frost2 to frost.  frost calculates frost dates for all
+C         frost calculates frost dates for all
 C         parcels of structure, IB, for the year, IY
 C         stores them in JBEG(I,IY), JEND(I,IY) where I is the parcel #
 Cjhb=&==================================================================
-C 43        call frost2(IB,IY)
-  43      call frost(IB,IY)
+
+          call frost(IB,IY)
 Cjhb=&==================================================================
 C-----    Calculate Carry Over Soil Moisture
 Cjhb=&==================================================================
@@ -407,7 +411,6 @@ C         so it would work in this routine (mainxc calls wbuildall.for)
 C         1 is a flag to indicate the daily PM method is being used
 C         stores the values in WBU(IB,IY,IM) (IM is the month index)
 Cjhb=&==================================================================
-c         CALL WBUILD(1,IB)
           CALL WBUILD(1,IB,IY)
 Cjhb=&==================================================================
 C         Begin Crop Loop
@@ -511,7 +514,6 @@ C              because of new code above, not sure this is necessary, but leave 
   15           continue
 C-----         Verify if maximum root is achieved at full cover
                IF ((ID-JSTR).GE.GDATE5(KEY)) THEN
-                  incst = 0.0
                   incrz = 0.0
                ENDIF
 C
@@ -626,7 +628,7 @@ C-----Write results to Output Files
                  endif
               endif
 
-             CALL FOUTPUT(IP,ID,ICROP,incst,IB,IY,re)
+             CALL FOUTPUT(IP,ID,IB,IY,re)
 
 C-----End of daily Calculations (ID)
 200          CONTINUE  
@@ -645,7 +647,7 @@ C
 C---- End some other loop
 C
 
-100      continue
+        continue
 
         do 115 l=1,12
            REQT(IB,IY,L) = REQT(IB,IY,L) / 12.0
@@ -929,11 +931,11 @@ Cjhb====================================================================
         if(sboutput) then
         DO I=0,SBCOUNT
           CHAR12_1=SBID(I)
-          CHAR12_2=SBNAME(I)
+          CHAR12_2=SBNAME(I)(1:12)
           WRITE(UNIT=IBD1UN)NBASIN+I+1,CHAR12_1,CHAR12_2
         END DO
         CHAR12_1=BID
-        CHAR12_2=BNAME
+        CHAR12_2=BNAME (1:12)
         WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
         endif
 Cjhb=&==================================================================
@@ -1109,13 +1111,10 @@ C-----Format Statements
  917  FORMAT(/A1,A40,A1,i4)
  918  FORMAT('Missing climate data for the year, no ET calculated')
  921  FORMAT(6x,i4,11x,i4)
-C 922  FORMAT(i4)
-922   FORMAT(i4,2x,i2,1x,a12,31F8.0)
-930   FORMAT(i4,2x,i2,1x,a12,31F8.0)
 931   FORMAT(i4,2x,i2,1x,a12,31F8.0)
 932   FORMAT(i4,2x,i2,1x,a12,31F8.0)
 
-1000  RETURN
+      RETURN
 
 
       END

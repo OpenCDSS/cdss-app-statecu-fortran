@@ -48,10 +48,12 @@ C-----Initialize
       TOTAL=0
       ITOTAL=0
       DO 10 I = 1, NYRS
- 10      ANNUAL(I) = 0.0
+        ANNUAL(I) = 0.0
+ 10   CONTINUE 
       DO 20 J = 1, 12
          IMONTH(J)=0
- 20      MONTLY(J) = 0.0
+         MONTLY(J) = 0.0
+ 20   CONTINUE
 
 C-----Calculate Annual Total (or average), Monthly Total, and Grand Total 
       DO 40 I = 1, NYRS
@@ -66,7 +68,6 @@ C-----Calculate Annual Total (or average), Monthly Total, and Grand Total
             MONTLY(J) = MONTLY(J) + DIVSUP(IB,I,J)
             IMONTH(J) = IMONTH(J)+1
          ENDIF
-
  30   CONTINUE
       IF(IANNUAL(I) .EQ. 1) ANNUAL(I) = -999
       IF(ANNUAL(I) .GT. -998) THEN
@@ -81,7 +82,8 @@ C-----Write Results
 
       WRITE(8,900) SLLINE
       DO 50 I = 1, NYRS
- 50      WRITE(8,904) NYR1+I-1,(DIVSUP(IB,I,J),J=1,12),ANNUAL(I)
+        WRITE(8,904) NYR1+I-1,(DIVSUP(IB,I,J),J=1,12),ANNUAL(I)
+ 50   CONTINUE
       WRITE(8,900) SLLINE
 
       WRITE(8,905) QUOTE,QUOTE,(MONTLY(J)/IMONTH(J), J=1,12),

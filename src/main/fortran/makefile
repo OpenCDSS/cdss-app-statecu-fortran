@@ -17,13 +17,26 @@
 # The compiler
 FC = gfortran
 
-# Determine the StateCU version
+# Determine the StateCU version:
 # - used in the executable name
 # - also used for installer upload folder, etc.
-# - example code line:
+# - must handle version syntax that has changed over time
+# - example code line using a floating point version:
 #      PARAMETER (VERS = 13.12)
+# - as of version 14, uses a character string:
+#      PARAMETER (VERS = '14.0.0')
 # - "dev" at the end of the version (e.g., 15.00.14.dev) indicates the software is under development
-STATECU_VERSION := $(shell cat gcommon.inc | grep 'PARAMETER' | grep 'VERS' | cut -d '(' -f 2 | cut -d '=' -f 2 | tr -d ' ' | tr -d ')')
+#
+# Explanation of the following command:
+# - (grep) search for lines with 'PARAMETER', ignoring case
+# - (grep) filter to lines with 'VERS', ignoring case
+# - (grep) ignore lines with ! since comment
+# - (cut) cut out the part after (
+# - (cut) cut out the part after the =
+# - (tr) remove spaces
+# - (tr) remove )
+# - (tr) remove '
+STATECU_VERSION := $(shell cat gcommon.inc | grep -i 'PARAMETER' | grep -i 'VERS' | grep -v '!' | cut -d '(' -f 2 | cut -d '=' -f 2 | tr -d ' ' | tr -d ')' | tr -d "'")
 
 # Number of bytes for executable
 # - used because executable has been 32-bit until 2021
@@ -77,12 +90,12 @@ FFLAGS_EXTRA_CHECKS = -fcheck=bits,bounds,do,mem,pointer,recursion
 
 # The following compiler options result in all runtime checks but is slower to run.
 # - this is used by statecu_check target and 'check' variant
-FFLAGS_CHECK = -g -O1 -Wall -cpp -DCOMPILER=$(COMPILER_ENUM) -fno-align-commons -static $(FFLAGS_ARCH) $(FFLAGS_EXTRA_CHECKS) -I/usr/include
+FFLAGS_CHECK = -g -O1 -Wall -cpp -DCOMPILER=$(COMPILER_ENUM) -fno-align-commons -ffpe-trap=invalid,zero,overflow -fbacktrace -static $(FFLAGS_ARCH) $(FFLAGS_EXTRA_CHECKS) -I/usr/include
 
 # The following compiler options result in fewer runtime checks but is faster to run.
 # -fcheck=bounds is retained because it catches major issues in array boundary issues
 # - this is used by statecu_o3 target and 'o3' variant
-FFLAGS_O3 = -Og -O3 -cpp -DCOMPILER=$(COMPILER_ENUM) -fno-align-commons -static -fcheck=bounds $(FFLAGS_ARCH) -I/usr/include
+FFLAGS_O3 = -Og -O3 -Wall -cpp -DCOMPILER=$(COMPILER_ENUM) -fno-align-commons -static -fcheck=bounds $(FFLAGS_ARCH) -I/usr/include
 
 # Compiler flags for all cases (e.g. look for system .mod files, required in gfortran)
 # - TODO smalers 2021-06-13 include above so it is easily included in variant FFLAGS
@@ -191,6 +204,7 @@ proj.o: gcommon.inc
 proto.o: pmcommon.inc gcommon.inc xccommon.inc bindat.inc
 rain.o: pmcommon.inc gcommon.inc
 readin.o: xccommon.inc gcommon.inc pmdata.inc
+readepr.o: gcommon.inc
 readrcr.o: gcommon.inc
 sb_final.o: gcommon.inc
 sb_init.o: gcommon.inc
@@ -330,6 +344,7 @@ statecu_compile: \
 		pmclim.o \
 		proj.o \
 		proto.o \
+		readepr.o \
 		readfn.o \
 		readin.o \
 		readrcr.o \

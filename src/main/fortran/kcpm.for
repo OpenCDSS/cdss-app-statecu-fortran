@@ -77,7 +77,7 @@ C--------planting to peak
           stop
        endif     
          XKCB(IDY) = KCB(CID,II)-(KCB(CID,II)-KCB(CID,II+1))*
-     :	    (DY1-I)/(DY1-DY2)
+     :      (DY1-I)/(DY1-DY2)
  10   CONTINUE   
 
  200  RETURN

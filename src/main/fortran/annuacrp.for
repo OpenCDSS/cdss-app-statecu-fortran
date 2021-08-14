@@ -69,7 +69,8 @@ C-----------------------------------------------------------------------
          do 78 k=1,12
            xkc(k) = -999
            xf(k) = -999
- 78        xkt(k) = -999
+           xkt(k) = -999
+ 78      continue
          return
       endif
       if(nbegda .eq. nendda) then
@@ -86,10 +87,10 @@ C-----adjust end of growing season from length of growing season
       IF((nend-nbeg+1).GT.ngrows(key)) nend=nbeg + ngrows(key) - 1
 
 C-----Calculate midpoint of beginning month in spring
-      midpts=((month(nbegmo)-nbegda+ 1)/2.0) + nbegda
+      midpts=((month(nbegmo)-nbegda+ 1)/2) + nbegda
 
 C-----Calculate midpoint of ending month in spring
-      midptf= (nendda + 1)/2.0
+      midptf= (nendda + 1)/2
 
 C-----Calculate number of days in beginning month of spring
       npart= month(nbegmo)-nbegda + 1
@@ -105,24 +106,24 @@ C-----------------------------------------------------------------------
 
       IF(nbegmo.EQ.nendmo)  midpts = ((nendda -
      :   nbegda+1)/2) + nbegda 
-      naccum(nbegmo)  =  JULIAN(nbegmo,midpts) - nbeg
+      naccum(nbegmo)  =  INT(JULIAN(nbegmo,midpts) - nbeg)
       fake3 = nend - nbeg
-      nperct(nbegmo) =(naccum(nbegmo)/( fake3 ))* 100.0
+      nperct(nbegmo) =INT((naccum(nbegmo)/( fake3 ))* 100.0)
 
 C-----interpolate temperature and dayhours for beginning month in spring
       IF(icrop .NE. iwheat) THEN
          DO 105 K = 1, 8
             IF(JULIAN(nbegmo,midpts).LT.middle(K)) then
-	     CALL INTERTD(temps,days,K,nyr,npart,nbegmo,
+              CALL INTERTD(temps,days,K,nyr,npart,nbegmo,
      :                    midpts)
-	     goto 109
+              goto 109
             endif
 
             IF(JULIAN(nbegmo,midpts).EQ.middle(K)) then
-	     temps = tmean(nyr ,K)
-	     days = pclite(K)
-	     goto 109
-	    endif
+             temps = tmean(nyr ,K)
+             days = pclite(K)
+             goto 109
+            endif
 
   105    CONTINUE
       else
@@ -146,7 +147,7 @@ C-----interpolate temperature and dayhours for ending month
         DO 112 K = 1,12
             IF( JULIAN(nendmo, midptf).LT. middle(K)) THEN
                CALL INTERTD(tempf,dayf,K,nyr,nendda,
-     :	       nendmo, midptf)
+     :         nendmo, midptf)
                GO TO 118
             ENDIF 
             IF( JULIAN(nendmo, midptf) .EQ. middle(K)) THEN 
@@ -171,14 +172,14 @@ C-----------------------------------------------------------------------
             endmon =  nendmo - 1
             DO 630 K = begmon,endmon
                naccum(K)=JULIAN(K,15)-nbeg
-               nperct(K)=(naccum(K) /( fake3 ))* 100.0
+               nperct(K)= INT((naccum(K) /( fake3 ))* 100.0)
                CALL INTERKC(k, tmean(nyr,k), pclite(k), icrop)
   630       CONTINUE
          ENDIF
 
 C-----interpolate kc for ending of month in fall
-         naccum(nendmo) = nend - nbeg- (nendda + 1)/2.0
-         nperct(nendmo)=(naccum(nendmo) / (fake3))* 100.0
+         naccum(nendmo) = INT(nend - nbeg- (nendda + 1)/2)
+         nperct(nendmo)=INT((naccum(nendmo) / (fake3))* 100)
 
         CALL INTERKC(nendmo, tempf, dayf, icrop)
       ENDIF

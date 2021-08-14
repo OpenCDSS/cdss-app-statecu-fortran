@@ -58,19 +58,19 @@ C***************************************************************************
       INCLUDE 'gcommon.inc'
 
 C-----Local Variable Declaration
-      INTEGER MON, DOM, N, M, DOY, IS, NMO
+      INTEGER DOM, DOY, IS, NMO
       REAL ETROUT, LAT_rad
-      REAL DELTA, XLTHT, PC, PX, ALBEDO
-      REAL XA1, A1, RBO, RSO, RATIO, A, B, outs
-      REAL RB, G, UZ, VPD, XNUM, RAALF, XKK1
-      REAL ETOALF1, ETOALF2, RN, FAC1, FAC2
+      REAL DELTA, PC, PX
+      REAL RSO
+      REAL UZ
+      REAL ETOALF1, RN
 
-      PX=101.3*((293-0.0065*WELEV(IS))/293)**5.26
-      PC = 0.000665*PX
+      PX=101.3*((293-0.0065*WELEV(IS))/293)**5.26                  !ASCE Eq 3 - Atmospheric Pressure
+      PC = 0.000665*PX                                             !ASCE Eq 4 - Psychrometric constant  
       Gday=0
-      DELTA=2504.0*EXP((17.27*TAVG)/(TAVG+237.3))/(TAVG + 237.3)**2
+      DELTA=2503.0*EXP((17.27*TAVG)/(TAVG+237.3))/(TAVG + 237.3)**2      !ASCE Eq 5 - Slope of Saturated Vapor Pressure Curve
 
-      Es_min = 0.6108*EXP((17.27*TMIN)/(TMIN+237.3))  
+      Es_min = 0.6108*EXP((17.27*TMIN)/(TMIN+237.3))                      !ASCE Eq 6 and 7 Saturated Vapo Pressure
       Es_max = 0.6108*EXP((17.27*TMAX)/(TMAX+237.3))  
       Es = (Es_min + Es_max)/2.0
       Ea = EDPT    
@@ -78,10 +78,10 @@ C-----Local Variable Declaration
 c look into vapor pressure measured vs calculated from dew point temp.
       UZ=WD/86.4
 c  alfalfa based
-      U_2r=Uz*4.87/(ALOG(67.8*ZM(IS)-5.42))
+      U_2r=Uz*4.87/(ALOG(67.8*ZM(IS)-5.42))                            ! ASCE Eq 33           
       DOY=JULIAN(NMO,DOM)
-      Dr = 1 + 0.033*COS(2*PI*DOY/365)
-      SD =  0.409 * SIN((2*PI*DOY/365)-1.39)
+      Dr = 1 + 0.033*COS(2*PI*DOY/365)                                 !ASCE Eq 23
+      SD =  0.409 * SIN((2*PI*DOY/365)-1.39)                           !ASCE Eq 24
       LAT_rad = wlat(IS)*PI/180
       SS_ang = ACOS(-TAN(LAT_rad)*TAN(SD))
       Ra = (24.0/PI) * 4.92 * Dr * ((SS_ang * SIN(LAT_rad) * SIN(SD)) +

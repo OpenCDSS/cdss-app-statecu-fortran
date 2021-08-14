@@ -70,16 +70,19 @@ C-----Initialize
       PTOT = 0.0
       IPTOT=0
       DO 705 IY = 1, NYRS
- 705     RIGH(IY) = 0.0
+        RIGH(IY) = 0.0
+ 705  CONTINUE
 
       DO 706 M = 1,12
          IDOWN(M) = 0
- 706     DOWN(M) = 0.0
-
+         DOWN(M) = 0.0
+ 706  CONTINUE
+ 
       IF (INCH.EQ.1) THEN 
       DO 715 M  = 1, 12
- 715        IF (T_AREA(IB,IY).NE.0) BODY(IY,M) = 12000 * BODY(IY,M)
+        IF (T_AREA(IB,IY).NE.0) BODY(IY,M) = 12000 * BODY(IY,M)
      :         / T_AREA(IB,IY)
+ 715  CONTINUE 
       ENDIF
 
       DO 710 IY = 1, NYRS
@@ -133,16 +136,12 @@ C-----Get Monthly Totals
              WRITE(10,905) QUOTE, QUOTE
            ELSEIF(ITIME .EQ. 1) THEN
              WRITE(10,911) QUOTE, QUOTE
-!           ELSEIF(ITIME .EQ. 3) THEN
-!             WRITE(10,914) QUOTE, QUOTE
            ENDIF
          ELSE
            IF(ITIME .EQ. 0) THEN
               WRITE(10,906) QUOTE, QUOTE
            ELSEIF(ITIME .EQ. 1) THEN
               WRITE(10,912) QUOTE, QUOTE
-!           ELSEIF(ITIME .EQ. 3) THEN
-!              WRITE(10,913) QUOTE, QUOTE
            ENDIF
          ENDIF
       IF (IFILE.EQ.14) WRITE (10,908) QUOTE,QUOTE
@@ -156,6 +155,7 @@ C-----Get Monthly Totals
 
       AR_AVG = 0.0
       DO 750 IY = 1, NYRS
+         write(0,*) 'TABLE Processing IY=', IY, ' of ', NYRS
          UDEPTH = 0.0
          if(iclim .eq. 0) then
            AR_AVG = AR_AVG + T_AREA(IB,IY)/100
@@ -182,15 +182,20 @@ C-----Get Monthly Totals
          endif
  750  CONTINUE
       UDEPTH = 0.0
+      write(0,*) 'TABLE before calculating AR_AVG'
       AR_AVG = AR_AVG/NYRS
+      write(0,*) 'TABLE before calculating UDEPTH'
+      write(0,*) 'IPTOT=',IPTOT,' AR_AVG=',AR_AVG
       IF (AR_AVG.NE.0) UDEPTH = PTOT/IPTOT/AR_AVG
       WRITE(10,900) SLLINE
+      write(0,*) 'TABLE before calculating TTOT'
       IF(IPTOT .EQ. 0) THEN
          TTOT=-999
          UDEPTH=-999
       ELSE
          TTOT=PTOT/IPTOT
       ENDIF
+      write(0,*) 'TABLE before calculating NEWDOWN'
       DO 751 M=1,12
         IF(IDOWN(M) .EQ. 0) THEN
            NEWDOWN(M) = -999
@@ -236,10 +241,6 @@ c rb- add .0 to floating formats
      :43(" "))
  912  FORMAT (37x,A1,' SUPPLY-LIMITED CONSUMPTIVE USE (acre-ft)',A1,
      :40(" "))
- 913  FORMAT(35x,A1,1x,'TOTAL CROP CU FROM PPT AND IRRIGATION SUPPLY ',
-     :'(acre-ft)',A1,28(" "))
- 914  FORMAT(35x,A1,1x,'TOTAL CROP CU FROM PPT AND IRRIGATION SUPPLY ',
-     :'(inches)',A1,27(" "))
-
+ 
       RETURN
       END

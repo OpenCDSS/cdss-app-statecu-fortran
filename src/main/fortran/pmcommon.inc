@@ -60,7 +60,8 @@ C-----Variable Declaration
       REAL XKCB(366),REFET(366)
       REAL ET(366),RNFALL(366)
       REAL REFETR(366),REFETO(366)
-      REAL KCDAY(PM_NY,33) 
+C ew - should KCDAY be an integer?
+      INTEGER KCDAY(PM_NY,33) 
       REAL KCB(PM_NY,33)
       REAL pnm_er(12),pnm_dp(12),pnm_et(12), pnm_qr(12),reftot(50,12)
 

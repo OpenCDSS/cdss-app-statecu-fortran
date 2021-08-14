@@ -59,7 +59,7 @@ C***************************************************************************
       INCLUDE 'gcommon.inc'
 
 C-----Local Variable Declaration
-      INTEGER MON, DOM, N, M, DOY, IS, NMO
+      INTEGER DOM, DOY, IS, NMO
       REAL ETROUT
       REAL DELTA, XLTHT, PC, PX, ALBEDO
       REAL XA1, A1, RBO, RSO, RATIO, A, B, outs
@@ -94,14 +94,15 @@ C      RSO = APRM + BPRM * COS(6.28318*(DOY-170)/365)  ! eq. 6.66 p. 135
       RSO = APRM + BPRM * COS(6.28318*DOY/365 - 2.93)  ! eq. 6.66 p. 135
 
       RATIO = RS / RSO
-      IF (RATIO - 0.70) 30,30,40
- 30   A = 1.017                                       ! p. 137
-      B = -0.06                                       ! p. 137
-      GO TO 50
- 40   A = 1.126                                       ! p. 137
-      B = -0.07                                       ! p. 137
+      IF ((RATIO - 0.70) .LE. 0.0) THEN
+         A = 1.017                                       ! p. 137
+         B = -0.06                                       ! p. 137
+      ELSE
+         A = 1.126                                       ! p. 137
+         B = -0.07                                       ! p. 137
+      ENDIF
 
- 50   RB = RBO * (A * (RS/RSO) + B)                   ! eq. 3.16 p. 35
+      RB = RBO * (A * (RS/RSO) + B)                   ! eq. 3.16 p. 35
       RN = (1 - ALBEDO) * RS - RB                     ! eq. 3.5  p. 30
 
       G = 0.377 * (TAVG - ((TAVG_1+TAVG_2+TAVG_3)*.3333))

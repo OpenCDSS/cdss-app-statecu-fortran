@@ -127,6 +127,10 @@ c_________________________________________________________________NoticeEnd___
 ! smalers 2018-11-14   version 13.11
 !                Add GPLv3+ license copyright notice comments to all source files.
 !                Still need to ensure that -v prints the notice.
+! smalers 2021-08-14   version 13.12
+!                Incremental version not intended to be released.
+!                Includes initial transition to gfortran 10 64-bit compiler.
+!                Version 14.x uses a string version that allows more flexibility.
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
@@ -151,9 +155,9 @@ c_________________________________________________________________NoticeEnd___
       REAL VERS
 ! grb new version number 
       PARAMETER (VERS = 13.12)
-      PARAMETER (RDATE = '05/31/19 06:00PM')
+      PARAMETER (RDATE = '    DUMB        ')
+!      PARAMETER (RDATE = '11/14/18 06:00PM')
 !     jhb 07/10
-!     PARAMETER (DIM_NA = 800)
       PARAMETER (DIM_NA = 1200)
       PARAMETER (DIM_NP = 50)
       PARAMETER (DIM_NY = 130)
@@ -163,9 +167,6 @@ c_________________________________________________________________NoticeEnd___
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
       parameter (dim_sub = 5)
-! _____________________________________________________
-! rrb 2003/06/20; Allow multiple subirrigation crops
-      integer subirr
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
       character*5  subname(dim_sub)
@@ -206,9 +207,10 @@ c_________________________________________________________________NoticeEnd___
       CHARACTER*87 DLINE, SLINE
       CHARACTER*130 DLLINE,SLLINE
       CHARACTER*40 BAS_ID(DIM_NA)
-      CHARACTER*30 CPNAME(DIM_NC)
+      CHARACTER*30 CPNAME(DIM_NA)
       CHARACTER*10 OCOUNT(DIM_CH),TTCOUNT(DIM_CH),NU_NME(DIM_NC+1)
       CHARACTER*10 NU_SUM(DIM_NY,DIM_NC+1),SUM_Y(DIM_NY)
+      CHARACTER*10 atxt(dim_na,DIM_NC,DIM_NY),crpname(DIM_NC,dim_ny)
       CHARACTER*15 SOIL(DIM_NC), SNAME(14)
       CHARACTER*24 NAMEASP(DIM_NA)
       CHARACTER*200 dfile
@@ -220,17 +222,17 @@ c_________________________________________________________________NoticeEnd___
       character*200 pdyfile,solfile,vapfile,wndfile,dlyfile
       character*200 ipyfile,pvhfile,dlafile,clifile
 ! grb 06-29-00 add admfile and dddfile
-! jhb 07-12-00 add gisfile (known, but unused in statecu)
       character*200 admfile,dddfile,addfile,dcufile,gisfile
 ! jhb 12-07-11 add rcr file types - only used by statecu, not statecui
-      character*200 rcrfile
-      character*200 pcrfile
+      character*200 rcrfile,pcrfile,eprfile
       character*12 wsid(DIM_NW),ttid(DIM_NW),S4CATID
       integer dbyear,deyear,ddcsw,iwheat
       integer ifir,ddstrctt,ddindex,iddrec
       character*12 ddstruct(DIM_NA)
       integer imissflg
-      REAL TRIGHTS(DIM_NA)
+      REAL TRIGHTS(DIM_NA),rights(dim_na,31),rightss(dim_na,31) 
+c EW TEST
+      REAL RQT(DIM_NP, DIM_NA,12),tmpsup(DIM_NA,DIM_NY,13)
       REAL def_irr, def_irr_frac(DIM_NA,DIM_NY)
 ! grb 06-29-00 add variables for admin calculation
       real persen(dim_na,dim_ny,12),peroth(dim_na,dim_ny,12)
@@ -256,7 +258,7 @@ c_________________________________________________________________NoticeEnd___
       INTEGER FLAG1, FLAG2, FLAG3, ISUPLY, NU_DIM,GWFLAG
       INTEGER NYRS, NYR1, NYR2, RN_XCO, RN_REF
       INTEGER GNYRS, GNYR1, GNYR2
-      INTEGER ONYRS, ONYR1, ONYR2
+      INTEGER ONYRS, ONYR1, ONYR2,iflags(DIM_NA,DIM_NY)
       INTEGER N_STA, N_CRPS, N_CRP(DIM_NC)
       INTEGER N_SOIL(DIM_NC),CRPTYP(DIM_NC)
       INTEGER JBEG(DIM_NP,DIM_NY), JEND(DIM_NP,DIM_NY)
@@ -265,11 +267,13 @@ c_________________________________________________________________NoticeEnd___
       INTEGER GDATE4(DIM_NC),GDATES(DIM_NC)
       INTEGER MONTH(12), GDATE5(DIM_NC),CUT2(DIM_NC),CUT3(DIM_NC)
       INTEGER TYPOUT(DIM_NA)
-      INTEGER INCH, S_OUT, JEXIST(DIM_NY)
-
+      INTEGER INCH,JEXIST(DIM_NY)
+! ew test
+      integer i11(DIM_NA,DIM_NY),i22(DIM_NA,DIM_NY)
+      integer i33(DIM_NA,DIM_NY), i44(DIM_NA,DIM_NY)
       REAL AWCR(DIM_NA),DIVSUP(DIM_NA,DIM_NY,14),SENASP(DIM_NA)
       REAL*8 ADMINENT
-      REAL JUNASP(DIM_NA)
+      REAL JUNASP(DIM_NA),ceff(DIM_NA,DIM_NY)
       REAL WLAT(DIM_NW),WELEV(DIM_NW)
       REAL TRAIN(DIM_NY,366)
       REAL wws(DIM_NA,DIM_NW), WRS(DIM_NA,DIM_NW)
@@ -288,9 +292,28 @@ c_________________________________________________________________NoticeEnd___
       REAL EFF(DIM_NA),APER(DIM_NA),DPER(DIM_NA),GWP(DIM_NA,DIM_NY,12)
       REAL BLAT(DIM_NA),BELEV(DIM_NA),ETTOT(DIM_NA,DIM_NY,14)
       REAL TMEAN(DIM_NY,13),RNTOT(DIM_NY,13),EFFPPT(DIM_NA,DIM_NY,14)
-      REAL T28(DIM_NA,DIM_NY,2),T32(DIM_NA,DIM_NY,2),PERDP(DIM_NA)
+      REAL exprec(DIM_NA,DIM_NY,14),tmprcr(DIM_NA,DIM_NY,12)
+      REAL T28(DIM_NA,DIM_NY,2),T32(DIM_NA,DIM_NY,2)
       REAL AREA(DIM_NA,DIM_NP,DIM_NY), PJAREA(DIM_NY) 
+      REAL effp2(DIM_NP,DIM_NA,12), tmpepr(DIM_NA,DIM_NY,12)
+      REAL GRASS(DIM_NA,DIM_NY,14,10)
+      REAL fleff(dim_na,dim_ny),speff(DIM_NA,DIM_NY)
+      REAL gper(DIM_NA,DIM_NY),sper(dim_na,dim_ny)
+      REAL mprate(dim_na,dim_ny,14)
+      REAL sfeff(dim_na,dim_ny)
+      REAL gfeff(dim_na,dim_ny)
+      REAL custot(dim_na,dim_ny,14)
+      REAL tail(dim_na,dim_ny,14)
+      REAL swflac(dim_na,dim_ny),swspac(dim_na,dim_ny)
+      REAL swgwflac(dim_na,dim_ny),swgwspac(dim_na,dim_ny)
+      REAL swflsm(dim_na,dim_ny),swspsm(dim_na,dim_ny)
+      REAL swgwflsm(dim_na,dim_ny),swgwspsm(dim_na,dim_ny)
+      INTEGER gmode(dim_na,dim_ny)
+      INTEGER iflag(DIM_NA,DIM_NY)
+      REAL :: swflcu(dim_na,dim_ny),swspcu(dim_na,dim_ny)
+      REAL :: swgwflcu(dim_na,dim_ny),swgwspcu(dim_na,dim_ny)
 
+      
 ! ew dimensioned arrays to go with new common block G12 to carry variables
 !    that used to be written to tmp files
       REAL REQT(DIM_NA,DIM_NY,14),DEPLET(DIM_NA,DIM_NY,12)
@@ -298,22 +321,23 @@ c_________________________________________________________________NoticeEnd___
       REAL SMEF
       
 ! ew 03/12/2004; Consider drain/tailwater supply
-      INTEGER IDRAIN, EYETIME
+      INTEGER IDRAIN, eyetime
       CHARACTER*200 DRAFILE
 ! jhb declare/dimension sub-basin (sb) common block variables
       integer :: sbcount, sbsb(dim_na)
       logical :: sboutput, sb_flag, sb0_flag, b_flag
-      character*6 :: sbid(0:dim_nsb)
+      character*12 :: sbid(0:dim_nsb)
       character*24 :: sbname(0:dim_nsb)
       integer :: sbstrcnt(0:dim_nsb)
       real :: sbtarea(0:dim_nsb,dim_ny,12), sbmarea(0:dim_nsb,dim_ny,12)
       real :: sbettot(0:dim_nsb,dim_ny,12),sbeffppt(0:dim_nsb,dim_ny,12)
       real :: sbreqt(0:dim_nsb,dim_ny,12), sbwbu(0:dim_nsb,dim_ny,12)
-      real ::sbwbused(0:dim_nsb,dim_ny,12),sbreqreq(0:dim_nsb,dim_ny,12)
+      real :: sbwbused(0:dim_nsb,dim_ny,12)
+      real :: sbreqreq(0:dim_nsb,dim_ny,12)
       real :: sbdivsup(0:dim_nsb,dim_ny,12),sbcloss(0:dim_nsb,dim_ny,12)
       real :: sbceff(0:dim_nsb,dim_ny,12),sbfdiv(0:dim_nsb,dim_ny,12)
-      real :: sbsfeff(0:dim_nsb,dim_ny,12)
-      real :: sbeffcu(0:dim_nsb,dim_ny,12)
+      real :: sbsfeff(0:dim_nsb,dim_ny,12),idcnt(dim_na,dim_ny,14)
+      real :: sbeffcu(0:dim_nsb,dim_ny,12),swmet(dim_na,dim_ny,14)
       real :: sbseffcu(0:dim_nsb,dim_ny,12)
       real :: sbarech(0:dim_nsb,dim_ny,12)
       real :: sbtail(0:dim_nsb,dim_ny,12)
@@ -369,7 +393,7 @@ c_________________________________________________________________NoticeEnd___
       real :: sbshortage(0:dim_nsb,dim_ny,12)
       real :: sbgrass(0:dim_nsb,dim_ny,12,10)
 ! jhb declare/dimension basin (b) common block variables
-      character*2 :: bid
+      character*12 :: bid
       character*24 :: bname
       real :: btarea(dim_ny,12), bmarea(dim_ny,12)
       real :: bettot(dim_ny,12),beffppt(dim_ny,12)
@@ -447,14 +471,17 @@ c_________________________________________________________________NoticeEnd___
       COMMON /MISC/ WARNINGS
       COMMON /FILL_LOG/ FILLONFLY
       COMMON /FILL_INT/ CLIMONFLY,DIVONFLY
-      COMMON /GG1a/ MONTH
-      COMMON /GG1b/ MIDDLE
-      COMMON /GG1c/ IQUOTE
+      COMMON /GG1a/ MONTH,iflags,rights,rightss
+      COMMON /GG1b/ MIDDLE,tmpsup
+! ew TEST
+      COMMON /GG1c/ IQUOTE, RQT,effp2
+      COMMON /GG1d/ i11, i22, i33, i44
 ! grb 06-29-00 add admfile and dddfile
       COMMON /GG2a/ DBYEAR,DEYEAR,IFIR
       COMMON /GG2b/ ddstrctt,ddindex,iddrec
       COMMON /GG2c/ ddstruct,imissflg,TRIGHTS
-      common /gg2d/ admfile,dddfile,addfile,dcufile
+c jhb 07-12-00 add gisfile (known, but unused in statecu)
+      common /gg2d/ admfile,dddfile,addfile,dcufile,gisfile
       common /gg2e/ rcufile,ccufile,kbcfile,tmpfile,pptfile
       common /gg2f/ ddhfile,othfile,logfile,cdsfile,fdfile,cchfile
       common /gg2g/ kpmfile,strfile,ddsfile,kmhfile
@@ -467,13 +494,20 @@ c_________________________________________________________________NoticeEnd___
 ! grb 05-20-00 add variable missflag and ktsw to common
       common /gg2m/ missflag,missflg1,ktsw,missiwr,missdiv
 ! ew 03/12/2004 add variables to Consider drain/tailwater supply
-      common /gg2n/ idrain,drafile
-!
+      common /gg2n/ idrain,drafile,atxt
+! ew 7/4/2021 add variables readin external ET and Effective Precip infor      
+      common /gg2o/ rcrfile,pcrfile,eprfile
 ! ew added common block g12 for variables that used to be written to tmp files
 !     variables are the same for Blanney Criddle and Penman-Montieth since methods
 !     are not used simultaneously
 !
-      COMMON /G12/REQT,DEPLET,ESTCRPT,ETTOT,EFFPPT,GWP
+      COMMON /G12/REQT,DEPLET,ESTCRPT,ETTOT,EFFPPT,GWP,TMPRCR,
+     !       TMPEPR 
+     
+      COMMON /G13/GRASS,fleff,speff,gper,sper,mprate,sfeff,gfeff,
+     !         custot,tail,swflac,swspac,swgwflac,swgwspac,swflsm,
+     !         swspsm,swgwflsm,swgwspsm,gmode,iflag
+      
 !
 ! ew added common block for supply limit variables, diversions and water rights
 !
@@ -488,28 +522,30 @@ c_________________________________________________________________NoticeEnd___
 !jhb
 !jhb  added common block for deficit irrigation parameters
       COMMON /G16/ def_irr, def_irr_frac
+!ew  added common block for excess precipitation array
+      COMMON /G17/ exprec
 !jhb  added common block for all the sub-basin or district totals
       COMMON /SUBBASIN/ sbcount, sbstrcnt, sbsb, sbtarea, sbmarea,
      &            sbettot, sbeffppt, sbreqt,
      &            sbwbu, sbwbused, sbreqreq,
      &            sbceff, sbcloss, sbfdiv, sbtail,
      &            sbseniorf, sbjuniorf, sbotherf, sballf,
-     &            sbdivsup, sbarech,
+     &            sbdivsup, sbarech,swmet,
      &            sbcrop_cus,sbcrop_cuj,sbcrop_cuo,sbcrop_cut,
      &            sbsoil_cus,sbsoil_cuj,sbsoil_cuo,sbsoil_cu,
      &            sbsoiltotts,sbsoiltottj,sbsoiltotto,sbsoiltott,
-     &            sbcropcusoil,
+     &            sbcropcusoil,ceff,crpname,
      &            sbestcrps,sbestcrpj,sbestcrpo,sbestcrpt,
      &            sbdivcus,sbdivcuj,sbdivcuo,sbdivcu,
      &            sbgdiv,sbgwcu,sbgwcusm,sbeffgw,sbgwro,
      &            sbgsdiv, sbgfdiv, sbgwdivsm,
-     &            sbcutot, sbcustot, sbtdp,
+     &            sbcutot, sbcustot, sbtdp,idcnt,
      &            sbulags,sbulagj,sbulago,sbulagt,
      &            sblagrets,sblagretj,sblagreto,sblagrett,sbtotret,
      &            sblaglates,sblaglatej,sblaglateo,sblaglatet,
      &            sbdeps,sbdepj,sbdepo,sbdept,
      &            sbsfeff, sbeffcu, sbseffcu, sbshortage,
-     &            sbgrass
+     &            sbgrass,swflcu,swspcu,swgwflcu,swgwspcu
       COMMON /BASIN/ btarea, bmarea,
      &            bettot, beffppt, breqt,
      &            bwbu, bwbused, breqreq,

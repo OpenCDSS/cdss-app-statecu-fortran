@@ -45,78 +45,14 @@ C***************************************************************************
 
 C-----Local variable declaration
 
-      INTEGER YR,TYR,IB,IY,ID,IM,IS
+      INTEGER IB,IY,IM,IS
       REAL TAVE1(12)
-      INTEGER I,J,K,Y,IDUM,ISUM(12),MFLAG(DIM_NY)
-      REAL SUM,SSUMT,SSUM,SUMT(12),sumt2(12),ssumt2
-      INTEGER IERR
-      character*12 tid
-
-c
-c-----Open up climate files
-c
-c      Open(60,file=tmxfile,status='OLD',iostat=ierr)
-c      Open(61,file=tmnfile,status='OLD',iostat=ierr)
-c      if(ipdy .eq. 1) then 
-c        Open(62,file=pdyfile,status='OLD',iostat=ierr)
-c      endif
-c      Open(63,file=solfile,status='OLD',iostat=ierr)
-c      if(flag1 .eq. 3 .or. flag1 .eq. 5) then
-c          Open(64,file=vapfile,status='OLD',iostat=ierr)
-c      endif
-c      Open(65,file=wndfile,status='OLD',iostat=ierr)
-
+      INTEGER I,J,IDUM,ISUM(12),MFLAG(DIM_NY)
+      REAL SSUMT,SSUM,SUMT(12),sumt2(12),ssumt2
 
       ISKIP=N_STA-1
 
       DO 800 I=1,N_STA
-
-C--- skip to first year of data and N-sta
-c      call skipn(60)
-c      read(60,921) idum,idum
-c745   read(60,923) tyr,tid
-c      if(tyr.lt.nyr1) goto 745
-c      if(tid .ne. wsid(I)) goto 745
-c      backspace(60)
-
-c      call skipn(61)
-c      read(61,921) idum,idum
-c746   read(61,923) tyr,tid
-c      if(tyr.lt.nyr1) goto 746   
-c      if(tid .ne. wsid(I)) goto 746
-c      backspace(61)
-
-c      if(ipdy .eq. 1) then 
-c        call skipn(62)
-c        read(62,921) idum,idum
-c747     read(62,923) tyr,tid
-c        if(tyr.lt.nyr1) goto 747   
-c        if(tid .ne. wsid(I)) goto 747
-c        backspace(62)
-c      endif
-
-c      call skipn(63)
-c      read(63,921) idum,idum
-c748   read(63,923) tyr,tid
-c      if(tyr.lt.nyr1) goto 748   
-c      if(tid .ne. wsid(I)) goto 748
-c      backspace(63)
-
-c      if(flag1 .eq. 3 .or. flag1 .eq. 5) then
-c      call skipn(64)
-c      read(64,921) idum,idum
-c749   read(64,923) tyr,tid
-c      if(tyr.lt.nyr1) goto 749   
-c      if(tid .ne. wsid(I)) goto 749
-c      backspace(64)
-c      endif
-
-c      call skipn(65)
-c      read(65,921) idum,idum
-c750   read(65,923) tyr,tid
-c      if(tyr.lt.nyr1) goto 750   
-c      if(tid .ne. wsid(I)) goto 750
-c      backspace(65)
 
       if(flag1 .eq. 3 .or. flag1 .eq. 5) then
          IF (I.LT.10) THEN
@@ -156,15 +92,12 @@ c
 
           DO 90 IM = 1,12
           tave2=0
-c          READ(60,922) YR, MO, tid,(TMX(J),J=1,31)
-c          READ(61,922) YR, MO, tid,(TMN(J),J=1,31)
 
-c          IF(TID .NE. WSID(I)) GOTO 90
           DO 50 J=1,MONTH(IM)
             if((tmx(I,IY,IM,J).lt.-998)
      &          .or.(tmn(I,IY,IM,J).lt.-998)) mflag(IY)=1
-50          tave2=tave2+(tmx(I,IY,IM,J)+tmn(I,IY,IM,J))/2
-
+            tave2=tave2+(tmx(I,IY,IM,J)+tmn(I,IY,IM,J))/2
+50       continue
          TAVE1(IM)=TAVE2/MONTH(IM)
          SSUM = SSUM + TAVE1(IM)      !ADD UP ALL MONTHS
          IF(MFLAG(IY) .EQ. 0) THEN
@@ -234,13 +167,11 @@ c
 
           DO 190 IM = 1,12
           tave2=0
-c          READ(62,922) YR, MO, tid,(TMX(J),J=1,31)
 
-c          IF(TID .NE. WSID(I)) GOTO 190
           DO 150 J=1,MONTH(IM)
             if(rf(I,IY,IM,J) .lt. -998) mflag(IY)=1
-150         tave1(IM)=tave1(IM)+rf(I,IY,IM,J)
-
+            tave1(IM)=tave1(IM)+rf(I,IY,IM,J)
+150       continue
          SSUM = SSUM + TAVE1(IM)      !ADD UP ALL MONTHS
          IF(MFLAG(IY) .EQ. 0) THEN
             SUMT(IM)=SUMT(IM)+TAVE1(IM)
@@ -291,13 +222,11 @@ c
 
           DO 290 IM = 1,12
           tave2=0
-c          READ(63,922) YR, MO, tid,(TMX(J),J=1,31)
 
-c          IF(TID .NE. WSID(I)) GOTO 290
           DO 250 J=1,MONTH(IM)
             if(rs2(I,IY,IM,J) .lt. -998) mflag(IY)=1
-250         tave1(IM)=tave1(IM)+rs2(I,IY,IM,J)
-
+             tave1(IM)=tave1(IM)+rs2(I,IY,IM,J)
+250       continue
          TAVE1(IM)=TAVE1(IM)/MONTH(IM)
          SSUM = SSUM + TAVE1(IM)      !ADD UP ALL MONTHS
          IF(MFLAG(IY) .EQ. 0) THEN
@@ -350,13 +279,11 @@ c
 
           DO 390 IM = 1,12
           tave2=0
-c          READ(64,922) YR, MO, tid,(TMX(J),J=1,31)
 
-c          IF(TID .NE. WSID(I)) GOTO 390
           DO 350 J=1,MONTH(IM)
             if(edpt2(I,IY,IM,J) .lt. -998) mflag(IY)=1
-350         tave1(IM)=tave1(IM)+edpt2(I,IY,IM,J)
-
+            tave1(IM)=tave1(IM)+edpt2(I,IY,IM,J)
+350       continue
          TAVE1(IM)=TAVE1(IM)/MONTH(IM)
          SSUM = SSUM + TAVE1(IM)      !ADD UP ALL MONTHS
          IF(MFLAG(IY) .EQ. 0) THEN
@@ -409,13 +336,11 @@ c
 
           DO 490 IM = 1,12
           tave2=0
-c          READ(65,922) YR, MO, tid,(TMX(J),J=1,31)
 
-c          IF(TID .NE. WSID(I)) GOTO 490
           DO 450 J=1,MONTH(IM)
             if(wd2(I,IY,IM,J) .lt. -998) mflag(IY)=1
-450         tave1(IM)=tave1(IM)+wd2(I,IY,IM,J)
-
+            tave1(IM)=tave1(IM)+wd2(I,IY,IM,J)
+450       continue
          TAVE1(IM)=TAVE1(IM)/MONTH(IM)
          SSUM = SSUM + TAVE1(IM)      !ADD UP ALL MONTHS
          IF(MFLAG(IY) .EQ. 0) THEN
@@ -491,9 +416,6 @@ c      close(65)
 
  897  FORMAT(A40,81(" "))
  898  FORMAT(121(" "))
- 921  FORMAT(6x,i4,11x,i4)
- 922  FORMAT(i4,2x,i2,1x,a12,31F8.0)
- 923  FORMAT(i4,5x,a12)
  950  FORMAT(A1,'Modified Hargreaves Weather Parameters = (St',I1,')',
      :1X,A12,A1,3(" "))
  951  FORMAT(A1,'Penman-Monteith Weather Parameters = (St',I1,')',
