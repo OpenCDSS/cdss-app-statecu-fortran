@@ -34,29 +34,18 @@ c_________________________________________________________________NoticeEnd___
 !***************************************************************************C 
       INCLUDE 'gcommon.inc'
 
-      CHARACTER headdum*1
       character*24 namet,twdid
-      character*16 tempc
       character*3 idum3
-      character*8 dlyt
-      character*16 rtsave(20)
-      character*8 tempdp
 ! grb 06029-00 add line character variable
       character*12 ddhidt,ddridt,aspid,temp2,Line
-      integer itmp,ifound(dim_na),iflag(DIM_NA,DIM_NY)
-      integer t2,ndly(60)
-      integer dlyid(20),rtndl(20)
-      real*8 admint, rights(dim_na,31), admday(31),admno(12)
-      real temp(13),rightt,twcr,eff2(20)
-      real tmpsup(DIM_NA,DIM_NY,13),eff1,dlyp,dlyrat(20,60)
-      real pcttot(20)
-! grb 06-20-00 add variables for administration logic
+      integer itmp,ifound(dim_na)
+      real admint, admday(31),admno(12)
+      real temp(13),rightt,junadmint
+      ! grb 06-20-00 add variables for administration logic
       real*4 divndata(31),divnmo
       integer iadmin, numright(dim_na)
-      real rightss(dim_na,31)
       character*12 wdid
       integer iyr,imo
-      character*24 wdidt
       character*3 yrstr
       if(eyetime.eq.2) goto 8
       if(isuply .ge. 1) then
@@ -81,7 +70,7 @@ c_________________________________________________________________NoticeEnd___
       do j=1,DIM_NA
         do k=1,DIM_NY
            ifound(j)=0
-           iflag(j,k)=0
+           iflags(j,k)=0
            do i=1,13
               tmpsup(j,k,i)=0.0
               divsup(j,k,i)=0.0
@@ -92,96 +81,14 @@ c_________________________________________________________________NoticeEnd___
       senadmint=0
       junadmint=0
 
-!
-! read in delay table file, if required
-!
-      if(isuply .eq. 3) then
-        ndlyt=0
-        open(unit=40,file=dlyfile,status='old',iostat=ierr)
-        call skipn(40)
-306     ndlyt=ndlyt+1
-        read(40,931,end=307) dlyid(ndlyt), i1
-        ndly(ndlyt) = i1
-        backspace(40)
-        if(i1 .le. 12) then
-          read(40,932) (dlyrat(ndlyt,j),j=1,i1)
-        elseif(i1 .le. 24) then
-          read(40,932) (dlyrat(ndlyt,j),j=1,12)
-          read(40,932) (dlyrat(ndlyt,j),j=13,i1)
-        elseif(i1 .le. 36) then
-          read(40,932) (dlyrat(ndlyt,j),j=1,12)
-          read(40,932) (dlyrat(ndlyt,j),j=13,24)
-          read(40,932) (dlyrat(ndlyt,j),j=25,i1)
-        elseif(i1 .le. 48) then
-          read(40,932) (dlyrat(ndlyt,j),j=1,12)
-          read(40,932) (dlyrat(ndlyt,j),j=13,24)
-          read(40,932) (dlyrat(ndlyt,j),j=25,36)
-          read(40,932) (dlyrat(ndlyt,j),j=37,i1)
-        else
-          read(40,932) (dlyrat(ndlyt,j),j=1,12)
-          read(40,932) (dlyrat(ndlyt,j),j=13,24)
-          read(40,932) (dlyrat(ndlyt,j),j=25,36)
-          read(40,932) (dlyrat(ndlyt,j),j=37,48)
-          read(40,932) (dlyrat(ndlyt,j),j=49,i1)
-        endif
-        goto 306
-
-307     ndlyt=ndlyt-1
-        close(40)
-      endif
-
-!-----read in delay assignment file *.dla  (isuply .eq. 3)
-      if(isuply .eq. 3) then
-      open (unit=100,file=dlafile,status='old',iostat=ierr)
-      IF (IERR.NE.0) CALL MYEXIT(14)
-      call skipn(100)
-20    read (100,16,end=27) aspid,idly,(rtsave(i),i=1,idly)
-16    format(a12,i2,20(a16))
-
-      do 25 j=1,nbasin
-        twdid=bas_id(j)
-        if(twdid(1:12) .eq. aspid) then
-            ii=0
-            do 26 i=1,idly
-              tempc=rtsave(i)
-              read(tempc(1:8),'(f8.0)') pcttot(i)
-              read(tempc(9:16),'(i8)') rtndl(i)
-26          continue
-200         do 313 i=1,idly
-              iret=0
-              do 312 k=1,ndlyt
-               if(rtndl(i) .eq. dlyid(k)) then
-                 iret=1
-                 do 311 im=1,ndly(k)
-                   retn(j,im)=retn(j,im)+pcttot(i)/100
-     :                                 *dlyrat(k,im)/100
-311              continue
-               endif
-!               goto 313
-312           continue
-              if(iret.eq.0) then
-               write(*,*) 'Return flow delay table not found for struct
-     :ure ', twdid
-               write(999,*) 'Return flow delay table not found for stru
-     :cture ', twdid
-               stop
-              endif
-313         continue
-
-          goto 20
-        endif
-25    continue
-      goto 20
-!
-!  endif for read dla file
-!
-      endif
-
+      do j=1,nbasin
+           numright(j)=0
+      enddo
 
 !
 !----if consider soil moisture option is off, set awcr array to 0
 !
-27    if(ISM .eq. 0) then 
+      if(ISM .eq. 0) then 
         do j=1,nbasin
           awcr(j)=0.0
         enddo
@@ -208,10 +115,10 @@ c_________________________________________________________________NoticeEnd___
 31      format(i4,1x,a12,12(f8.0),f10.0)
         if((itmp .lt. nyr1).or.(itmp .gt. nyr2)) goto 30
         do 35 i=1,nbasin
-          twdid=bas_id(i)
+          twdid=bas_id(i)(1:12)
           if(twdid(1:12) .eq. ddhidt) then
             itmp2=itmp-nyr1+1
-            iflag(i,itmp2) = 1
+            iflags(i,itmp2) = 1
             do 32 j=1,12
 !jhb=&==================================================================
 !     removed iagg and use imiss to prorate aggr data
@@ -232,10 +139,10 @@ c_________________________________________________________________NoticeEnd___
 35      continue
         goto 30
 
-40      do 41 i=1,nbasin
+40      do 411 i=1,nbasin
           do 41 j=1,nyrs
-            if(iflag(i,j) .eq. 0) then
-              twdid=bas_id(i)
+            if(iflags(i,j) .eq. 0) then
+              twdid=bas_id(i)(1:12)
               aspid=twdid(1:12)
               call lw_update(66,bas_id(i))
 !              if(twdid(3:5) .ne. 'URF') then
@@ -244,16 +151,17 @@ c_________________________________________________________________NoticeEnd___
 !                stop
 !               endif
             endif
-41      continue
+41        continue
+411     continue
 
 !
 !----ew-convert diversions to calendar year to match all other calculations
 !     (if .ddh file is in water year)
 !
-        do 191 i=1,nbasin
+        do 192 i=1,nbasin
           do 191 m=1,nyrs
             divsup(i,m,13) = 0
-          do 191 j=1,12
+            do 190 j=1,12
             if(idum3 .eq. 'WYR') then
               if(j .gt. 3) then
                 divsup(i,m,j-3)=tmpsup(i,m,j)
@@ -264,7 +172,9 @@ c_________________________________________________________________NoticeEnd___
             else
               divsup(i,m,j)=tmpsup(i,m,j)
             endif
+190        continue
 191       continue
+192     continue
         if(divonfly.gt.0)then
           call flyfilld
         endif
@@ -288,15 +198,17 @@ c_________________________________________________________________NoticeEnd___
 !     set senasp to large
 
       IF(IDAILY.EQ.0) then
-        do 42 k=1,nbasin
-          senasp(k) = 1000000
-          junasp(k) = 0
-          trights(k)= 0
-          do 42 i=1, nyrs
-            do 42 j=1,12
-		      persen(k,i,j)=1.0
-	          peroth(k,i,j)=0.0
- 42     continue
+        do 422 k=1,nbasin
+          senasp(k) = 1000000.0
+          junasp(k) = 0.0
+          trights(k)= 0.0
+          do 421 i=1, nyrs
+            do 420 j=1,12
+               persen(k,i,j)=1.0
+               peroth(k,i,j)=0.0
+ 420        continue  
+ 421      continue
+ 422    continue 
         goto 551
       ENDIF
 
@@ -371,7 +283,7 @@ c_________________________________________________________________NoticeEnd___
 500     format (a12,a24,a12,f16.0,f8.0)     
 !  Determine junior and senior water right amounts from ddr list
         do 470 j=1,nbasin
-         twdid=bas_id(j)
+         twdid=bas_id(j)(1:12)
          if (twdid(1:12) .eq. ddridt) then
            ifound(j) = 1
            numright(j)=numright(j)+1
@@ -390,15 +302,6 @@ c_________________________________________________________________NoticeEnd___
 55      senadmint = 0
         junadmint = 0
         do 56 j=1,nbasin
-!         if(ifound(j) .eq. 0) then
-!           twdid=bas_id(j)
-!           ddridt=twdid(1:12)
-!        write(*,*) 'stop-structure ',ddridt,' not in water rights file'
-!       write(999,*) 'stop-structure ',ddridt,' not in water rights file'
-!           stop
-!         endif
-
-! grb 09-13-00 add one location for determining total rights of structure
          trights(j)= 0
          senasp(j) = 0
          junasp(j) = 0
@@ -415,8 +318,6 @@ c_________________________________________________________________NoticeEnd___
                  endif
              endif
  57      continue
-         
-
 56      continue
 
 !     IDAILY=0      NO WATER RIGHTS CONSIDERED, NO COLORING OF DIVERSIONS
@@ -431,13 +332,13 @@ c_________________________________________________________________NoticeEnd___
       if (idaily.le.3) then 
         write(*,*)
      1"Coloring of water supply with daily diversions using daily,"
-     	write(*,*)
+        write(*,*)
      1"monthly, or single administration numbers creates a file"
-     	write(*,*)
+        write(*,*)
      1"(SENPER) of senior water supply as a percent of monthly water"
-     	write(*,*)
+       write(*,*)
      1"supply, negatives reflect daily"
-     	write(*,*)
+        write(*,*)
      1"   admin (-999) or senior cfs with monthly admin values."
       endif
 
@@ -456,7 +357,7 @@ c_________________________________________________________________NoticeEnd___
           call skipn(500)
           READ(500,201) LINE
           READ(500,201) LINE
-201	    FORMAT(A12,A24,A12,F11.0,F13.0)
+201        FORMAT(A12,A24,A12,F11.0,F13.0)
 ! grb iadmin=0 = monthly iadmin=1 daily admfile data available
           IF(LINE(5:8).EQ."    ") IADMIN=0
           BACKSPACE(500)
@@ -513,22 +414,22 @@ c_________________________________________________________________NoticeEnd___
           if (idaily.eq.2.or.idaily.eq.4) then
 !      read monthly administration values
  502        READ(500,250) IYR,(ADMnO(k),k=1,12)
-      	  if (iyr.lt.(nyr1+i-1)) goto 502
-	      if (iyr.gt.(nyr1+i-1)) then
+          if (iyr.lt.(nyr1+i-1)) goto 502
+            if (iyr.gt.(nyr1+i-1)) then
                 write(*,*) "missing data, year ",nyr1+i-1," in monthly 
      :adminfile"
-	        stop
+               stop
             endif
           endif
 
 !  month loop
-	    do 650 j=1,12
+            do 650 j=1,12
 
              if (idaily.eq.1) then
  503           READ(500,300) IYR,IMO,(ADMDAY(K),K=1,31)
                if (iyr.lt.(nyr1+i-1)) goto 503
                if (iyr.eq.(nyr1+i-1).and.imo.lt.j) goto 503
-	         if (iyr.gt.(nyr1+i-1)) then
+                 if (iyr.gt.(nyr1+i-1)) then
                write(*,*) "Missing data, year ",nyr1+i-1," in daily
      :           adminfile. Data must be included for analysis period.
      :           Please add admin data or revise your water rights
@@ -537,17 +438,17 @@ c_________________________________________________________________NoticeEnd___
      :           adminfile. Data must be included for analysis period.
      :           Please add admin data or revise your water rights
      :           processing option (idaily( in the *.ccu file,"
-	           stop
-	         ENDIF
+                   stop
+                 ENDIF
              endif
 250          FORMAT(I4,4X,12F14.5)
 300          FORMAT(2I4,31F14.5)
 
-505            do 750 k=1,nbasin
-	        twdid=bas_id(k)
+               do 750 k=1,nbasin
+                 twdid=bas_id(k)(1:12)
 ! initialize arrays of monthly values for percent senior and other diversions in a month
                 persen(k,i,j)=-999
-	        peroth(k,i,j)=-999
+                peroth(k,i,j)=-999
                 ifound(1)=0
                 imissflg=0
                 do 7501 k5=1,12
@@ -558,8 +459,8 @@ c_________________________________________________________________NoticeEnd___
  
                 if (idaily.le.3) then
                   do 7500 k4=1,ddstrctt
-	            if (trim(adjustr(ddstruct(k4))).eq.
-     1		 	trim(adjustr(twdid(1:12)))) then
+                    if (trim(adjustr(ddstruct(k4))).eq.
+     1                 trim(adjustr(twdid(1:12)))) then
                        ddindex=k4
                        ifound(1)=1
                        goto 751           
@@ -573,7 +474,7 @@ c_________________________________________________________________NoticeEnd___
      1           then
               if (idaily.eq.1) then
                   do 8502 l=1,31
-	            divndata(l)=0
+                     divndata(l)=0
 !
 ! determine amount of daily diversions that is senior to admday
                   do 9502 m=1,numright(k)
@@ -583,12 +484,12 @@ c_________________________________________________________________NoticeEnd___
  9502             continue
  8502             continue
                   iddrec=ddindex+((nyr1-1-dbyear+i)*(ddstrctt*12))+
-     1			    ((j-1)*ddstrctt)
+     1                     ((j-1)*ddstrctt)
                  write(538,rec=iddrec) (divndata(k3),k3=1,31)
                  goto 507
               endif 
-	         if (idaily.eq.2.or.idaily.eq.4) then
-	            persen(k,i,j)=0
+                 if (idaily.eq.2.or.idaily.eq.4) then
+                    persen(k,i,j)=0
                     if(admno(j).eq.-999) goto 507
                       do 9508 m=1,numright(k)
                          IF(RIGHTS(K,m).LE.ADMnO(J)) then 
@@ -597,9 +498,9 @@ c_________________________________________________________________NoticeEnd___
 9508                  continue
                  endif
 
-	         if (idaily.eq.3.or.idaily.eq.5) then
-	            persen(k,i,j)=0
-    	            do 9509 m=1,numright(k)
+                 if (idaily.eq.3.or.idaily.eq.5) then
+                     persen(k,i,j)=0
+                     do 9509 m=1,numright(k)
                       IF(RIGHTS(K,m).LE.ADMinent) then 
                            persen(k,i,j)=persen(k,i,j)-rightss(k,m)
                       ENDIF
@@ -611,24 +512,23 @@ c_________________________________________________________________NoticeEnd___
               if (idaily.le.3) then
 !  process daily diversion data with daily, monthly or constant admin date
               iddrec=ddindex+((nyr1-1-dbyear+i)*(ddstrctt*12))+
-     1			 ((j-1)*ddstrctt)
+     1                   ((j-1)*ddstrctt)
 
               read(538,rec=iddrec) (divndata(k3),k3=1,31)
-100	          FORMAT(6X,I4,11X,I4,7X,A3)
-150	          FORMAT(2I4,1x,A12,31F8.0)
+150               FORMAT(2I4,1x,A12,31F8.0)
                  
                divnmo=0
                  DO 451 M=1,31
-	            if (divndata(m).eq.-999) goto 507
+                    if (divndata(m).eq.-999) goto 507
                     DIVNMO=DIVNMO+DIVNDATA(M)*1.9835
  451             Continue  
 
                  do 850 L4=1,31
-	            sumright=0
+                    sumright=0
                     do 950 m=1,numright(k)
                     if(idaily.eq.2) then 
                         if (admno(j).eq.-999) goto 507
-	                IF(RIGHTS(K,M).LE.ADMnO(J)) then 
+                        IF(RIGHTS(K,M).LE.ADMnO(J)) then 
                               sumright=sumright+rightss(k,m)
                         ENDIF
                    endif
@@ -650,7 +550,7 @@ c_________________________________________________________________NoticeEnd___
         if((sumright*1.9835).lt.(divndata(L4)*1.9835)) sendivn=sendivn+
      1    (sumright*1.9835)
         if (divndata(L4).gt.trights(K)) othdivn=
-     1	  othdivn+((divndata(L4)-trights(K))*1.9835)
+     1     othdivn+((divndata(L4)-trights(K))*1.9835)
 
  850           Continue      !end of day loop
                if (divnmo.eq.0) persen(k,i,j)=1.0
@@ -667,22 +567,22 @@ c_________________________________________________________________NoticeEnd___
 ! grb 09-13-00 remove initialization here, move prior
 !                trights(K)=0
                 do 9500 m=1,numright(k)
-! grb 09-13-00 remove calculation of trights here, move prior				
-!	            trights(K)=trights(K)+rightss(k,m)
+! grb 09-13-00 remove calculation of trights here, move prior
+!                  trights(K)=trights(K)+rightss(k,m)
                    if (idaily.eq.4) then
-	              if (admno(j).eq.-999) goto 507
-	              IF(RIGHTS(K,M).LE.ADMnO(J)) then 
-	     	          sumright=sumright+rightss(k,m)
-		          ENDIF
+                      if (admno(j).eq.-999) goto 507
+                      IF(RIGHTS(K,M).LE.ADMnO(J)) then 
+                         sumright=sumright+rightss(k,m)
+                      ENDIF
                   endif
                   if(idaily.eq.5) then
                     IF(RIGHTS(K,M).LE.ADminent) THEN
-		    	      SUMRIGHT=SUMRIGHT+RIGHTSS(K,M)
+                           SUMRIGHT=SUMRIGHT+RIGHTSS(K,M)
                     endif
                   endif
  9500           continue
                 If ((sumright*1.9835*month(j)).gE.divsup(K,I,J))sendivn
-     1			  =sendivn+divsup(K,I,J)
+     1                 =sendivn+divsup(K,I,J)
                 if((sumright*1.9835*month(j)).lt.divsup(K,I,J)) sendivn
      1              =sendivn+(sumright*1.9835*month(j))
              if (divsup(K,I,J).gt.(trights(K)*1.9835*month(j))) othdivn
@@ -692,7 +592,7 @@ c_________________________________________________________________NoticeEnd___
 ! GRB 11-08-00 MAKE SURE FOLLOWING LINES DO NOT EXTEND PAST 72 CHARACTERS
           if (divsup(k,i,j).ne.0) persen(k,i,j)=sendivn/divsup(K,I,J)
           if (divsup(k,i,j).ne.0) peroth(k,i,j)=othdivn/divsup(K,I,J)
-	        endif
+               endif
  
  507          if (j.eq.12) then 
                 write(502,506) (I+NYR1-1),twdid,(persen(k,i,j1),j1=1,12)
@@ -714,6 +614,5 @@ c_________________________________________________________________NoticeEnd___
       if(isuply .ge. 2) CLOSE (400)
 
 202   format(6x,i4,11x,i4,7x,a3)
-931   format(i8,i4)
-932   format(12x,12f8.0)
+
         end

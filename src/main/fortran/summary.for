@@ -48,24 +48,23 @@ C-----Local variable declaration
       CHARACTER*200 ofile1
       CHARACTER*130 TITL1, TITL2, TITL3
 
-c rb- delete fn_len since now commoned, add flen1
-      INTEGER I,J,K,Y,IDUM,flen1
+      INTEGER I,J,K,Y,IDUM
       REAL SUM
       REAL SUM_C(DIM_NC)
       INTEGER EDAT12(DIM_NC), FDAT12(DIM_NC)
       INTEGER EDAT34(DIM_NC), FDAT34(DIM_NC)
       REAL ST1(DIM_NC), ST2(DIM_NC)
       REAL SMAD(DIM_NC), SRZ(DIM_NC), SAWC(DIM_NC), SAPD(DIM_NC)
-      INTEGER NUMC(DIM_NC),TCOUNT(12),RCOUNT(12),TTOTAL,STOTAL
-      INTEGER KK, JDAT12, JDAT34, NN, FDIM1
+      INTEGER NUMC(DIM_NC),TCOUNT(12),RCOUNT(12),TTOTAL
+      INTEGER KK, JDAT12, JDAT34, NN
       INTEGER EP1, EP2, FP1, FP2, EH1, EH2, FH1, FH2 
       INTEGER JULIAN,RYCOUNT(DIM_NY)
       CHARACTER*10 AS(10)
-      INTEGER NU_K, IYY, XTRADY
-      INTEGER idum1,idum2,idum3
-      REAL SMLT
-      INTEGER YR1,YR2
+      INTEGER NU_K
+      INTEGER idum1,idum2
+C  EW 5/31/2019  
       REAL TWWS(DIM_NA),TWRS(DIM_NA)
+      REAL SUMTT(12),SUMRR(12)
       INTEGER IERR
 c rb- add dimension
       integer tyr
@@ -73,10 +72,10 @@ c rb- add dimension
       real ttdat(12)
       
 
-      CHARACTER*120  TITL7
-      INTEGER IB,NBAS,IY,ID,IM,IS
-      REAL SSUMT,SSUMR,SSUMS,SSUM,SSUMDL
-      REAL SUMT(12),SUMR(12),SUMDL(12)
+      CHARACTER*143  TITL7
+      INTEGER IB,NBAS,IY,IM,IS
+      REAL SSUMT,SSUMR,SSUM,SSUMDL,SSTEMP
+      REAL SUMT(12),SUMR(12),SUMDL(12),SSUMRT(12)
       REAL TMP_T(DIM_NY,12),TMP_R(DIM_NY,12)
 Cjhb0000011111111112222222222333333333344444444445555555555666666666677777
 Cjhb5678901234567890123456789012345678901234567890123456789012345678901234
@@ -112,7 +111,8 @@ c jhb add header lines to SUM output file
 
 C-----Initialize
       DO 5 I = 1, DIM_NC
- 5       SUM_C(I) = 0.0
+         SUM_C(I) = 0.0
+5     CONTINUE
 
 C-----Write Title strings
       WRITE(8,899) QUOTE,vers,QUOTE
@@ -207,7 +207,7 @@ C-----Renumber indeces
       DO 151 K = 1,DIM_NC
          IF (SUM_C(K).GT.0) THEN
             NU_K = NU_K +1
-            NU_NME(NU_K) = CPNAME(K)
+            NU_NME(NU_K) = CPNAME(K) (1:10)
             DO 152 J=1,NYRS
               if(iclim .eq. 0) then
                  write(nu_sum(j,nu_k),"(f10.2)") c_area(j,k)/SUM
@@ -226,7 +226,7 @@ C-----Renumber indeces
          WRITE(8,921) QUOTE,QUOTE
       endif
       DO K=1,10
-        AS(K) = '           '
+        AS(K) = '          '
       ENDDO
       IF((NU_DIM+1) .LE. 10) THEN
         IDIM1=10-(NU_DIM+1)
@@ -396,7 +396,7 @@ C-----open and read input file
        call skipn(26)
        read(26,940) idum1,idum2
 940    format(6x,i4,11x,i4)
-945    read(26,941,end=942) tyr,tid,(ttdat(jj),jj=1,12)	 
+945    read(26,941,end=942) tyr,tid,(ttdat(jj),jj=1,12)
        if(tyr.lt.nyr1.or.tyr.gt.nyr2) goto 945         
 941    format(i4,1x,a12,12(f8.0))
          do  943 i=1,n_sta
@@ -418,12 +418,13 @@ C-----open and read input file
 
        call skipn(27)
        read(27,940) idum1,idum2
-745    read(27,941,end=742) tyr,tid,(ttdat(jj),jj=1,12)	 
+745    read(27,941,end=742) tyr,tid,(ttdat(jj),jj=1,12)
        if(tyr.lt.nyr1.or.tyr.gt.nyr2) goto 745         
        do  743 i=1,n_sta
          if(tid.eq.wsid(i)) then
-	       do 744 j=1,12
-744          tmpr(i,tyr-nyr1+1,j)=ttdat(j)
+            do 744 j=1,12
+              tmpr(i,tyr-nyr1+1,j)=ttdat(j)
+744         continue               
          endif 
 743    continue   
        goto 745
@@ -441,25 +442,30 @@ C-----Sum Weights
  221     CONTINUE
 
          DO 211 IB = 1, NBAS
-         DO 211 I = 1, N_STA
+           DO 21 I = 1, N_STA
             TWWS(IB) = TWWS(IB) + WWS(IB,I)
             TWRS(IB) = TWRS(IB) + WRS(IB,I)
+ 21        CONTINUE
  211     CONTINUE
+ 
 
+         TTOTAL = 0
          DO 205 I = 1,N_STA
             stname(i)=wsid(i)
             do 776 iy=1,nyrs
                RYCOUNT(IY)=0
-            do 776 im=1,12
-               tmp_t(iy,im)=tmpt(i,iy,im) 
- 776           tmp_r(iy,im)=tmpr(i,iy,im)
+              do 77 im=1,12
+                 tmp_t(iy,im)=tmpt(i,iy,im) 
+                 tmp_r(iy,im)=tmpr(i,iy,im)
+ 77           continue
+ 776        continue
 
 C-----Calculate Daylight from Latitude and Tabular values
            CALL DAYHRS(wlat(I),SUMDL)
            SSUMDL = 0.0
            DO 213 IM = 1,12
- 213         SSUMDL = SSUMDL + SUMDL(IM)
-
+             SSUMDL = SSUMDL + SUMDL(IM)
+213        continue
 C-----Calculate average values for the duration
 
            DO 209 IM = 1,12
@@ -487,10 +493,16 @@ C-----Calculate average values for the duration
               SSUMR = 0.0
               TTOTAL = 0.0
               DO 210 IM = 1,12
-                SSUMT = SSUMT + SUMT(IM)
-                TTOTAL=TTOTAL+TCOUNT(IM)
+C  ew 5/31/2019
+                
+                IF(TCOUNT(IM) .GT. 0) THEN
+                    SSUMT = SSUMT + SUMT(IM)
+                    TTOTAL = TTOTAL + TCOUNT(IM)
+                ENDIF    
                 IF(RCOUNT(IM) .GT. 0) THEN
                   SSUMR = SSUMR + SUMR(IM)/RCOUNT(IM)
+                ELSE
+                  SSUMR=-999
                 ENDIF
  210          CONTINUE
               
@@ -512,9 +524,27 @@ C-----Write Weather Summary Tables
            WRITE(8,999) SLLINE
 
            IF (SOUT.EQ.0) THEN
-              WRITE(8,952) QUOTE,QUOTE,(SUMT(IM)/TCOUNT(IM),
-     :            IM=1,12),SSUMT/TTOTAL
-              WRITE(8,956) QUOTE,QUOTE,(SUMR(IM)/RCOUNT(IM),
+C  ew 5/31/2019
+           DO 413 IM = 1,12
+              IF(TCOUNT(IM).EQ.0) THEN 
+                 SUMTT(IM)  = -999
+              ELSE
+                 SUMTT(IM) = SUMT(IM)/TCOUNT(IM)
+              ENDIF   
+              IF(RCOUNT(IM).EQ.0) THEN 
+                 SUMRR(IM) = -999
+              ELSE   
+                 SUMRR(IM) = SUMR(IM)/RCOUNT(IM) 
+              ENDIF
+ 413       CONTINUE
+           IF(TTOTAL .EQ. 0) THEN 
+              SSUMT = -999
+           ELSE   
+              SSUMT = SSUMT/TTOTAL
+           ENDIF   
+              WRITE(8,952) QUOTE,QUOTE,(SUMTT(IM),
+     :            IM=1,12),SSUMT
+              WRITE(8,956) QUOTE,QUOTE,(SUMRR(IM),
      :            IM=1,12),SSUMR
               WRITE(8,973) QUOTE,QUOTE,(SUMDL(IM),IM=1,12),SSUMDL/12 
               WRITE(8,999) SLLINE
@@ -524,34 +554,68 @@ C-----Write Weather Summary Tables
 
 C-----Mean Temperature
               WRITE(8,957) QUOTE,QUOTE
+              SSUMT = 0.0
+              TOTALT = 0
               DO 214  IY = 1,NYRS
                  SSUM = 0.0
-                 STOTAL = 0.0
+                 TTOTAL = 0.0
                  DO 215 IM=1,12
                     IF(TMP_T(IY,IM) .GE. -998) THEN
                         SSUM = SSUM + TMP_T(IY,IM)
-                        STOTAL=STOTAL+1
+                        TTOTAL=TTOTAL+1
                     ENDIF
  215             CONTINUE
+C     ew 5/31/2019
+                 IF(TTOTAL .EQ. 12) THEN
+                     SSTEMP = SSUM/TTOTAL
+                 ELSE
+                     SSTEMP = -999
+                 ENDIF    
                  WRITE(8,962) NYR1+IY-1,(TMP_T(IY,IM),IM=1,12),
-     :                       SSUM/STOTAL
+     :                       SSTEMP
  214          CONTINUE
-              WRITE(8,963) QUOTE,QUOTE,(SUMT(IM)/TCOUNT(IM),IM=1,12),
-     :                     SSUMT/TTOTAL
+C     ew 5/31/2019
+              DO 632 IM=1,12
+                    IF(TCOUNT(IM) .EQ. 0) THEN
+                        SUMTT(IM) = -999 
+                    ELSE
+                        SUMTT(IM) = SUMT(IM)/TCOUNT(IM)
+                        SSUMT = SSUMT + SUMTT(IM)
+                        TOTALT = TOTALT+1
+                    ENDIF
+632           CONTINUE
+              IF(SSUMT .EQ. 0) THEN 
+                  SSUMT = -999
+              ELSE
+                  SSUMT=SSUMT/TOTALT
+              ENDIF    
+              WRITE(8,963) QUOTE,QUOTE,(SUMTT(IM),IM=1,12),
+     :                     SSUMT
               WRITE(8,999) SLLINE
 
 C------Rainfall
               WRITE(8,961) QUOTE,QUOTE
               DO 222 IY = 1,NYRS
                  SSUM = 0.0
+                 IRYEAR = 0
                  DO 223 IM=1,12
                     IF(TMP_R(IY,IM) .GE. -998) THEN
                       SSUM = SSUM + TMP_R(IY,IM)
+                    ELSE
+                      IRYEAR = 1
                     ENDIF
  223             CONTINUE
+                 IF(IRYEAR .EQ. 1)SSUM = -999 
                  WRITE(8,962) NYR1+IY-1,(TMP_R(IY,IM),IM=1,12),SSUM
  222          CONTINUE
-              WRITE(8,963) QUOTE,QUOTE,(SUMR(IM)/RCOUNT(IM),
+              DO 633 IM=1,12
+                IF(RCOUNT(IM).EQ. 0) THEN
+                  SSUMRT(IM) = -999
+                ELSE
+                  SSUMRT(IM) = SUMR(IM)/RCOUNT(IM)
+                ENDIF  
+633           CONTINUE
+              WRITE(8,963) QUOTE,QUOTE,(SSUMRT(IM),
      :            IM=1,12),SSUMR
               WRITE(8,999) SLLINE
 
@@ -575,7 +639,7 @@ C-----Write Weight Matrix for Blaney-Criddle
  980            format(4x,a8,2f6.2,97(" "))
                 goto 301
               endif
- 301	    continue         
+ 301        continue         
  300      continue
           WRITE(8,898)
          
@@ -590,7 +654,6 @@ C-----Write Weight Matrix for Blaney-Criddle
      :A1,'End Year               :    ',A1,I4,87(" ")/121(" "))
  902  FORMAT(A1,'Blaney-Criddle Method  :    ',A8,A1,83(" "))
  903  FORMAT(A1,'Penman-Monteith Method :    ',A8,A1,83(" "))
- 904  FORMAT(A1,'Modified Hargreaves    :    ',A8,A1,83(" "))
  905  FORMAT(A1,'Monthly Precip Method  :    SCS',A1,88(" "))
  906  FORMAT(A1,'Monthly Precip Method  :    USBR',A1,87(" "))
  907  FORMAT(A1,'Monthly Precip Method  :    None',A1,87(" "))
@@ -666,5 +729,3 @@ c rb- change Fx formats to Fx.0
 
       RETURN
       END
-
-

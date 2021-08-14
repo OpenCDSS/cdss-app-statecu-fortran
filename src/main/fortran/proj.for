@@ -67,15 +67,14 @@ c rb- delete fn_len since commoned
 c     INTEGER IY, M, fn_len, IB, IDUM
       INTEGER IY, M, IB, IDUM, ID
       CHARACTER*200 ofile1 
-      INTEGER IBODY2(DIM_NY,12),IRIGH2(DIM_NY),IDOWN2(12)
       INTEGER IBODY1(DIM_NY,12),IRIGH1(DIM_NY),IDOWN1(12)
       REAL RIGH(DIM_NY)
       REAL DOWN(12),NDOWN1(12)
       REAL PTOT, BODY(DIM_NY,12)
-      REAL BODY_1(DIM_NY,12), BODY_2(DIM_NY,12), BODY_3(DIM_NY,12)
-      REAL RIGH_1(DIM_NY), RIGH_2(DIM_NY), RIGH_3(DIM_NY)
-      REAL DOWN_1(12), DOWN_2(12), DOWN_3(12)
-      REAL PTOT_1, PTOT_2, PTOT_3
+      REAL BODY_1(DIM_NY,12)
+      REAL RIGH_1(DIM_NY)
+      REAL DOWN_1(12)
+      REAL PTOT_1
       REAL AR_AVG, UDEPTH 
 
 
@@ -123,25 +122,33 @@ C---------------------------------------------------------------------------
 
 
 C-----Initialize Project Variables
-         DO 1 IY = 1, NYRS
-         DO 1 M = 1, 12
+       DO 12 IY = 1, NYRS
+         DO 11 M = 1, 12
             IBODY1(IY,M) = 0
- 1          BODY_1(IY,M) = 0.0
+            BODY_1(IY,M) = 0.0
+11       CONTINUE
+12     CONTINUE 
 
          DO 2 IY =  1, NYRS
             IRIGH1(IY)=0
- 2          RIGH_1(IY) = 0.0
+            RIGH_1(IY) = 0.0
+ 2       CONTINUE
 
          DO 3 M = 1, 12
- 3          DOWN_1(M) = 0.0
+           DOWN_1(M) = 0.0
+ 3       CONTINUE 
+          
 
          PTOT_1 = 0.0
          IPTOT1 =0
          DO 500 IB = 1,NBASIN
+            write(0,*) 'Processing IB=', IB, ' of ', NBASIN
+            write(0,*) 'Calling TABLE'
             CALL TABLE(ID,IB,BODY,RIGH,DOWN,PTOT,ITIME)
+            write(0,*) 'Back from TABLE'
 
 C-----Update Project Total
-            DO 530 IY = 1, NYRS
+            DO 531 IY = 1, NYRS
                IF(RIGH(IY) .GT. -998) THEN
                  RIGH_1(IY) = RIGH_1(IY) + RIGH(IY)
                ELSE
@@ -154,6 +161,7 @@ C-----Update Project Total
                  IBODY1(IY,M) = 1
                ENDIF
  530        CONTINUE
+ 531        CONTINUE
 
  500     CONTINUE
 
@@ -161,7 +169,8 @@ C-----Update Project Total
 C-----Calculate project average annual area
       AR_AVG = 0.0
       DO 10 IY = 1, NYRS
- 10      AR_AVG = AR_AVG + PJAREA(IY)
+        AR_AVG = AR_AVG + PJAREA(IY)
+ 10   Continue 
       AR_AVG = AR_AVG/NYRS
 
 C---------------------------------------------------------------------------
@@ -201,6 +210,7 @@ C---------------------------------------------------------------------------
          IDOWN1 = 0
          PTOT_1 = 0
          DO 80 IY = 1, NYRS
+            write(0,*) 'Processing IY=', IY, ' of ', NYRS
             UDEPTH = 0.0
             IF(IRIGH1(IY) .EQ. 1) RIGH_1(IY) = -999
             IF(RIGH_1(IY) .GT. -998) THEN
@@ -256,6 +266,8 @@ C---------------------------------------------------------------------------
 !         ITIME=2
 !         GOTO 5
       ENDIF
+
+      write(0,*) 'At end of PROJ'
 
 
  900  FORMAT(A120)

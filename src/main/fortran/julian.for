@@ -65,7 +65,8 @@ c         m_mon = 4
 
       sum_ = 0
       DO 10 ii = 1,m_mon-1
-  10     sum_ =  sum_ + MONTH(ii)
+        sum_ =  sum_ + MONTH(ii)
+10    continue   
       Julian = sum_ + m_day 
 
       END FUNCTION

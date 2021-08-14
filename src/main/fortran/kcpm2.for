@@ -70,7 +70,7 @@ C-----Local Variable Declaration
             DY2 = KCDAY(CID,II+1)
          ENDIF
          XKCB(IDY) = KCB(CID,II)-(KCB(CID,II)-KCB(CID,II+1))*
-     :	    (DY1-I)/(DY1-DY2)
+     :      (DY1-I)/(DY1-DY2)
  10   CONTINUE   
 
  200  RETURN

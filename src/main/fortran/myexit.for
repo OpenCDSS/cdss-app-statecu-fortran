@@ -49,7 +49,6 @@ C***************************************************************************
 c rb- delete fn_len since commoned
 c      INTEGER fn_len
       INTEGER errndx
-      CHARACTER*200 dfile1
       CHARACTER*100 errmsg(99)
 
       errmsg(1) = 'Scenario Control File is not found!'
@@ -110,7 +109,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
       errmsg(46) = 'File *.wbc problem weather data year' 
       errmsg(47) = 'File *.wbc problem weather data comment' 
       errmsg(48) = 'File *.wbc problem weather data' 
-	  
+
       errmsg(49) = 'File *.wpm problem with sim. years or # basins'
       errmsg(50) = 'File *.wpm simulation years exceed .cmn years'
       errmsg(51) = 'File *.wpm # of basins does not match .cmn # basins'
@@ -151,12 +150,7 @@ c rb- add general message
             write(*,*) 'Stopping - see log file'
             stop 1
       endif
-c rb- do not need index
-c      fn_len = index(dfile,' ')
-c      dfile1 = dfile
-c      dfile1(fn_len:fn_len+4) = '.log'
 
-c      OPEN(UNIT=999,FILE=dfile1)
       IF (errndx.eq.0) then
          WRITE(999,*)' run successful - program ended normally'
          WRITE(*,*)' run successful - program ended normally'
@@ -166,7 +160,7 @@ c      OPEN(UNIT=999,FILE=dfile1)
          WRITE(999,*)'Error ',errndx,'. ->  ',errmsg(errndx)
          WRITE(*,*)'Error ',errndx,'. ->  ',errmsg(errndx)
 c rb- change stop(1) to stop 1
-906	     stop 1
+      stop 1
       endif
 
       END SUBROUTINE

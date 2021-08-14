@@ -77,8 +77,7 @@ C***************************************************************************
       INCLUDE 'xccommon.inc'
 
 C-----Local Variable Declaration
-      INTEGER II,IP,IY,ENDYR,NDX,M1,M2,D1,D2,IB,IRNF(2,12), ENDSN, BEGSN
-      REAL SUM1, SUM2
+      INTEGER IP,IY,ENDYR,NDX,M1,M2,D1,D2,IB,IRNF(2,12), ENDSN, BEGSN
 
 cjhb=&==================================================================
 c     calculate WINTPREC() for ALL months, then zero out afterwards

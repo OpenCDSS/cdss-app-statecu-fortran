@@ -49,8 +49,7 @@ C***************************************************************************
 
       INCLUDE 'gcommon.inc'
 
-      INTEGER i,j,jfrost,JULIAN,ib,keye
-      INTEGER meth
+      INTEGER i,j,jfrost,JULIAN,ib
       CHARACTER*30 CROPN
 Cjhb=&==================================================================
 C-----Use mean monthly temperature for computing frost dates
@@ -77,9 +76,9 @@ Cjhb=&==================================================================
                if (tflg2(key).eq.0) then
                   call fall(j,tmois2(key),jfrost)
                elseif (tflg2(key).eq.1) then
-                  jfrost = t28(ib,j,2)
+                  jfrost = INT(t28(ib,j,2))
                elseif (tflg2(key).eq.2) then
-                  jfrost = t32(ib,j,2)
+                  jfrost = INT(t32(ib,j,2))
                else 
                   call MYEXIT(32) 
                endif
@@ -116,9 +115,9 @@ Cjhb=&==================================================================
                if (tflg1(key).eq.0) then
                   call spring(j,tmois1(key),jfrost)
                elseif (tflg1(key).eq.1) then
-                  jfrost = t28(ib,j,1)
+                  jfrost = INT(t28(ib,j,1))
                elseif (tflg1(key).eq.2) then
-                  jfrost = t32(ib,j,1)
+                  jfrost = INT(t32(ib,j,1))
                else
                   call MYEXIT(33)
                endif
@@ -149,9 +148,9 @@ Cjhb=&==================================================================
                if (tflg1(key).eq.0) then
                   call spring(j,tmois1(key),jfrost)
                elseif (tflg1(key).eq.1) then
-                  jfrost = t28(ib,j,1)
+                  jfrost = INT(t28(ib,j,1))
                elseif (tflg1(key).eq.2) then
-                  jfrost = t32(ib,j,1)
+                  jfrost = INT(t32(ib,j,1))
                else
                   call MYEXIT(34)
                endif
@@ -176,9 +175,9 @@ Cjhb=&==================================================================
                if (tflg2(key).eq.0) then
                  call fall(j,tmois2(key),jfrost)
                elseif (tflg2(key).eq.1) then
-                 jfrost = t28(ib,j,2)
+                 jfrost = INT(t28(ib,j,2))
                elseif (tflg2(key).eq.2) then
-                 jfrost = t32(ib,j,2)
+                 jfrost = INT(t32(ib,j,2))
                else 
                  call MYEXIT(35)   
                endif

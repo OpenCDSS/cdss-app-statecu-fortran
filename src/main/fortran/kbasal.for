@@ -48,14 +48,11 @@ C***************************************************************************
 
 C-----Local Variable Declaration
       CHARACTER*80 remark
-      CHARACTER*200 dfile1
-      CHARACTER*40 NM 
       CHARACTER*30 cropn
 c rb- delete fn_len since commoned
 c      INTEGER NC, ID, I, fn_len, LEN, J
       INTEGER NC, ID, I,CRVLEN, J
 c      INTEGER IERR
-      REAL KCDUM(40,48)
 
 C-----Read crop coefficient file (read from input as kbcfile)
 c      write(*,*)'give me a break...'
@@ -83,8 +80,8 @@ c      IF (IERR.NE.0) CALL MYEXIT(4)
          IF (cropn(1:13) .eq. 'GRASS_PASTURE') CRVLEN = 11  ! grass pasture
 
          DO 22 J=1,CRVLEN
- 22         READ(1313,*,ERR=101) KCDAY(ID,J),KCB(ID,J)
-
+             READ(1313,*,ERR=101) KCDAY(ID,J),KCB(ID,J)
+  22     CONTINUE
  10   CONTINUE
 
       ELSEIF(FLAG1 .EQ. 4) THEN
@@ -98,10 +95,12 @@ c      IF (IERR.NE.0) CALL MYEXIT(4)
  28        CONTINUE
          ELSE 
            DO 24 J=1,4
- 24           READ(1313,*,ERR=101) KCDAY(ID,J)
+              READ(1313,*,ERR=101) KCDAY(ID,J)
+ 24        CONTINUE   
          ENDIF
          DO 25 J=1,3
- 25        READ(1313,*,ERR=101) KCB(ID,J)
+           READ(1313,*,ERR=101) KCB(ID,J)
+ 25      CONTINUE
  20   CONTINUE
 
       ENDIF

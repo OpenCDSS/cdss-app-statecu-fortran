@@ -55,7 +55,6 @@ C-----Local Variable Declaration
       INTEGER l, npart, ip
       INTEGER nbegmo,nbegda,nendmo,nendda
       REAL f, X, re(DIM_NP,13), cu(DIM_NP,13), apdep
-      real*8 testx
 
 C-----------------------------------------------------------------------
 C              compute effective precipitation for each crop default
@@ -67,6 +66,8 @@ C-----------------------------------------------------------------------
             ELSEIF(apdep.GT.0.) THEN
                F=0.531747+0.295164*apdep-0.057697*apdep**2
      :         + 0.003804*apdep**3
+            ELSE
+               F=0.0 
             ENDIF
 
       DO 10 L = 1, 12

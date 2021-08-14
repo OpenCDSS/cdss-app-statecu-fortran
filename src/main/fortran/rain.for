@@ -76,9 +76,9 @@ C-----Effective Precipitation is specified from a factor
          EFFPCP = RNFALL(DOY) * cn(1)
 C-----Effective Precipitation is estimated using NEH Curve number method 
       ELSEIF (RN_XCO.EQ.5) THEN
-        IF (DOY.EQ.1) THEN
-	     AM = 0
-	     ELSEIF (DOY.EQ.2) THEN
+         IF (DOY.EQ.1) THEN
+             AM = 0
+         ELSEIF (DOY.EQ.2) THEN
             AM = RNFALL(1)
          ELSEIF (DOY.EQ.3) THEN
            AM = RNFALL(2)+RNFALL(1)
@@ -95,21 +95,21 @@ C-----Effective Precipitation is estimated using NEH Curve number method
          IF (AM .GE. 2.1)  IAMC = 3
 
 
-	     IF (DOY.GE.5) THEN
-            IF (ET(DOY-1) .GT. 0 .OR. ET(DOY-2) .GT. 0 .OR.
-     :         ET(DOY-3) .GT. 0 .OR. ET(DOY-4) .GT. 0 .OR.
-     :         ET(DOY) .GT. 0)  IAMC = 3
-         ELSEIF (DOY.EQ.4) THEN
+         IF (DOY.GE.5) THEN
+          IF (ET(DOY-1) .GT. 0 .OR. ET(DOY-2) .GT. 0 .OR.
+     :       ET(DOY-3) .GT. 0 .OR. ET(DOY-4) .GT. 0 .OR.
+     :       ET(DOY) .GT. 0)  IAMC = 3
+          ELSEIF (DOY.EQ.4) THEN
             IF (ET(DOY-1) .GT. 0 .OR. ET(DOY-2) .GT. 0 .OR.
      :         ET(DOY-3) .GT. 0 .OR. ET(DOY) .GT. 0)  IAMC = 3
-    	 ELSEIF (DOY.EQ.3) THEN
+          ELSEIF (DOY.EQ.3) THEN
             IF (ET(DOY-1) .GT. 0 .OR. ET(DOY-2) .GT. 0 .OR.
      :         ET(DOY) .GT. 0)  IAMC = 3
-	     ELSEIF (DOY.EQ.2) THEN
+          ELSEIF (DOY.EQ.2) THEN
             IF (ET(DOY-1) .GT. 0 .OR. ET(DOY) .GT. 0)  IAMC = 3
-         ELSE
+          ELSE
             IF (ET(DOY) .GT. 0) IAMC = 3
-         ENDIF
+          ENDIF
 
 
          S = 1000/CN(IAMC) - 10

@@ -64,8 +64,8 @@ C-----Argument Variable Declaration
 C-----Include Global Variables and Data Defaults
       INCLUDE 'gcommon.inc'
 C-----Local Variable Declarations
-      integer :: i,m,j,k,divsupcnt(dim_na,12)
-      real :: divsupavg(dim_na,12), sum, fillvalue
+      integer :: i,m,j,divsupcnt(dim_na,12)
+      real ::  sum, fillvalue
       do i=1,nbasin
         do j=1,12
           select case (divonfly)

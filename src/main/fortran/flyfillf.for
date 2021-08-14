@@ -67,7 +67,7 @@ C-----Include Global Variables and Data Defaults
       INCLUDE 'gcommon.inc'
 C-----Local Variable Declarations
       integer :: i, m, j, t28_cnt(dim_nw,2), t32_cnt(dim_nw,2)
-      integer :: t28_avg(dim_nw,2), t32_avg(dim_nw,2), t28_sum, t32_sum
+!      integer :: t28_sum, t32_sum
       do i=1,n_sta
         do j=1,2 !spring and fall
           t28_sum=0

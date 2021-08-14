@@ -44,7 +44,7 @@ C
 
       INCLUDE 'gcommon.inc'
 
-      INTEGER K, KK
+      INTEGER KK
       CHARACTER*30 CROPN
 
 C-----Get Crop Index

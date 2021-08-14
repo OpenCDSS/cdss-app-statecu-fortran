@@ -34,7 +34,7 @@ C   Calling program : many
 C   Called programs : 
 C   Input arguments :
 C                     LW_NDX - log file warning index - integer
-C                     STR_TOKEN - ID string for keeping sub counts- CHARACTER*24
+C                     STR_TOKEN - ID string for keeping sub counts- CHARACTER*40
 C   Output arguments: none
 C   Assumptions     :
 C   Limitations     :

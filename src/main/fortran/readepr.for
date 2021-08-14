@@ -1,4 +1,4 @@
-c readrcr
+c readepr
 c_________________________________________________________________NoticeStart_
 c StateCU Consumptive Use Model
 c StateCU is a part of Colorado's Decision Support Systems (CDSS)
@@ -18,16 +18,15 @@ c     You should have received a copy of the GNU General Public License
 c     along with StateCU.  If not, see <https://www.gnu.org/licenses/>.
 c_________________________________________________________________NoticeEnd___
 
-      SUBROUTINE READRCR(initflag,filename)
+      SUBROUTINE READEPR(initflag,filename)
 
 C***************************************************************************
 C
-C   Function        : readrcr.for
-C   Author          : Jim Brannon
-C   Date            : December 2011
-C   Purpose         : This reads the RCR data - replacement crop requirement - 
-C                     or PCR data - partial replacement crop requirement - 
-C                     and overwrites the REQT array with the values it finds
+C   Function        : readepr.for
+C   Author          : Erin Wilson
+C   Date            : November 2019
+C   Purpose         : This reads the EPR data - excess effective precipitation
+C                     and overwrites the EXPREC array with the values it finds
 C                     in the file
 C   Calling program : statecu.for 
 C   Called programs : none
@@ -36,6 +35,7 @@ C                                the REQT array with -999 values
 C                                0 - do nothing
 C                                1 - initialize with -999 values
 C                     filename = the name of the file to open and read
+C          Note, currently only option is to completely overwrite (iniflag=1)
 C   Output arguments: none
 C   Assumptions     : the file should be a STM formatted file of monthly data
 C   Limitations     : 
@@ -65,21 +65,10 @@ C initialize the arrays
         do j=1,DIM_NA
           do k=1,DIM_NY
             do i=1,12
-              reqt(j,k,i)=-999.0
-              tmprcr(j,k,i)=-999.0
+              exprec(j,k,i)=-999.0
             enddo
-            reqt(j,k,13)=0.0
-            reqt(j,k,14)=0.0
-          enddo
-        enddo
-      else
-        do j=1,DIM_NA
-          do k=1,DIM_NY
-            do i=1,12
-              tmprcr(j,k,i)=-999.0
-            enddo
-            reqt(j,k,13)=0.0
-            reqt(j,k,14)=0.0
+            exprec(j,k,13)=0.0
+            exprec(j,k,14)=0.0
           enddo
         enddo
       endif
@@ -97,7 +86,7 @@ C all the following code and logic copied from slimit.for
         if(twdid(1:12) .eq. rcridt) then
           itmp2=itmp-nyr1+1
           do 32 j=1,12
-            tmprcr(i,itmp2,j)=temp(j)
+            exprec(i,itmp2,j)=temp(j)
 32        continue
           goto 30
         endif
@@ -114,13 +103,13 @@ C all the following code and logic copied from slimit.for
             if(tmprcr(i,m,j).gt.-999.0)then
               if(idum3 .eq. 'WYR') then
                 if(j .gt. 3) then
-                  reqt(i,m,j-3)=tmprcr(i,m,j)
+                  exprec(i,m,j-3)=tmpepr(i,m,j)
                 else
                   if(m .eq. 1) goto 191
-                  reqt(i,m-1,j+9)=tmprcr(i,m,j)
+                  exprec(i,m-1,j+9)=tmpepr(i,m,j)
                 endif
               else
-                reqt(i,m,j)=tmprcr(i,m,j)
+                exprec(i,m,j)=tmpepr(i,m,j)
               endif
             endif
 190       continue

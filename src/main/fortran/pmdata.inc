@@ -131,6 +131,12 @@ Cjhb=&==================================================================
       character(len=*),parameter :: Token31="pcr"
       character(len=*),parameter :: 
      & Token71="PartialReplacement_Crop_Requirement"
+C ew
+C ew  The excess effective precipitation file was added during ArkDSS
+C ew
+      character(len=*),parameter :: Token32="epr"
+      character(len=*),parameter :: 
+     & Token72="Excess_Effective_Precipitation"
 C0000000011111111112222222222333333333344444444445555555555666666666677777777778
 C2345678901234567890123456789012345678901234567890123456789012345678901234567890
 Cjhb=&==================================================================

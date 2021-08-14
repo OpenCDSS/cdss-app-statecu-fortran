@@ -132,8 +132,8 @@ C-----Local Variable Declarations
         enddo
       enddo
 
-        bid=''
-        bname=''
+        bid='     '
+        bname='                        '
         do j=1,dim_ny
           do k=1,12
             btarea(j,k)=0.0

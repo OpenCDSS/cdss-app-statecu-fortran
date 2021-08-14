@@ -18,7 +18,7 @@ c     You should have received a copy of the GNU General Public License
 c     along with StateCU.  If not, see <https://www.gnu.org/licenses/>.
 c_________________________________________________________________NoticeEnd___
 
-      SUBROUTINE CALPCROP(IB,cugrass)
+      SUBROUTINE CALPCROP(IB)
 
 C***************************************************************************
 C
@@ -56,19 +56,19 @@ C***************************************************************************
 C-----------------------------------------------------------------------
 C-----Local Variable Declaration
 C-----------------------------------------------------------------------
-      INTEGER L, K, IP , julian, IB, key, IDUM
-      INTEGER nbeg, nend
+      INTEGER L, K, IP , IB, key, IDUM
+      INTEGER nbeg, nend,IMISYR(DIM_NY)
       INTEGER npart(DIM_NP), icrop
-      INTEGER ddiff,nbegmo(DIM_NP),nbegda(DIM_NP)
+      INTEGER nbegmo(DIM_NP),nbegda(DIM_NP)
       INTEGER nendmo(DIM_NP),nendda(DIM_NP)
       REAL re2(DIM_NP,13)
       REAL re(DIM_NP,13),cu(DIM_NP,13),cuirr(DIM_NP,13)
-      REAL scapasp
-      REAL scap(DIM_NP),cugrass(12)
+      REAL scapasp,area1
+      REAL scap(DIM_NP),grs
       REAL xxf(DIM_NP,12),xxkt(DIM_NP,12),xxkc(DIM_NP,12)
       REAL ttemps(DIM_NP),ttempf(DIM_NP),ddays(DIM_NP)
       REAL ddayf(DIM_NP)
-      character*12 twdid, cropid
+      character*12 cropid
       character*40 method(DIM_NC)
       dimension icf(5)
       character rec5*5
@@ -93,8 +93,8 @@ C--------Get Growing Season (Begin and End Dates)
         DO 800 IP = 1, nparce(IB,nyr)
           key = bkey(IB,IP,nyr)
           icrop = ncrop(key)
-          cropid=cpname(icrop)
-          call lw_update(64,cpname(icrop))
+          cropid=cpname(icrop)(1:12)
+          call lw_update(64,cropid)
           nbeg = jbeg(IP,nyr)
           nend = jend(IP,nyr)
 C----------------------------------------------------------------------------
@@ -158,7 +158,11 @@ C-----------------------------------------------------------------------
                aadj=(0.029*(belev(ib)-4429)/1000)+1
             elseif(l.eq.6 .or. l.eq.7 .or. l.eq.8) then
                aadj=(0.023*(belev(ib)-4429)/1000)+1
+            else
+               aadj=0
             endif
+          else
+            aadj=0  
           endif
           !make sure elevation adjustment does not go below 1.0
           ! in other words - apply adjustment when elevation is higher than 4429', but not when it is less.
@@ -175,7 +179,7 @@ C-----------------------------------------------------------------------
          do l=1,12
             cutot=cutot+cu(ip,l)
          enddo
-  662    format(i4,3x,13(f8.2))
+
 C--------Assign variables used for generating *.obc output file
          ttemps(IP) = temps
          ddays(IP) = days
@@ -213,11 +217,11 @@ c ew- if any months of precip are missing, do not calculate CU for year
 c
          do l=1,12
           if(re(ip,l) .lt. -998) then
-             iflag=1
+               IMISYR(ip)=1
           endif
          enddo
          do l=1,12
-           if(iflag .eq. 1) then
+           if(IMISYR(ip) .eq. 1) then
              re(ip,l) = -999
            endif
          enddo
@@ -251,12 +255,12 @@ c            write(999,*)'Rick', IB, cropid, nyr, l, re(ip,l)   'special output 
               if(rec5.eq.subname(if1)) then
                 icf(if1)=1
                 if(cuirr(ip,l).lt.-1.0)then
-                  grass = -999.0
+                  grs = -999.0
                 else
-                  grass = cuirr(ip,l)*AREA(IB,IP,nyr)/12
+                  grs = cuirr(ip,l)*AREA(IB,IP,nyr)/12
                 endif
                 area1=area(ib,ip,nyr)
-                write(104,'(i5, 20f8.2)') if1, grass, area1
+                write(104,'(i5, 2f8.2)') if1, grs, area1
               endif
             end do
 
@@ -319,10 +323,6 @@ C--------Print Results
             WRITE(3,908) QUOTE,CPNAME(key),QUOTE,QUOTE,method(key),
      :         QUOTE,QUOTE,NYR1+nyr-1,QUOTE 
             WRITE(3,906) DLINE
-c            IF(NBEGMO(IP) .EQ. 1) THEN
-c               WRITE(3,912) 
-c               GOTO 102
-c            ENDIF
             WRITE(3,907) (QUOTE, IDUM=1,46)
             WRITE(3,906) SLINE
 
@@ -341,11 +341,6 @@ c            endif
             goto 106
             endif
             DO 101 L = nbegmo(IP), nendmo(IP)
-c               if(nbegmo(ip) .eq. 1) then
-c                  nendmo(ip)=1
-c                  WRITE(3,905) QUOTE
-c                  goto 105
-c               endif
                IF (L.EQ.nbegmo(IP)) THEN
                   WRITE(3,901) QUOTE,AMN(L),nbegda(IP),QUOTE,100.0*
      :          npart(IP)/
@@ -363,7 +358,7 @@ c               endif
      :            xxf(IP,L),xxkt(IP,L),xxkc(IP,L),xxkt(IP,L)*
      :            xxkc(IP,L),cu(IP,L),re(IP,L),cuirr(IP,L)
                ENDIF   
-105        IF(CU(IP,L) .LT. -998) THEN
+           IF(CU(IP,L) .LT. -998) THEN
               ETTOT(IB,NYR,L) = -999
            ELSE
            ETTOT(IB,NYR,L)=ETTOT(IB,NYR,L)+CU(IP,L)*AREA(IB,IP,nyr)/12
@@ -404,11 +399,8 @@ c               endif
   908 FORMAT(A1,A30,A1,A1,'METHOD=',A35,A1,A1,'Year=',
      :I4,A1)
   901 FORMAT(A1,A3,I2,A1,F8.1,9F8.2)
-  905 FORMAT(A1,'n/a',3x,'  -999.0',9(' -999.00'))
   902 FORMAT(A1,A3,A1,2x,'   100.0',9F8.2)
   904 FORMAT(A1,'Season Total',A1,14A1,35x,3F8.2)
-  912 FORMAT(1X,'Missing Climate Data, CU Not Calculated',47(" ")/
-     : 87(" ")/87(" "))
 
       RETURN
       END

@@ -42,20 +42,16 @@ C***************************************************************************
 
       INCLUDE 'gcommon.inc'
 c  delete fn_len since now commoned
-c     INTEGER I,J,IB,IY,fn_len,NBAS,YR1,YR2,IDUM
-      INTEGER I,J,IB,IY,NBAS,YR1,YR2,IDUM
-      INTEGER IERR,ICNT(12)
+      INTEGER I,J,IB
+      INTEGER ICNT(12)
       REAL WSUM(12), WSUMM
-      REAL GCEFF(DIM_NY)
       CHARACTER*40 wdid
-      CHARACTER*80 REMARK
-      CHARACTER*200 dfile1
 
 C-----Write water supply information into the summary file
       IF (SOUT.EQ.0) THEN
          IF (IB.EQ.1) THEN
             WRITE(8,903)
-	    WRITE(8,902) QUOTE,QUOTE
+            WRITE(8,902) QUOTE,QUOTE
             WRITE(8,915) DLLINE
             WRITE(8,914) 
             WRITE(8,915) SLLINE
@@ -63,14 +59,16 @@ C-----Write water supply information into the summary file
 
          DO 174 I = 1, 12
             ICNT(I) = 0
- 174        WSUM(I) = 0.0
+            WSUM(I) = 0.0
+ 174     CONTINUE
 
          DO 175 J = 1, NYRS
-         DO 175 I = 1, 12
-            IF(DIVSUP(IB,J,I) .GT. -998) THEN
-               WSUM(I)=WSUM(I)+DIVSUP(IB,J,I)
-               ICNT(I)=ICNT(I)+1
-            ENDIF
+           DO 17 I = 1, 12
+              IF(DIVSUP(IB,J,I) .GT. -998) THEN
+                 WSUM(I)=WSUM(I)+DIVSUP(IB,J,I)
+                 ICNT(I)=ICNT(I)+1
+              ENDIF
+ 17        CONTINUE  
  175     CONTINUE
          DO 176 I = 1, 12
             IF(ICNT(I) .EQ. 0) THEN

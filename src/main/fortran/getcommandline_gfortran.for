@@ -30,22 +30,8 @@ c_________________________________________________________________NoticeEnd___
 ! Local variables
 !
       CHARACTER(72) :: cmd
-      INTEGER :: err , i , l
-      INTEGER :: IPXFARGC
-!
-!*** End of declarations rewritten by SPAG
-!
-!-IF INTEL
-!      Cmdln = ''
-!      DO i = 1 , IPXFARGC()
-!         CALL PXFGETARG(i,cmd,l,err)
-!         IF ( i==1 ) THEN
-!            Cmdln = cmd
-!         ELSE
-!            Cmdln = TRIM(Cmdln)//' '//cmd
-!         ENDIF
-!      ENDDO
-!-IF GFORTRAN
+      INTEGER :: i
+
       Cmdln = ''
       DO i = 1 , IARGC()
          CALL GETARG(i,cmd)

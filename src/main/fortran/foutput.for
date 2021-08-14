@@ -18,7 +18,7 @@ c     You should have received a copy of the GNU General Public License
 c     along with StateCU.  If not, see <https://www.gnu.org/licenses/>.
 c_________________________________________________________________NoticeEnd___
 
-      SUBROUTINE FOUTPUT(IP,DOY,CID,incst,IB,IY,re)
+      SUBROUTINE FOUTPUT(IP,DOY,IB,IY,re)
 
 C***************************************************************************
 C
@@ -33,8 +33,6 @@ C                     should be generated or not.
 C   Calling program : proto.f
 C   Called programs : none
 C   Input arguments : ip    = current parcel 
-C                     cid   = crop index
-C                     incst = daily increase in storage due to root growth 
 C                     IB    = current sub-basin
 C   Output arguments: none
 C   Assumptions     :
@@ -56,10 +54,9 @@ C***************************************************************************
 C-----Local Variable Declaration
       CHARACTER*21 STRG
       INTEGER IB, IDUM ,DOY
-      INTEGER IP, IC, CID, II
+      INTEGER IP, IC, II
       REAL re(DIM_NP,13)
-      REAL SUM1, SUM2, SUM3, SUM4, incst, inctot
-      REAL SMTEMP
+      REAL SUM1, SUM2, SUM3, SUM4, inctot
 
 c      do i=1, dim_np
 c        do j=1, 13
@@ -105,9 +102,9 @@ c      ENDIF
 C-----Initialize Tabular Monthly Values
       IF (DOY.EQ.JSTR) THEN
          DO 10 II=1,12
-	    PNM_ET(II) = 0.0
-    	    PNM_QR(II) = 0.0
-	    pnm_er(II) = 0.0
+           PNM_ET(II) = 0.0
+           PNM_QR(II) = 0.0
+           pnm_er(II) = 0.0
  10      CONTINUE
       ENDIF
 
@@ -136,7 +133,7 @@ c           prevent monthly eff precip from being greater than monthly ET
          WRITE(9,906)
             IF (IDAY.NE.1) THEN
                WRITE(9,907) QUOTE,REFTOT(IY,IMON),
-     :	       QUOTE,QUOTE,QUOTE,QUOTE,QUOTE,PNM_ET(IMON),
+     :         QUOTE,QUOTE,QUOTE,QUOTE,QUOTE,PNM_ET(IMON),
      :            PNM_ER(IMON),PNM_QR(IMON)
             ELSE
                WRITE(9,907) QUOTE,REFTOT(IY,IMON),

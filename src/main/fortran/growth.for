@@ -66,8 +66,8 @@ Cjhb=&==================================================================
       CROPN=CPNAME(CID)
 Cjhb=&==================================================================
       DO 121  I = 1,366
- 121     XKCB(I) = 0.0
-
+         XKCB(I) = 0.0
+ 121  CONTINUE
 
 C-----Calculate daily mean crop coefficients
 Cjhb=&==================================================================
@@ -112,10 +112,8 @@ C--------peak to harvest (days after peak)
          NLEN = JSTP-JSTR+1-GDATE5(KEY)
          DPASS = GDATE5(KEY)
          CALL KCPM2(CID,NLEN,12,DPASS)
-	    
+
       ENDIF
 
-
-
- 200  RETURN
+      RETURN
       END

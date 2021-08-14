@@ -39,12 +39,11 @@ C***************************************************************************
 
 C-----Argument Variable Declaration
       INTEGER :: IYOUNIT
-      character*60 cuopt
-      character*5 ioptcar
+      character*90 cuopt
 C-----Include Global Variables and Data Defaults
       INCLUDE 'gcommon.inc'
 C-----Local Variable Declarations
-      integer :: i, j
+      integer :: i
 
       write(IYOUNIT,*)' '
       write(IYOUNIT,*)' '
@@ -223,7 +222,6 @@ c imiss option
       
       ENDIF   
 
-100   format(A42,A26)  
 900   format(A120)
 950   continue
       end
