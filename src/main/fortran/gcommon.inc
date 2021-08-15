@@ -152,11 +152,12 @@ c_________________________________________________________________NoticeEnd___
       INTEGER  DIM_NA, DIM_NP, DIM_NY, DIM_NC, DIM_NW, DIM_CH
       INTEGER  DIM_SUB, DIM_NSB, DIM_NLW, DIM_NLWS
       CHARACTER*16 RDATE
-      REAL VERS
-! grb new version number 
-      PARAMETER (VERS = 13.12)
-      PARAMETER (RDATE = '    DUMB        ')
-!      PARAMETER (RDATE = '11/14/18 06:00PM')
+      CHARACTER*12 VERS
+
+      ! Use semantic version number.
+      PARAMETER (VERS = '14.0.0')
+      PARAMETER (RDATE = '08/13/21')
+
 !     jhb 07/10
       PARAMETER (DIM_NA = 1200)
       PARAMETER (DIM_NP = 50)

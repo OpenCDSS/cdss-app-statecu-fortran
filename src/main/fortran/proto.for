@@ -647,7 +647,7 @@ C
 C---- End some other loop
 C
 
-        continue
+C        continue
 
         do 115 l=1,12
            REQT(IB,IY,L) = REQT(IB,IY,L) / 12.0

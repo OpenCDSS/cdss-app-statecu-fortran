@@ -73,44 +73,43 @@ c      INCLUDE 'gdata.inc'
 
 C-----Local Variable Declarations
       INTEGER IERR
-      INTEGER I, J, K, IYR
+      INTEGER I, J, K
       character*200 gwfile
-      CHARACTER*200 dfile1,argmet,prfile,ddcfile,croprep,setout
+      CHARACTER*200 ddcfile
       INTEGER KK,iacre(dim_na)
-      integer(2) nbuff,statln,ndlyt
-      character*127 command,tchar,tdesc
-      REAL tlat,tttwws,tttwrs,rept4,rept5
+      integer(2) nbuff
+      character*127 command
+      REAL tlat
       real ttacre,tpct(20),tcdsarea(20),tcdssum
-      real t21,t22,t33(12),tpct1
-      real rlat(dim_na),tlo,tel,trlatd,relev(dim_na)
+      real tpct1
+      real rlat(dim_na),relev(dim_na)
       real smcar
       character*200 file1,file2,fline
       Character*60 ext
       character*6 fd1,fd2,fd3,fd4
       character*12 twdid,tid,tempid
       character*12 cid(900)
-      character*20 chtest
       character*30 cropn
       character*30 TMPSTR1, TMPSTR2
       character*24 tname
-      character*10 tcounty,rept1,rept3,tid2
-      character*40 tbasin,line,fstring
+      character*10 tcounty
+      character*40 tbasin,fstring,forty
       character*3 idum3
 Cjhb=&==================================================================
       character*40 OptArgs
-      character*9 celev
 Cjhb=&==================================================================
-      integer thuc,tyr,tyr1,ptyr,ifound,if1,ttyr
-      integer tread,ttcrop,istart,tncrop,tnparce
-      integer t1,t2,t3,t4,t5,t6,t7,t8,iloca(7),rept2,rept6
+      integer thuc,tyr,tyr1,ptyr,if1,ttyr
+      integer tncrop
+      integer t1,t2,t3,t4,t5,t6,t7,t8
       INTEGER tbkey(20),T28_1,T28_2,T32_1,T32_2,ttypout
-      integer pyr1,pyr2,i1(DIM_NA,DIM_NY),i2(DIM_NA,DIM_NY)
-      integer i3(DIM_NA,DIM_NY), i4(DIM_NA,DIM_NY)
+!      integer pyr1,pyr2,i1(DIM_NA,DIM_NY),i2(DIM_NA,DIM_NY)
+!      integer i3(DIM_NA,DIM_NY), i4(DIM_NA,DIM_NY)
+      integer pyr1,pyr2
+
       character*100 theCWD
       integer(4) istat, itmp
       logical bUseAcreage
       integer ArgCount
-      integer numch
 
       CALL DATE_AND_TIME (CURDATE, CURTIME)
       nbuff=1
@@ -181,8 +180,7 @@ C----------------------------------------------------------------------------
       logfile(fn_len:fn_len+4)='.log'
       idra=0
       ipdy=0
-      OPEN (UNIT=999,FILE=logfile,STATUS='unknown',ACTION='write')
-      write(0,*) 'Opened log file: ', logfile
+      OPEN (UNIT=999,FILE=logfile)
       ISTAT = GETCWD (theCWD)
       IF (ISTAT == 0) write (0,*) 'Current directory is ',theCWD
       open (unit=25,file=rcufile,status='old',err=945)
@@ -1333,8 +1331,7 @@ Cjhb=&==================================================================
       write(999,*) 'Reading Crop Characteristics File:  ', cchfile
       open(unit=31,file=cchfile,status='old',iostat=ierr)
       call skipn(31)
-Cjhb=&==================================================================
-c500   read(31,929,end=505) cropn
+
 500   read(31,*,end=505) cropn
 Cjhb=&==================================================================
 C     replace the following
@@ -1357,9 +1354,7 @@ Cjhb=&==================================================================
 c     IF (k.EQ.1) THEN         ! alfalfa
       IF (cropn(1:7).EQ.'ALFALFA') THEN         ! alfalfa
 Cjhb=&==================================================================
-c         READ(31,936,End=505) cpname(k),CKEY(K),GDATE1(K),GDATE2(K),
           READ(31,*,End=505) cpname(k),CKEY(K),GDATE1(K),GDATE2(K),
-Cjhb=&==================================================================
      :      GDATE3(K),GDATE4(K),GDATE5(K),GDATES(K),TMOIS1(K),
      :      TMOIS2(K),MAD(K),IRZ(K),FRZ(K),AWC(K),APD(K),TFLG1(K),
      :      TFLG2(K),CUT2(K),CUT3(K)
@@ -1387,10 +1382,7 @@ Cjhb=&==================================================================
 c          k=ksave
 Cjhb=&==================================================================
       ELSE
-Cjhb=&==================================================================
-c         READ(31,936,End=505) cpname(k),CKEY(K),GDATE1(K),GDATE2(K),
           READ(31,*,End=505) cpname(k),CKEY(K),GDATE1(K),GDATE2(K),
-Cjhb=&==================================================================
      :      GDATE3(K),GDATE4(K),GDATE5(K),GDATES(K),TMOIS1(K),
      :      TMOIS2(K),MAD(K),IRZ(K),FRZ(K),AWC(K),APD(K),TFLG1(K),
      :      TFLG2(K)
@@ -1409,7 +1401,7 @@ Cjhb=&==================================================================
       n_crps=k
 c
 c
-510    if(isuply .gt. 0) then 
+       if(isuply .gt. 0) then 
          write(*,*) 'Reading Water Supply File:  ', ddhfile
          write(999,*) 'Reading Water Supply File:  ', ddhfile
          call slimit
@@ -1449,7 +1441,6 @@ c
 Cjhb=&==================================================================
 C     change to unformatted read
 Cjhb=&==================================================================
-C515   READ(32,935,End=570) tyr,tid,ttacre,tncrop
 515   READ(32,*,End=570) tyr,tid,ttacre,tncrop
 Cjhb=&==================================================================
 c     reset any negative acreages to 0
@@ -1470,8 +1461,6 @@ C     11/13/2007 change to try to read the 3rd field on the record - the acreage
 C                set acreage to -999. and see if it gets changed
 C                if not, use the percentage
 Cjhb=&==================================================================
-C     READ(32,942,END=530) cropn,tpct(k1)
-c      READ(32,*,END=530) cropn,tpct(k1)
       READ(32,'(A200)',END=530)fline
       call CountArgs(fline,ArgCount)
       select case (ArgCount)
@@ -1514,8 +1503,10 @@ Cjhb=&==================================================================
 520   CONTINUE
       if (tyr.lt.nyr1.or.tyr.gt.nyr2) goto 515
 530   do 565 j1=1,nbasin !loop through structures to find the one that matches
-         twdid=bas_id(j1) 
-         if(twdid(1:12).eq.tid) then !found it
+C         
+         forty=bas_id(j1)  
+         twdid=forty(1:12)
+         if(twdid.eq.tid) then !found it
            if(bUseAcreage)then !use acreage values
              iacre(j1) = 1
              !check sum of acreages against total
@@ -1560,7 +1551,7 @@ c                sum of crop %s are far off enough from 100% to warrant a warnin
 550            continue
              endif
 551          tyr1=tyr-nyr1+1
-555          do 560 j2=1,tncrop
+             do 560 j2=1,tncrop
                bkey(j1,j2,tyr1)=tbkey(j2)
                if(iclim .eq. 1) then
                  area(j1,j2,tyr1)=tpct(j2)*ttacre
@@ -1577,7 +1568,8 @@ c                sum of crop %s are far off enough from 100% to warrant a warnin
       
       do j1=1,nbasin
         if(iacre(j1) .eq. 0) then
-          twdid=bas_id(j1)
+          forty=bas_id(j1) 
+          twdid=forty(1:12)
           call lw_update(61,'bas_id(j1)')
           do j2=1,nyrs
              nparce(j1,j2)=0
@@ -1603,10 +1595,10 @@ c
           t28(ib,i,2) = 0
           t32(ib,i,1) = 0
           t32(ib,i,2) = 0
-         i1(ib,i)=0
-         i2(ib,i)=0
-         i3(ib,i)=0
-         i4(ib,i)=0
+         i11(ib,i)=0
+         i22(ib,i)=0
+         i33(ib,i)=0
+         i44(ib,i)=0
 601     continue
 600   continue
       itempf=0
@@ -1691,22 +1683,22 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
              if(T28_1.gt. -998) then
                T28(ib,ttyr,1) = T28(ib,ttyr,1) + WWS(IB,I) * T28_1
              elseif(wws(ib,i) .gt. 0) then
-               i1(ib,ttyr)=1
+               i11(ib,ttyr)=1
              endif
              if(T28_2.gt. -998) then
                T28(ib,ttyr,2) = T28(ib,ttyr,2) + WWS(IB,I) * T28_2
              elseif(wws(ib,i) .gt. 0) then
-               i2(ib,ttyr)=1
+               i22(ib,ttyr)=1
              endif
              if(T32_1.gt. -998) then
                T32(ib,ttyr,1) = T32(ib,ttyr,1) + WWS(IB,I) * T32_1
              elseif(wws(ib,i) .gt. 0) then
-               i3(ib,ttyr)=1
+               i33(ib,ttyr)=1
              endif
              if(T32_2.gt. -998) then
                T32(ib,ttyr,2) = T32(ib,ttyr,2) + WWS(IB,I) * T32_2
              elseif(wws(ib,i) .gt. 0) then
-               i4(ib,ttyr)=1
+               i44(ib,ttyr)=1
              endif
 610      continue
          goto 605
@@ -1727,10 +1719,10 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
          
          do 625 i=1,nyrs
            do 624 ib=1,nbasin
-             if(i1(ib,i) .eq. 1) T28(ib,i,1)=-999
-             if(i2(ib,i) .eq. 1) T28(ib,i,2)=-999
-             if(i3(ib,i) .eq. 1) T32(ib,i,1)=-999
-             if(i4(ib,i) .eq. 1) T32(ib,i,2)=-999
+             if(i11(ib,i) .eq. 1) T28(ib,i,1)=-999
+             if(i22(ib,i) .eq. 1) T28(ib,i,2)=-999
+             if(i33(ib,i) .eq. 1) T32(ib,i,1)=-999
+             if(i44(ib,i) .eq. 1) T32(ib,i,2)=-999
 624        continue
 625      continue
 
@@ -1900,20 +1892,14 @@ c       operate a presimulation to initialize soil moisture  grb 5-04-00
 Cjhb &==================================================================
       write(0,*) 'Writing consumptive use summary: '
       write(999,*) 'Writing consumptive use summary '
-      write(0,*) 'Calling PROJ'
-      write(999,*) 'Calling PROJ'
       CALL PROJ
-      write(0,*) 'Back from PROJ'
-      write(999,*) 'Back from PROJ'
 
 C-----Include water supply in input summary file
-      write(999,*) 'Calling WSUPPLY'
        IF (ISUPLY.GE.1) THEN
          DO 740 I=1,NBASIN
            CALL WSUPPLY(I)
 740      continue
        ENDIF
-      write(999,*) 'Back from WSUPPLY'
 
 c rb- create statemod (.ddc) file of output
       if (ddcsw.ge.1) then           
@@ -1989,45 +1975,18 @@ C-----Read error exit calls and format statements
 
 816   format(a12,f6.0,f9.0,56x,2f6.0)
 900   FORMAT(A120)
-901   FORMAT(A40)
-902   FORMAT(I2,A20)
-903   FORMAT(I3,A20,A15)
-905   format (a40)
 906   format(a12,f6.0,f9.0,2x,a20,a8,2x,a24,i4,f8.0)
 907   format(6x,i4,11x,i4,7x,a3)
-908   FORMAT('StateCU Version ', f5.2,2x,a16)
+908   FORMAT('StateCU Version ', a12,2x,a16)
 909   CALL MYEXIT(7)
 910   format(i4,1x,a12)
 912   CALL MYEXIT(15)
 913   CALL MYEXIT(18)
-914   CALL MYEXIT(20)
-915   format(i2,6x,f5.3,18x,a10,1x,i8)
-916   format(a12,f6.0,f9.0,2x,a20,a8,2x,a20)
-917   format(a12,1x,f7.0,16x,a10,i8,1x,f5.0,2x,f5.0)       
 918   CALL MYEXIT(21)
-919   format(a12,4x,i2)
-920   format(48x,f8.0,i8)
-921   format(a12,1x,i5)
-922   format(1x,i8,1x,a12,1x,i2,10(1x,a20,f6.0))
-923   FORMAT(A12, A24)        
 Cjhb=&==================================================================
 C924   FORMAT(a12, f6.0, f9.0)
 924   FORMAT(a12, f6.0, f9.0, a40)
 Cjhb=&==================================================================
-925   FORMAT(1X,'warning- Structure ', A12,' has a demsrc of '
-     :           , I3, ' and a DemCode of ',I3,' and an',/,
-     :           ' area of ', F8.1,'. This is inconsistent.')
-927   format('warning: Default crop types used for structure ',a12)
-928   format('No default crop mix found for structure ',a12)
-929   format(a20)
-931   format(i8,i4)
-932   format(12x,12f8.0)
-933   format(a12)
-934   format(4x,A20,F10.0)
-935   format(i4,1x,a12,8x,F10.0,i10)
-936   format(a20,1x,i2,2x,i2,1x,i2,2x,i2,2x,i2,2x,i4,1x,i4,1x,f3.0,1x,
-     :  f3.0,1x,f3.0,1x,f4.0,1x,f4.0,1x,f4.0,1x,f4.0,1x,i2,1x,i2,1x,i3,
-     :  1x,i3)   
 937   FORMAT('# File of statemod formatted CU results generated by',
      : ' run-cu',54(" "))
 938   FORMAT(I5,A1,I4,A5,I5,A1,I4,A5,A5,78(" "))
@@ -2035,14 +1994,10 @@ Cjhb=&==================================================================
 940   FORMAT('# File of statemod formatted ground water pumping results
      : generated by StateCU',34(" "))
 Cjhb=&==================================================================
-C942   format(5x,a20,f10.0)
-942   format(5x,a30,f10.0)
-Cjhb=&==================================================================
 946   format(' Warning: The crop percentages do not add up to 1.000 for 
      :structure ',a12,'(total percentage= ', f5.3,'),',/, '   Adjusting 
      :crop types proportionally so total = 1.000')
 977   format(i4,1x,a12,2x,a6,3(2x,a6))
-999   FORMAT(1x,'program is running...')
 945   WRITE(*,*) 'Response file not found.  Exiting program'
       WRITE(999,*) 'Response file not found.  Exiting program'
       close(999)
