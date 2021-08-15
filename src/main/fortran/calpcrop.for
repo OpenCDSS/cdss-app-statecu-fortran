@@ -68,7 +68,7 @@ C-----------------------------------------------------------------------
       REAL xxf(DIM_NP,12),xxkt(DIM_NP,12),xxkc(DIM_NP,12)
       REAL ttemps(DIM_NP),ttempf(DIM_NP),ddays(DIM_NP)
       REAL ddayf(DIM_NP)
-      character*12 cropid
+      character*30 cropid
       character*40 method(DIM_NC)
       dimension icf(5)
       character rec5*5
@@ -93,8 +93,8 @@ C--------Get Growing Season (Begin and End Dates)
         DO 800 IP = 1, nparce(IB,nyr)
           key = bkey(IB,IP,nyr)
           icrop = ncrop(key)
-          cropid=cpname(icrop)(1:12)
-          call lw_update(64,cropid)
+          cropid=cpname(icrop)
+          call lw_update(64,cpname(icrop))
           nbeg = jbeg(IP,nyr)
           nend = jend(IP,nyr)
 C----------------------------------------------------------------------------
@@ -144,13 +144,13 @@ c  emw 8/24/04 add high altitude adjustment capabilities
 c  ktsw(icrop) = 0 SCS Modified, = 1 Original, = 2 modified w/elev
 c   ktsw (icrop ) = 3 original w/elev, 4 pochop
 C-----------------------------------------------------------------------
+       
+         aadj=0.0
          if(ktsw(icrop).eq.0 .or. ktsw(icrop).eq.1) then 
             aadj=1.0
          elseif(ktsw(icrop).eq.2 .or. ktsw(icrop).eq.3) then
             aadj=(0.10*(belev(ib)*fT_M)/1000)+1
          endif
-
-
          DO 660 L=1,12
           !add Pochop elevation adjustment for bluegrass
           if(ktsw(icrop).eq.4) then
@@ -161,14 +161,13 @@ C-----------------------------------------------------------------------
             else
                aadj=0
             endif
-          else
-            aadj=0  
           endif
           !make sure elevation adjustment does not go below 1.0
           ! in other words - apply adjustment when elevation is higher than 4429', but not when it is less.
           if (aadj .lt. 1.0) then
             aadj=1.0
           endif
+
           if(xkt(L) .gt. -998) then
             cu(IP,L) = xf(L)*xkt(L)*xkc(L)*aadj
           else
@@ -188,7 +187,7 @@ C--------Assign variables used for generating *.obc output file
          DO 559 L=1,12
             xxf(IP,L) = xf(L)
             xxkt(IP,L) = xkt(L)
-            xxkc(IP,L) = xkc(L)
+            xxkc(IP,L) = xkc(L)*aadj
   559    CONTINUE
 
 C-----------------------------------------------------------------------
@@ -210,11 +209,10 @@ C--------initialize totals to zero
          icufl2 = 0
          iflag=0
 
-
-
 c
 c ew- if any months of precip are missing, do not calculate CU for year
 c
+         IMISYR(ip)=0
          do l=1,12
           if(re(ip,l) .lt. -998) then
                IMISYR(ip)=1

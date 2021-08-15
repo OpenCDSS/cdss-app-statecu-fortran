@@ -96,7 +96,7 @@ C-----open output (obcfile) file
       OPEN (UNIT=3,FILE=ofile1,STATUS='UNKNOWN')
 c jhb add header lines to OBC output file
       write(3,1108)vers, rdate
-1108  FORMAT('StateCU Version ', f5.2,2x,a16)
+1108  FORMAT('StateCU Version ', a12,2x,a16)
       write(3,1109)dfile
 1109  FORMAT('Scenario name: ', a200)
       write(3,1110)CURDATE(5:6),CURDATE(7:8),CURDATE(1:4),

@@ -93,7 +93,7 @@ c          7/2008 change iwr to cir to prevent conflict with statemod file name.
           OPEN (UNIT=10,FILE=ofile1,STATUS='UNKNOWN')
 c jhb add header lines to IWR output file
           write(10,1108)vers, rdate
-1108      FORMAT('StateCU Version ', f5.2,2x,a16)
+1108      FORMAT('StateCU Version ', a12,2x,a16)
           write(10,1109)dfile
 1109      FORMAT('Scenario name: ', a200)
           write(10,1110)CURDATE(5:6),CURDATE(7:8),CURDATE(1:4),
@@ -142,10 +142,7 @@ C-----Initialize Project Variables
          PTOT_1 = 0.0
          IPTOT1 =0
          DO 500 IB = 1,NBASIN
-            write(0,*) 'Processing IB=', IB, ' of ', NBASIN
-            write(0,*) 'Calling TABLE'
             CALL TABLE(ID,IB,BODY,RIGH,DOWN,PTOT,ITIME)
-            write(0,*) 'Back from TABLE'
 
 C-----Update Project Total
             DO 531 IY = 1, NYRS
@@ -210,7 +207,6 @@ C---------------------------------------------------------------------------
          IDOWN1 = 0
          PTOT_1 = 0
          DO 80 IY = 1, NYRS
-            write(0,*) 'Processing IY=', IY, ' of ', NYRS
             UDEPTH = 0.0
             IF(IRIGH1(IY) .EQ. 1) RIGH_1(IY) = -999
             IF(RIGH_1(IY) .GT. -998) THEN
@@ -238,12 +234,12 @@ C---------------------------------------------------------------------------
  80      CONTINUE
 
          UDEPTH = 0.0
-         IF (AR_AVG.NE.0) UDEPTH = PTOT_1/IPTOT1/AR_AVG
          WRITE(10,900) SLLINE
          IF(IPTOT1 .EQ. 0) THEN
             TTOT1=-999
             UDEPTH=-999
          ELSE
+            IF (AR_AVG.NE.0) UDEPTH = PTOT_1/IPTOT1/AR_AVG
             TTOT1=PTOT_1/IPTOT1
          ENDIF
          DO 81 M=1,12
@@ -266,8 +262,6 @@ C---------------------------------------------------------------------------
 !         ITIME=2
 !         GOTO 5
       ENDIF
-
-      write(0,*) 'At end of PROJ'
 
 
  900  FORMAT(A120)

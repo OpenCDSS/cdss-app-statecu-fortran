@@ -2528,7 +2528,7 @@ c_________________________________________________________________NoticeEnd___
 
 ! jhb add header lines to 4WB output file
         write(413,1108)vers, rdate
-1108    FORMAT('# StateCU Version ', f5.2,2x,a16)
+1108    FORMAT('# StateCU Version ', a12,2x,a16)
         write(413,1109)dfile
 1109    FORMAT('# Scenario name: ', a200)
         write(413,1110)CURDATE(5:6),CURDATE(7:8),CURDATE(1:4),
@@ -6483,7 +6483,7 @@ C       write(413,'(a881)')
           if(ddcsw .ge. 1) then
             twdid=bas_id(i)(1:12)
             write(599,660) twdid(1:12),(comeff(l)*100,l=1,12),
-     &        twdid(13:24)
+     :       twdid(13:24)
           endif
 !
 !  write annual average for all years (for structure i)
@@ -8239,7 +8239,7 @@ C       write(413,'(a881)')
         if(ddcsw .ge. 1) then
           twdid=bas_id(i)(1:12)
           write(599,660)twdid(1:12),(comeff(l)*100.0,l=1,12),
-     :    twdid(13:24)
+     :     twdid(13:24)
           write(699,660)twdid(1:12),(effgw(nyrs1,l)*100.0,l=1,12),
      :     twdid(13:24)
         endif
@@ -9930,8 +9930,8 @@ C       write(413,'(a881)')
       OPEN (UNIT=256,FILE=thefile1,STATUS='Unknown',IOSTAT=IERR)
       open (unit=257, file="temp1")
       read(257,'(a520)',end=4664 ) tempwd
-      backspace(257)
-4664  open (unit=258,file="temp2")      
+4664  backspace(257)
+      open (unit=258,file="temp2")      
       write(0,513)
       write(999,513)
  513  format(' Writing water budget output: ')
@@ -9940,7 +9940,7 @@ C       write(413,'(a881)')
           write(0,*)'  processed through structure #',i
         endif
         twdid=bas_id(i)(1:12)
-        read(257,'(a520)',end=464 ) tempwd
+        read(257,'(a520)',end=464) tempwd
         if (tempwd(12:23).eq.twdid(1:12)) then
           m1=257
           goto 462          
@@ -9952,9 +9952,10 @@ C       write(413,'(a881)')
           m1=258
           goto 462 
         endif
-463     backspace(258)
+C463     backspace(258)
+C        goto 461
 !jhb=&==================================================================
-        write(0,*)
+463     write(0,*)
      &  "Error - structure not found in temp dwb files",twdid
         write(999,*)
      &  "Error - structure not found in temp dwb files",twdid
@@ -9978,7 +9979,7 @@ C       write(413,'(a881)')
         IF (ISUPLY.EQ.3) write(256,'(a522)') tempwd(1:522) 
         IF (ISUPLY.EQ.4) write(256,'(a372)') tempwd(1:372) 
         goto 465
-460     rewind(257)
+460     rewind(m1)
 461    continue
 !jhb=&==================================================================
 !466     CLOSE(258,STATUS='DELETE')

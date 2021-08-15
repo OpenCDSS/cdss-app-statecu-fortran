@@ -38,7 +38,7 @@ FC = gfortran
 # - (tr) remove '
 STATECU_VERSION := $(shell cat gcommon.inc | grep -i 'PARAMETER' | grep -i 'VERS' | grep -v '!' | cut -d '(' -f 2 | cut -d '=' -f 2 | tr -d ' ' | tr -d ')' | tr -d "'")
 
-# Number of bytes for executable
+# Number of bytes for executable:
 # - used because executable has been 32-bit until 2021
 # - use in filename to clearly differentiate between 32-bit and 64-bit versions until transition to 64-bit is complete
 # - TODO smalers 2021-03-11 focus on Windows and deal with Linux when there is time
@@ -62,7 +62,7 @@ ifdef OS
 		OBJ_WRONG_FILE_TYPE = 80386
 	endif
 else
-	# Linux
+	# Linux:
 	# - always compile 64-bit version
 	EXE_BITS = 64
 endif
@@ -76,7 +76,7 @@ BAD_OBJ_COUNT := $(shell file *.o | grep $(OBJ_WRONG_FILE_TYPE) | wc -l)
 # - do include all the other checks
 FFLAGS_EXTRA_CHECKS = -fcheck=bits,bounds,do,mem,pointer,recursion
 
-# TODO smalers 2021-06-24 need to remove these old combinations when optimized and check versions are tested out.
+# TODO smalers 2021-06-24 need to remove these old combinations when optimized and check variants are tested out.
 # The flags for debugging or for maximum performance, comment as necessary.
 #FFFLAGS = -g -fbounds-check -fno-align-commons
 # use -static especially for windows compiling 
@@ -257,12 +257,12 @@ help:
 	@echo "help              Print this message."
 	@echo "printenv          Helper to print which operating system is used, controls configuration."
 	@echo "statecu_prog      Compile the StateCU executable, recompiling any .o if .for modified."
-	@echo "                  Same as 'statecu_check' to compile with all checks for development testing."
+	@echo "                  Same as 'statecu_o3' to compile the optimized variant for testing."
 	@echo "                  USE FOR NORMAL DEVELOPMENT."
 	@echo "statecu_check     Compile the StateCU executable including all runtime checks."
 	@echo "statecu_o3        Compile the StateCU executable for optimization level 3 and limited runtime checks."
 	@echo "                  USE FOR PRODUCTION RELEASE AND FULL TESTING."
-	@echo "statecu_release   Do clean compile on each release variant and copy o3 variant to plain name."
+	@echo "statecu_release   Do clean compile on check and o3 release variant and copy o3 variant to plain name."
 	@echo "veryclean         Make the 'clean' target, and also remove the final executable."
 	@echo "veryclean_check   Needed by statemod_release."
 	@echo "veryclean_o3      Needed by statemod_release."
@@ -288,11 +288,11 @@ help:
 
 # statecu_check
 #
-# The default rule for building StateCU executable.
-# For developers, the full check version is used to ensure that issues don't slip through.
-# For production testing, the optimized version is used because it is faster.
-# Automated tests can be run on check and optimized variants to compare results.
-# Automated tests should be run on the optimized version prior to release.
+# The rule for building StateCU check executable:
+# - this executable can be used for troubleshooting
+# - for production testing, the optimized variant is used because it is faster
+# - automated tests can be run on check and optimized variants to compare results
+# - automated tests should be run on the optimized variant prior to release.
 statecu_check: FFLAGS = $(FFLAGS_CHECK)
 statecu_check: VARIANT = -check
 statecu_check: statecu_compile
@@ -300,6 +300,8 @@ statecu_check: statecu_compile
 # statecu_o3
 #
 # The rule for building StateCU optimized executable:
+# - the default rule for building StateCU executable
+# - for developers, the optimized variant is used to streamline testing and to ensure that issues don't slip through.
 # - see statecu_check comments.
 # - use multiple rules because ran into problems trying to list under one target
 statecu_o3: FFLAGS = $(FFLAGS_O3)
@@ -308,21 +310,21 @@ statecu_o3: statecu_compile copy_o3_for_release
 
 # statecu_prog
 #
-# Same as statecu_check, to compile the check executable used during development (all checks).
+# Same as statecu_check, to compile the optimized executable used during development.
 # - TODO smalers 2021-06-30 can't use 'statecu' because it interferes with statecu.o, etc.
-statecu_prog: statecu_check
+statecu_prog: statecu_o3
 
 # statecu_release
 #
 # Do a full clean compile for release.
-# - do the optimized version first because normal work uses the full-check version and want
+# - do the check variant first because normal work uses the optimized variant and want
 #   those .o files to be in working files for incremental make
 # - use separate calls to 'make' to ensure variables are set correctly
 statecu_release:
-	make veryclean_o3
-	make statecu_o3
 	make veryclean_check
 	make statecu_check
+	make veryclean_o3
+	make statecu_o3
 
 # statecu_compile
 #

@@ -78,7 +78,7 @@ C-----Local Variable Declaration
          goto 600
       endif
       idiff = INT(NDAYS(I)*(tmean(yr,I)-tfrost)/
-     !       (tmean(yr,I)-tmean(yr,I+1))+ 0.5)                   ! 0.5 is added for rounding
+     :       (tmean(yr,I)-tmean(yr,I+1))+ 0.5)                   ! 0.5 is added for rounding
       IF (idiff .LE. 15) THEN
          fmonth = I
          kdays = idiff + 15
