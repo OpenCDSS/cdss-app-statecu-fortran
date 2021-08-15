@@ -2,7 +2,7 @@ c calpcrop
 c_________________________________________________________________NoticeStart_
 c StateCU Consumptive Use Model
 c StateCU is a part of Colorado's Decision Support Systems (CDSS)
-c Copyright (C) 1994-2018 Colorado Department of Natural Resources
+c Copyright (C) 1994-2021 Colorado Department of Natural Resources
 c 
 c StateCU is free software:  you can redistribute it and/or modify
 c     it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ C--------initialize monthly values to zero
             naccum(K) = 0
    60     CONTINUE
 C-----------------------------------------------------------------------
-C------ -perrenial or annual
+C------ -perennial or annual
 C-----------------------------------------------------------------------
           IF (crptyp(key).eq.1)
      :      CALL PERENCRP(icrop,npart(IP),nbeg,nend,nbegmo(IP),

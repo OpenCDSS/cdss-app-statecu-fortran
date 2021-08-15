@@ -2,7 +2,7 @@ C flyfillf
 c_________________________________________________________________NoticeStart_
 c StateCU Consumptive Use Model
 c StateCU is a part of Colorado's Decision Support Systems (CDSS)
-c Copyright (C) 1994-2018 Colorado Department of Natural Resources
+c Copyright (C) 1994-2021 Colorado Department of Natural Resources
 c 
 c StateCU is free software:  you can redistribute it and/or modify
 c     it under the terms of the GNU General Public License as published by

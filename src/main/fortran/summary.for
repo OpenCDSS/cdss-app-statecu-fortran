@@ -2,7 +2,7 @@ c summary
 c_________________________________________________________________NoticeStart_
 c StateCU Consumptive Use Model
 c StateCU is a part of Colorado's Decision Support Systems (CDSS)
-c Copyright (C) 1994-2018 Colorado Department of Natural Resources
+c Copyright (C) 1994-2021 Colorado Department of Natural Resources
 c 
 c StateCU is free software:  you can redistribute it and/or modify
 c     it under the terms of the GNU General Public License as published by
@@ -323,7 +323,7 @@ c      DO 54 K = 1,DIM_NC
          CALL CLNDR(EDAT34(K),EH1,EH2)
          CALL CLNDR(FDAT34(K),FH1,FH2) 
          IF (SUM_C(K).GT.0) THEN
-            IF (CRPTYP(K).EQ.1) THEN   !perrenial
+            IF (CRPTYP(K).EQ.1) THEN   ! perennial
                WRITE(8,927) QUOTE,CPNAME(K),QUOTE,QUOTE,QUOTE,QUOTE,
      :            QUOTE,QUOTE,QUOTE,QUOTE,QUOTE,ST1(K)/NN,ST2(K)/NN,
      :            SRZ(K)/NN,SMAD(K)/NN,SAWC(K)/NN,SAPD(K)/NN
