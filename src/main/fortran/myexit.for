@@ -1,4 +1,4 @@
-c myexit
+c myexit - print a suitable warning and exit the program
 c_________________________________________________________________NoticeStart_
 c StateCU Consumptive Use Model
 c StateCU is a part of Colorado's Decision Support Systems (CDSS)
@@ -32,6 +32,10 @@ C   Calling program : annuacrp.f, frost.f, kbasal.f, monthly.f, perencrp.f,
 C                     proto.f, rain.f, distr.f, indece.f, supply.f, julian.f
 C   Called programs : none 
 C   Input arguments : errndx = error code 
+C                     Use a specific code to output a message and then exit.
+C                     Use a large number such as 999 to print a generic
+C                     message and exit, such as when error message is output
+C                     elsewhere.
 C   Output arguments: none
 C   Assumptions     :
 C   Limitations     :
@@ -46,8 +50,7 @@ C
 C***************************************************************************
 
       INCLUDE 'gcommon.inc'
-c rb- delete fn_len since commoned
-c      INTEGER fn_len
+
       INTEGER errndx
       CHARACTER*100 errmsg(99)
 
@@ -135,32 +138,37 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
       errmsg(65) = 'The number of weather stations exceeds the 
      :dimensions of DIM_NW.' 
 
-      errmsg(70) = 'Error with weather data. No temperature for a month  
+      errmsg(70) = 'Error with weather data. No temperature for a month 
      : needed to compute the fall cutoff'
       errmsg(71) = 'Error with converting a day to julian date'
       errmsg(72) = 'Error with converting a month to julian date'
-      errmsg(73) = 'Error with weather data. No temperature for a month  
+      errmsg(73) = 'Error with weather data. No temperature for a month 
      : needed to compute the spring cutoff'
 
       errmsg(80) = 'Error with water balance in original BC'
 
       errmsg(99) = 'Type of error not identified!'
-c rb- add general message
-      if(errndx.eq.100) then
-            write(*,*) 'Stopping - see log file'
-            stop 1
+
+      ! If the error code is outside the known range, output a general message.
+      if(errndx.ge.100) then
+            write(*,*) 'Stopping - see log file.'
+            call exit(1)
       endif
 
       IF (errndx.eq.0) then
+         ! Output a general message and exit the program with status 0 indicating success.
          WRITE(999,*)' run successful - program ended normally'
          WRITE(*,*)' run successful - program ended normally'
+
+         call exit(0)
       else
+         ! Output a specific message and exit the program with status 1 indicating failure.
          WRITE(999,*)' error encountered - program aborted'
          WRITE(*,*)' error encountered - program aborted'
          WRITE(999,*)'Error ',errndx,'. ->  ',errmsg(errndx)
          WRITE(*,*)'Error ',errndx,'. ->  ',errmsg(errndx)
-c rb- change stop(1) to stop 1
-      stop 1
+
+         call exit(1)
       endif
 
       END SUBROUTINE

@@ -17,6 +17,9 @@
 # The compiler
 FC = gfortran
 
+# Make sure that bash is used for 'shell' commands.
+SHELL := /bin/bash
+
 # Determine the StateCU version:
 # - used in the executable name
 # - also used for installer upload folder, etc.
@@ -24,19 +27,17 @@ FC = gfortran
 # - example code line using a floating point version:
 #      PARAMETER (VERS = 13.12)
 # - as of version 14, uses a character string:
-#      PARAMETER (VERS = '14.0.0')
+#      PARAMETER (VERS = '14.0.0') - used briefly but has been replaced with the follow:
+#      CHARACTER*16, PARAMETER :: VERS = '14.0.0'
 # - "dev" at the end of the version (e.g., 15.00.14.dev) indicates the software is under development
 #
 # Explanation of the following command:
 # - (grep) search for lines with 'PARAMETER', ignoring case
 # - (grep) filter to lines with 'VERS', ignoring case
 # - (grep) ignore lines with ! since comment
-# - (cut) cut out the part after (
 # - (cut) cut out the part after the =
-# - (tr) remove spaces
-# - (tr) remove )
-# - (tr) remove '
-STATECU_VERSION := $(shell cat gcommon.inc | grep -i 'PARAMETER' | grep -i 'VERS' | grep -v '!' | cut -d '(' -f 2 | cut -d '=' -f 2 | tr -d ' ' | tr -d ')' | tr -d "'")
+# - (tr) remove spaces, ), and ' characters (must use octal \051 for right parentheses to not confuse 'shell')
+STATECU_VERSION := $(shell cat gcommon.inc | grep -i 'PARAMETER' | grep -i 'VERS' | grep -v '!' | cut -d '=' -f 2 | tr -d "' \051")
 
 # Number of bytes for executable:
 # - used because executable has been 32-bit until 2021
