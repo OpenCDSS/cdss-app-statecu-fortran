@@ -48,7 +48,7 @@ The following are important considerations related to the `makefile` and executa
 	2. The version controls filenames produced by the build process,
 	software packaging, and uploads to the cloud.
 	3. The `get-statecu-version.bash` script can be used to determine the version.
-3. **Chip Archtecture**
+3. **Chip Architecture**
 	1. The `makefile` automatically compiles the appropriate 64-bit or 32-bit executables.
 	2. Normally, only 64-bit executables are of interest.
 	The ability to create 32-bit executable is retained for comparison and transition from 32-bit to 64-bit.
