@@ -18,6 +18,9 @@ c     You should have received a copy of the GNU General Public License
 c     along with StateCU.  If not, see <https://www.gnu.org/licenses/>.
 c_________________________________________________________________NoticeEnd___
 
+      ! Return the full command line with parameters separated by a space.
+      ! The command line arguments are parsed in calling code.
+
       SUBROUTINE GetCommandLine(Cmdln)
       IMPLICIT NONE
 !

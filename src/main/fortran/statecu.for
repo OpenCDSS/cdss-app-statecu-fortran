@@ -27,9 +27,9 @@ c    Integrated Decision Support Group of Colorado State University
 c   
 c    Modifications have been made to this program by Leonard Rice
 c    Consulting Water Engineers to enable a response file, statemod
-c    formatted input files, climate weight replacment file, etc.
+c    formatted input files, climate weight replacement file, etc.
 c
-c    November, 1998 - Modified program to accept a replacmeent file
+c    November, 1998 - Modified program to accept a replacement file
 c                     of climate weights for aggregated structures,
 c                     undefined structures, new climate definitions,
 c                     etc.
@@ -53,7 +53,7 @@ C
 c    May 12, 2003    Version 2.3 Revised to handle multiple subirrigated crops
 c    January 26,2004 Version 2.4 Revised Wsupsum to correct errors related to 
 c                    printing % Gw and Acres (were fractions) and information 
-c                    related to soil mosture when acres change
+c                    related to soil moisture when acres change
 C***************************************************************************
 C
 C     PROGRAM STATECU
@@ -114,9 +114,14 @@ Cjhb=&==================================================================
       CALL DATE_AND_TIME (CURDATE, CURTIME)
       nbuff=1
       quote = ' '
-      call FNM_INIT !init the file name variables
-      call lw_init !initialize the log file warning arrays
-      call GDATA_INIT !init constant variables (GDATA)
+
+      ! Initialize the file name variables.
+      call FNM_INIT
+      ! Initialize the log file warning arrays.
+      call lw_init
+      ! Initialize constant variables in global data (GDATA).
+      call GDATA_INIT
+
       rcrfile='xxx'
       pcrfile='xxx'
       eprfile='xxx'
@@ -126,12 +131,16 @@ Cjhb=&==================================================================
       EYETIME = 0
       SOUT=0
       SMEF = 0.0
+      idra=0
+      ipdy=0
+
       do I=1,dim_np
         do J=1,dim_ny
             jbeg(I,J) = 0
             jend(I,J) = 0
         enddo
       enddo
+
 cjhb=&==================================================================
 c     replace with something more universal
 cjhb=&==================================================================
@@ -141,28 +150,35 @@ c       call getcl(command)
 C      if (statln.eq.-1) then
 C      for lahey compiler use:
 cjhb=&==================================================================
+
+      ! Get the command line as parameters separated by a space.
       call GetCommandLine(command)
-cjhb=&==================================================================
-       if(command(1:1) .eq. ' ') then
-        WRITE (*,100)
-100     FORMAT(' Enter base name?') 
-c        READ(*,101) nch,dfile
-        READ(*,101) dfile
-101     FORMAT(a200)
+
+      if(command(1:1) .eq. ' ') then
+        ! No parameters were given so prompt for the response file name.
+        WRITE (*,*)
+     &  ' Enter response file base name without "rcu" file extension: '
+        READ(*,'(a200)') dfile
         nch=len_trim(dfile)
         write(*,*)nch,dfile
+        ! 1 is added to the length to be the position of the period in the extension
         fn_len=nch+1
-          goto 104
+      else
+        ! Extract the filename from the first command line parameter.
+        do i12=1,200
+          if (command(i12:i12).eq.' ') then
+            ! End of the file name.
+            ! - the length include the trailing space because it
+            !   is the position to start adding the extension below for dataset files
+            fn_len=i12
+            ! Exit the loop.
+            exit
+          else
+            ! Transfer another character from the command line.
+            dfile(i12:i12)=command(i12:i12)
+          endif
+        end do
       endif
-       do 102 i12=1,200
-           if (command(i12:i12).eq.' ') then
-             fn_len=i12
-             goto 103
-           else
-             dfile(i12:i12)=command(i12:i12)
-           endif
-102    continue
-103    continue
 
 C----------------------------------------------------------------------------
 C jhb090309 for outputting season begin/end date
@@ -174,16 +190,58 @@ C----------------------------------------------------------------------------
 C----------------------------------------------------------------------------
 C     Read response file *.rcu
 C----------------------------------------------------------------------------
-104   rcufile=dfile
+      ! If the file already ends with .rcu remove it for the following logic
+      ! because the name without extension is needed to determine the log file.
+      if ( (fn_len .gt. 4) .and.
+     &  ((dfile(fn_len-4:(fn_len-1)) .eq. '.rcu') .or.
+     &  (dfile(fn_len-4:(fn_len-1)) .eq. '.RCU')) ) then
+        ! User specified a file with extension so remove it.
+        ! Prior to version 14.0.0 would get an error.
+        dfile = dfile(1:fn_len - 5)
+        fn_len = fn_len - 4
+      endif
+      ! At this point, the base dataset name should not have the extension.
+      WRITE(*,*) 'Base dataset name:  ', dfile
+      WRITE(999,*) 'Base dataset name:  ', dfile
+
+      ! Add the extension to the base name and determine response file and log file names.
+      rcufile=dfile
       rcufile(fn_len:fn_len+4)='.rcu'
+      ! Set the log file to the response file name and then modify the file extension.
       logfile=dfile
       logfile(fn_len:fn_len+4)='.log'
-      idra=0
-      ipdy=0
-      OPEN (UNIT=999,FILE=logfile)
+
+      ! Open the log file.
+      OPEN (UNIT=999,FILE=logfile,iostat=ierror)
+      if ( ierror .ne. 0 ) then
+        ! Error opening the log file.
+        write(0,*) 'Log file cannot be opened: ', logfile
+        write(0,*) 'Maybe it is open in another program?  Exiting.'
+        ! Cannot call 'myexit' because that routine attempts to write to the log file.
+        ! Since the log file did not open, writing to it will generate confusing warnings.
+        call exit(1)
+      else
+        ! Successfully opened the log file.
+        ! From this point forward log messages can be written to unit 999.
+        ! TODO smalers 2021-08-15 Need to use a common block integer for log unit number.
+        write(0,*) 'Log file is: ', logfile
+      endif
       ISTAT = GETCWD (theCWD)
-      IF (ISTAT == 0) write (0,*) 'Current directory is ',theCWD
-      open (unit=25,file=rcufile,status='old',err=945)
+      IF (ISTAT == 0) then
+        write (0,*) 'Current directory is: ',theCWD
+      ENDIF
+
+      ! Open the response file.
+      open (unit=25,file=rcufile,status='old',iostat=ierror)
+      if ( ierror .ne. 0 ) then
+        ! The given response file name does not exist.
+        WRITE(*,*) 'Response file not found.  Exiting program.'
+        WRITE(999,*) 'Response file not found.  Exiting program.'
+        ! Exit with non-zero exit code to indicate an error.
+        ! Don't call myexit subroutine because the log file is not yet open.
+        call myexit(999)
+      endif
+
       write(0,908) vers, rdate
       write(999,908) vers, rdate
       write(999,1109)dfile
@@ -516,9 +574,9 @@ c        catch this warning and record in new log file format...
 
 
 15    if(ccufile .eq. '') then
-         write(999,*) 'No control file defined in the *.rcu file'
-         write(*,*) 'No control file defined in the *.rcu file'
-         stop
+         write(999,*) 'No control file defined in the *.rcu file.'
+         write(*,*) 'No control file defined in the *.rcu file.'
+         call myexit(999)
       endif   
       write(999,*)'Reading Control File:  ',ccufile
       write(*,*) 'Reading Control File:  ', ccufile
@@ -598,7 +656,7 @@ C                   = 5 - SCS NEH Method (read CN(1,3), runoff curve 1,2,3
           read(fstring(j2:40),*) (cn(i),i=1,3)
         endif
 c
-c  ew  - iclim = 0, climate station scenarion (unit cu), = 1, structure scenario
+c  ew  - iclim = 0, climate station scenario (unit cu), = 1, structure scenario
 c
       READ(1,*,ERR=913) ICLIM
 c
@@ -606,7 +664,7 @@ c if climate station scenario (iclim=0) do not read remainder of *.ccu file
 c
        if(iclim .eq. 0) goto 230
 c
-c -----Read Flag for calculating water supply, 0 = crop irrigation water reqt only
+c -----Read Flag for calculating water supply, 0 = crop irrigation water requirement only
 c                                              1 = water supply limited
 c                                              2 = water rights considered
 c                                              3 = return flows and water rights considered
@@ -628,9 +686,9 @@ c read climate station file
 c
 
 230   if(clifile .eq. '') then
-        write(999,*) 'No climate station file defined in the *.rcu file'
-        write(*,*) 'No climate station file defined in the *.rcu file'
-         stop
+        write(999,*)'No climate station file defined in the *.rcu file.'
+        write(*,*) 'No climate station file defined in the *.rcu file.'
+         call myexit(999)
       endif   
       write(999,*) 'Reading Climate Station File:  ',clifile
       write(*,*) 'Reading Climate Station File:  ', clifile
@@ -653,7 +711,7 @@ c200   read(28, 816, end=210) tid,tlat,telev,tzh,tzm
          select case (scu_debug)
          case (0)
          case (1)
-        write(999,*) 'height of climate station readings for station ',
+        write(999,*) 'Height of climate station readings for station ',
      :tid, 'was not set in climate station file, default of 1.5m for tem
      :perature height and 2m for wind height is used'
          case default
@@ -673,7 +731,7 @@ c200   read(28, 816, end=210) tid,tlat,telev,tzh,tzm
 
 c
 c ew - if flag1 .eq. 2, skip to other uses calculation
-c      if flag1 .ge. 3, read penman monteith control file to
+c      if flag1 .ge. 3, read Penman Monteith control file to
 c      get the names of the climate files, then skip to read climate weights
 c
        if(flag1 .ge. 3)  then
@@ -689,9 +747,9 @@ c jhb 2006 all therefore climate stations in time series files MUST be in the cl
 c jhb 2006       write(999,*) 'Extracting climate stations from time series files'
 c jhb 2006       write(*,*) 'Extracting climate stations from time series files'
       if(tmpfile .eq. '') then
-       write(999,*) 'No temperature data file defined in the *.rcu file'
-       write(*,*) 'No temperature data file defined in the *.rcu file'
-         stop
+       write(999,*)'No temperature data file defined in the *.rcu file.'
+       write(*,*) 'No temperature data file defined in the *.rcu file.'
+       call myexit(999)
       endif   
       write(*,*) 'Reading Monthly Temperature File: ', tmpfile
       write(999,*) 'Reading Monthly Temperature File: ', tmpfile
@@ -708,9 +766,9 @@ c
       read(fline,907) gnyr1,gnyr2,idum3
       GNYRS = GNYR2 - GNYR1 + 1
       if(idum3.ne.'CYR') then
-         write(*,*) 'Stop-temperature data not on calendar year basis'
-         write(999,*) 'Stop-temperature not on calendar year basis'
-         stop
+         write(*,*) 'Stop-temperature data not on calendar year basis.'
+         write(999,*) 'Stop-temperature not on calendar year basis.'
+         call myexit(999)
       endif
       itempt=0
       ptyr=0
@@ -736,7 +794,7 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
      &'has a different number of climate stations (',itempt,
      &') than the climate station file (',n_sta,'). ',
      &'Correct the files before proceeding.  Exiting StateCU.'
-          stop
+          call myexit(999)
         end if
         do i=1,n_sta
             imatch=0
@@ -757,16 +815,16 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
      &' is not included in the climate station file (*.cli). '//
      &' There must be a one to one correspondence between the '//
      &'two files. Exiting StateCU.'
-              stop
+              call myexit(999)
             end if
         end do
 
       IF ((GNYR1.GT.NYR1).OR.(GNYR2.LT.NYR2)) THEN
          WRITE(*,*) 'STOP-Temperature data not available for requested s 
-     &imulation period'
+     &imulation period.'
        WRITE(999,*) 'STOP-Temperature data not available for requested s
-     &imulation period'
-         STOP
+     &imulation period.'
+         call myexit(999)
       ENDIF
       
       if(rn_xco.gt.0)then
@@ -775,9 +833,9 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
 
       if(pptfile .eq. '') then
         write(999,*) 'No precipitation data file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
         write(*,*) 'No precipitation data file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
       endif   
 
         write(*,*) 'Reading Monthly Precipitation File:  ', pptfile
@@ -789,9 +847,9 @@ c        call skipn(27)
         if(fline(1:1).eq."#")goto 1111  !if it's a comment line read the next line
         read(fline,907,end=109) pyr1,pyr2,idum3
         if(idum3.ne.'CYR') then
-            write(*,*) 'Stop-precip data not on calendar year basis'
-            write(999,*) 'Stop-precip data not on calendar year basis'
-            stop
+            write(*,*) 'Stop-precip data not on calendar year basis.'
+            write(999,*) 'Stop-precip data not on calendar year basis.'
+            call myexit(999)
         end if
   107   read(227,'(a200)',end=109) fline  !read the raw line into a string variable
         if(len(fline).eq.0)goto 107       !if it's a blank line, read the next line
@@ -805,10 +863,10 @@ c        call skipn(27)
   109   close(227)
         IF ((pYR1.GT.NYR1).OR.(pYR2.LT.NYR2)) THEN
          WRITE(*,*) 'STOP-Precipitation data not available for requested
-     & simulation period'
+     & simulation period.'
        WRITE(999,*) 'STOP-Precipitation data not available for requested
-     & simulation period'
-          STOP
+     & simulation period.'
+          call myexit(999)
         ENDIF
 c jhb 2006 check the climate stations in the monthly precip file against the cli file
 c jhb 2006 this will be enforced as a 1-1 relationship from now on
@@ -821,7 +879,7 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
      &'has a different number of climate stations (',itempp,
      &') than the climate station file (',n_sta,'). ',
      &'Correct the files before proceeding.  Exiting StateCU.'
-          stop
+          call myexit(999)
         end if
         do i=1,n_sta
             imatch=0
@@ -842,7 +900,7 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
      &' is not included in the climate station file (*.cli). '//
      &' There must be a one to one correspondence between the '//
      &'two files. Exiting StateCU.'
-              stop
+              call myexit(999)
             end if
         enddo
       ENDIF
@@ -851,9 +909,9 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
 
       if(strfile .eq. '') then
         write(999,*) 'No structure file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
         write(*,*) 'No structure file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
       endif   
     
          write(*,*) 'Reading Structure File:  ', strfile
@@ -893,7 +951,7 @@ Cjhb=&==================================================================
      &       ' has no assigned climate stations. Stop.'
              write(999,*) 'Error: Structure ', twdid,
      &       ' has no assigned climate stations. Stop.'
-             stop
+             call myexit(999)
          endif
 Cjhb=&==================================================================
          do 401 ii=1,ncli
@@ -917,7 +975,7 @@ C            if there are extra params on the climate station assignment line AN
 C            if both elevs exist (<>0),
 C            ONLY THEN then use oro adj if they can be read...
 C            note: this logic BREAKS if a real elev=0.0 is ever used ...
-C                  assumed odds of this in colorado are ZERO, so no harm?
+C                  assumed odds of this in Colorado are ZERO, so no harm?
 Cjhb=&==================================================================
              if(flag1.eq.1) then
                  if(len(trim(optargs)).gt.0) then
@@ -930,7 +988,7 @@ C                   read(OptArgs,'(2F9.2)') ota(nbasin,i), opa(nbasin,i)
                 write(999,*)'for structure: ',twdid,' and station: ',tid
                      write(*,*)'Please correct.'
                      write(999,*)'Please correct.'
-                     stop
+                     call myexit(999)
 Cjhb=&==================================================================
 C                    if oro adj for precip exists on line, save it
 C                    note: this logic BREAKS if a oro prec adj=0.0 is ever used ...
@@ -1003,11 +1061,11 @@ Cjhb=&==================================================================
            if(imatch .eq. 0) then
             write(*,*) 'Climate Station ', trim(tid), 'assigned in '//
      :'structure file does not match station in Climate Station '//
-     :'file (*.cli)'
+     :'file (*.cli).'
            write(999,*) 'Climate Station ', trim(tid), 'assigned in '//
      :'structure file does not match station in Climate Station '//
-     :'file (*.cli)'
-             stop
+     :'file (*.cli).'
+             call myexit(999)
            endif
 401     continue
 c
@@ -1045,7 +1103,7 @@ Cjhb=&==================================================================
      :       bas_id(i), 'sum to 0. No ET can be calculated. Stop.'
             write(*,*) 'Error: Temperature weights for structure',
      :       bas_id(i), 'sum to 0. No ET can be calculated. Stop.'
-            stop
+            call myexit(999)
          endif
 Cjhb=&==================================================================
          if(testt .lt. 0.999 .or. testt .gt. 1.001) then
@@ -1055,7 +1113,7 @@ Cjhb=&==================================================================
            case (1)
            write(999,*)
      &'Warning: Temperature Weights for structure',
-     &bas_id(i), 'do not add up to 1.0'
+     &bas_id(i), 'do not add up to 1.0.'
            case default
            end select
          endif
@@ -1066,7 +1124,7 @@ Cjhb=&==================================================================
            case (1)
            write(999,*)
      &'Warning: Precipitation weights for structure',
-     &bas_id(i), 'do not add up to 1.0'
+     &bas_id(i), 'do not add up to 1.0.'
            case default
            end select
          endif
@@ -1323,9 +1381,9 @@ c      k=1
 Cjhb=&==================================================================
       if(cchfile .eq. '') then
         write(999,*) 'No crop characteristic file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
         write(*,*) 'No crop characteristic file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
       endif   
       write(*,*) 'Reading Crop Characteristics File:  ', cchfile
       write(999,*) 'Reading Crop Characteristics File:  ', cchfile
@@ -1417,9 +1475,9 @@ c
 
       if(cdsfile .eq. '') then
         write(999,*) 'No crop acreage file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
         write(*,*) 'No crop acreage file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
       endif   
       write(*,*) 'Reading Crop Acreage File:  ', cdsfile
       write(999,*) 'Reading Crop Acreage File:  ', cdsfile
@@ -1431,10 +1489,10 @@ c
 
       IF ((GNYR1.GT.NYR1).OR.(GNYR2.LT.NYR2)) THEN
          WRITE(*,*) 'STOP-Acreage data not available for requested simu 
-     &lation period'
+     &lation period.'
        WRITE(999,*) 'STOP-Acreage data not available for requested simu
-     &lation period'
-         STOP
+     &lation period.'
+         call myexit(999)
       ENDIF
 
 
@@ -1472,11 +1530,11 @@ Cjhb=&==================================================================
       case default
         write(*,*)' Error reading CDS file; line = ',fline
         write(*,*)' ID = ',tid,' Year = ',tyr,' crop # ',k1
-        write(*,*)' Program stopped'
+        write(*,*)' Program stopped.'
         write(999,*)' Error reading CDS file; line = ',fline
         write(999,*)' ID = ',tid,' Year = ',tyr,' crop # ',k1
-        write(999,*)' Program stopped'
-        stop
+        write(999,*)' Program stopped.'
+        call myexit(1)
       end select
 Cjhb=&==================================================================
       DO 525 KK= 1, dim_nc
@@ -1497,8 +1555,8 @@ Cjhb=&==================================================================
         write(*,*) 'Stop. File *.cds crop name ',cropn,' does not match 
      :crops identified in crop characteristic *.cch file.'
         write(999,*) 'Stop. File *.cds crop name ',cropn,' does not matc
-     :h cropss identified in crop characteristic *.cch file'
-       stop
+     :h cropss identified in crop characteristic *.cch file.'
+       call myexit(999)
       endif
 520   CONTINUE
       if (tyr.lt.nyr1.or.tyr.gt.nyr2) goto 515
@@ -1514,7 +1572,7 @@ C
              do 535 j2=1,tncrop
                tcdssum=tcdssum+tcdsarea(j2)
 535          continue
-c    ew new 5/31/2019             	     
+c    ew new 5/31/2019
              if(ttacre .ne. 0) then
              if(abs((ttacre-tcdssum)/ttacre).GT.0.02)then
                 call lw_update(60,bas_id(j1))
@@ -1583,9 +1641,9 @@ c
 
       if(fdfile .eq. '') then
         write(999,*) 'No frost date data file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
         write(*,*) 'No frost date data file defined in the '//
-     &'*.rcu file'
+     &'*.rcu file.'
       endif   
       open(unit=33,file=fdfile,status='old',iostat=ierr)
       
@@ -1607,14 +1665,14 @@ c
       call skipn(33)
       read(33,907) t1,t2,idum3       
       if(idum3.ne.'CYR') then
-         write(*,*) 'Stop-frost data not on calendar year basis'
-         write(999,*) 'Stop-frost data not on calendar year basis'
-         stop
+         write(*,*) 'Stop-frost data not on calendar year basis.'
+         write(999,*) 'Stop-frost data not on calendar year basis.'
+         call myexit(999)
       endif
       if(t1.gt.nyr1.or.t2.lt.nyr2) then
-         write(*,*) 'Stop-frost data not for full study period'
-         write(999,*) 'Stop-frost data not for full study period'
-         stop
+         write(*,*) 'Stop-frost data not for full study period.'
+         write(999,*) 'Stop-frost data not for full study period.'
+         call myexit(999)
       endif 
 605   read(33,977,end=620) tyr,tid,fd1,fd2,fd3,fd4
 c====================================================================jhb
@@ -1644,7 +1702,7 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
      &' is not included in the climate station file (*.cli). '//
      &' There must be a one to one correspondence between the '//
      &'two files. Exiting StateCU.'
-          stop
+          call myexit(999)
         end if
       endif
       if(fd1(1:6) .eq. '-999.0') then
@@ -1714,7 +1772,7 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
      &'has a different number of climate stations (',itempp,
      &') than the climate station file (',n_sta,'). ',
      &'Correct the files before proceeding.  Exiting StateCU.'
-        stop
+        call myexit(999)
       endif
          
          do 625 i=1,nyrs
@@ -1781,8 +1839,8 @@ C-----Start Calculation
             crptyp(k)=0
           end do
           CALL READIN(nbegyr, nendyr)
-          write(*,*) 'Summarizing input to file *.sum and processing'
-          write(999,*) 'Summarizing input to file *.sum and processing'
+          write(*,*) 'Summarizing input to file *.sum and processing.'
+          write(999,*) 'Summarizing input to file *.sum and processing.'
           CALL SUMMARY
           write(*,*) 'Starting Blaney Criddle Process'
           write(999,*) 'Starting Blaney Criddle Process'
@@ -1794,42 +1852,42 @@ C-----Start Calculation
         write(999,*) 'flag1=2 "other uses"is no longer a valid option 
      &in StateCU - only crop consumptive use methods are supported '//
      &'Correct in *.ccu file.'
-          stop
+          call myexit(999)
         case(3)
           do k=1,n_crps
             crptyp(k)=0
           end do
-          write(*,*) 'Summarizing input to file *.sum and processing'
-          write(999,*) 'Summarizing input to file *.sum and processing'
+          write(*,*) 'Summarizing input to file *.sum and processing.'
+          write(999,*) 'Summarizing input to file *.sum and processing.'
           CALL SUMMARY
           CALL DREAD
           CALL DSUM
-          write(*,*) 'Starting Penman-Monteith Process'
-          write(999,*) 'Starting Penman-Monteith Process'
+          write(*,*) 'Starting Penman-Monteith Process.'
+          write(999,*) 'Starting Penman-Monteith Process.'
           CALL PROTO
         case(4)
           do k=1,n_crps
             crptyp(k)=0
           end do
-          write(*,*) 'Summarizing input to file *.sum and processing'
-          write(999,*) 'Summarizing input to file *.sum and processing'
+          write(*,*) 'Summarizing input to file *.sum and processing.'
+          write(999,*) 'Summarizing input to file *.sum and processing.'
           CALL SUMMARY
           CALL DREAD
           CALL DSUM
-          write(*,*) 'Starting Modified Hargreave Process'
-          write(999,*) 'Starting Modified Hargreave Process'
+          write(*,*) 'Starting Modified Hargreave Process.'
+          write(999,*) 'Starting Modified Hargreave Process.'
           CALL PROTO
         case(5)
           do k=1,n_crps
             crptyp(k)=0
           end do
-          write(*,*) 'Summarizing input to file *.sum and processing'
-          write(999,*) 'Summarizing input to file *.sum and processing'
+          write(*,*) 'Summarizing input to file *.sum and processing.'
+          write(999,*) 'Summarizing input to file *.sum and processing.'
           CALL SUMMARY
           CALL DREAD
           CALL DSUM
-          write(*,*) 'Starting ASCE Penman-Monteith Process'
-          write(999,*) 'Starting ASCE Penman-Monteith Process'
+          write(*,*) 'Starting ASCE Penman-Monteith Process.'
+          write(999,*) 'Starting ASCE Penman-Monteith Process.'
           CALL PROTO
         Case Default
       end select
@@ -1903,8 +1961,8 @@ C-----Include water supply in input summary file
 
 c rb- create statemod (.ddc) file of output
       if (ddcsw.ge.1) then           
-       write(0,*) 'Creating *.ddc file (statemod formatted results)'
-       write(999,*) 'Creating *.ddc file (statemod formatted results)'
+       write(0,*) 'Creating *.ddc file (statemod formatted results).'
+       write(999,*) 'Creating *.ddc file (statemod formatted results).'
        ddcfile=dfile
        ddcfile(fn_len:fn_len+4) = '.ddc'
        open(unit=33,file=ddcfile,status='unknown',iostat=ierr)
@@ -1937,8 +1995,8 @@ c rb- create statemod (.ddc) file of output
 
 c ew- create ground water pumping file (.gwp)
       if (isuply .eq. 4 .and. ddcsw .gt. 0) then
-       write(0,*) 'Creating *.gwp file (ground water pumping file)'
-       write(999,*) 'Creating *.gwp file (ground water pumping file)'
+       write(0,*) 'Creating *.gwp file (ground water pumping file).'
+       write(999,*) 'Creating *.gwp file (ground water pumping file).'
        gwfile=dfile
        gwfile(fn_len:fn_len+4) = '.gwp'
        open(unit=33,file=gwfile,status='unknown',iostat=ierr)
@@ -1998,22 +2056,22 @@ Cjhb=&==================================================================
      :structure ',a12,'(total percentage= ', f5.3,'),',/, '   Adjusting 
      :crop types proportionally so total = 1.000')
 977   format(i4,1x,a12,2x,a6,3(2x,a6))
-945   WRITE(*,*) 'Response file not found.  Exiting program'
-      WRITE(999,*) 'Response file not found.  Exiting program'
-      close(999)
-      stop
+
 941   continue
+      ! If here the program is exiting normally.
       call lw_ccu(999)
       call lw_write(999)
       if(WARNINGS)then
-        write(*,*) 'Successful Completion with warnings. See log file.'
+        write(*,*)'Successful Completion with warnings. See log file: ',
+     &    logfile
         write(999,*)
-        write(999,*)'Successful Completion with warnings. See log file.'
+        write(999,*) 'Successful Completion with warnings.'
       else
         write(*,*) 'Successful Completion.  See log file.'
         write(999,*)
-        write(999,*) 'Successful Completion.  See log file.'
+        write(999,*) 'Successful Completion.'
       endif
+      ! Close the log file.
       close(999)
 C----------------------------------------------------------------------------
 C jhb090309 for outputting season begin/end date
@@ -2021,7 +2079,8 @@ C   jhb111510 - re-enabled and added to official release - Erin Wilson Nov 2010
 C----------------------------------------------------------------------------
       CLOSE(UNIT=914)
 C----------------------------------------------------------------------------
-      STOP
+      ! Exit with zero exit code to indicate success.
+      call myexit(0)
       END
 
       subroutine CountArgs(MyString, MyCount)

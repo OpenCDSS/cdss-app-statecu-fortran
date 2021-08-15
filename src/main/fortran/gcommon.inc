@@ -149,25 +149,38 @@ c_________________________________________________________________NoticeEnd___
 
 !-----Dimension (Corresponding dimension parameters in other include files
 !-----should be changed)
-      INTEGER  DIM_NA, DIM_NP, DIM_NY, DIM_NC, DIM_NW, DIM_CH
-      INTEGER  DIM_SUB, DIM_NSB, DIM_NLW, DIM_NLWS
-      CHARACTER*16 RDATE
-      CHARACTER*12 VERS
+      INTEGER, PARAMETER :: DIM_NA = 1200
+      INTEGER, PARAMETER :: DIM_NP = 50
+      INTEGER, PARAMETER :: DIM_NY = 130
+      INTEGER, PARAMETER :: DIM_NC = 70
+      INTEGER, PARAMETER :: DIM_NW = 300
+      INTEGER, PARAMETER :: DIM_CH = 200
 
-      ! Use semantic version number.
-      PARAMETER (VERS = '14.0.0')
-      PARAMETER (RDATE = '08/13/21')
-
-!     jhb 07/10
-      PARAMETER (DIM_NA = 1200)
-      PARAMETER (DIM_NP = 50)
-      PARAMETER (DIM_NY = 130)
-      PARAMETER (DIM_NC = 70)
-      PARAMETER (DIM_NW = 300)
-      PARAMETER (DIM_CH = 200)
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
-      parameter (dim_sub = 5)
+      INTEGER, PARAMETER :: DIM_SUB = 5
+! _____________________________________________________
+! jhb 02/20/08 added sub totals - sub basins (sb)
+! jhb          for now make it the first two chars of structure ID (district),
+! jhb          but it could be any subgrouping
+      INTEGER, PARAMETER :: DIM_NSB = 100
+
+      ! Number of log warnings.
+      INTEGER, PARAMETER :: DIM_NLW = 100
+      ! Maximum number of log file warning structures (per warning).
+      INTEGER, PARAMETER :: DIM_NLWS = 800
+
+      !CHARACTER*16 RDATE
+      !CHARACTER*12 VERS
+
+      ! Use semantic version for the unit number, for example:
+      ! - part 1 is major new feature release
+      ! - part 2 is minor new feature release
+      ! - part 3 is bug fix
+      ! - optional part 4 is ".beta", "dev1", etc.
+      CHARACTER*16, PARAMETER :: VERS = '14.0.0'
+      CHARACTER*12, PARAMETER :: RDATE = '08/13/21'
+
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
       character*5  subname(dim_sub)
@@ -180,14 +193,6 @@ c_________________________________________________________________NoticeEnd___
 ! _____________________________________________________
 ! grb 05-20-00 added switch in crop characteristics file for modified vs. original blaney (kt=1)	   
       integer ktsw(dim_nc)
-! _____________________________________________________
-! jhb 02/20/08 added sub totals - sub basins (sb)
-! jhb          for now make it the first two chars of structure ID (district),
-! jhb          but it could be any subgrouping
-      PARAMETER (DIM_NSB = 100)
-! _____________________________________________________
-      PARAMETER (DIM_NLW = 100)
-      PARAMETER (DIM_NLWS = 800)
 ! _____________________________________________________
 
 !-----Global Variable Declaration
