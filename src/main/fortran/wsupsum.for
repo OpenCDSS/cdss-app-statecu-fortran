@@ -6521,9 +6521,12 @@ C       write(413,'(a881)')
             id1=15-iparce
             write(256,744) (crpname(j,m),j=1,iparce),(as(k),k=1,id1)
             write(256,745)(atxt(i,j,m),j=1,iparce),(as(k),k=1,id1)
-            if( (mod(i,25).eq.0) .and. (m.eq.1)) then
-              write(0,*)'  processed through structure #',i
-            endif
+! smalers 2021-08-15 Comment out based on Erin Wilson's feedback that
+!                    the output may not print sequential and the
+!                    program is fast so no need for output.
+!           if( (mod(i,25).eq.0) .and. (m.eq.1)) then
+!             write(0,*)'  processed through structure #',i
+!           endif
             do l=1,12
 !=====================================================
 !jhb          add shortage calculation to bd1 output
@@ -6986,9 +6989,12 @@ C       write(413,'(a881)')
           id1=15-iparce
          write(256,844) (crpname(j,m),j=1,iparce),(as(k),k=1,id1)
          write(256,845)(atxt(i,j,m),j=1,iparce),(as(k),k=1,id1)
-           if( (mod(i,25).eq.0) .and. (m.eq.1)) then
-             write(0,*)'  processed through structure #',i
-           endif
+! smalers 2021-08-15 Comment out based on Erin Wilson's feedback that
+!                    the output may not print sequential and the
+!                    program is fast so no need for output.
+!          if( (mod(i,25).eq.0) .and. (m.eq.1)) then
+!            write(0,*)'  processed through structure #',i
+!          endif
            do l=1,12
 !=====================================================
 !jhb          add shortage calculation to bd1 output
@@ -7502,9 +7508,12 @@ C       write(413,'(a881)')
           id1=15-iparce
         write(256,944) (crpname(j,m),j=1,iparce),(as(k),k=1,id1)
         write(256,945)(atxt(i,j,m),j=1,iparce),(as(k),k=1,id1)
-           if( (mod(i,25).eq.0) .and. (m.eq.1)) then
-             write(0,*)'  processed through structure #',i
-           endif
+! smalers 2021-08-15 Comment out based on Erin Wilson's feedback that
+!                    the output may not print sequential and the
+!                    program is fast so no need for output.
+!          if( (mod(i,25).eq.0) .and. (m.eq.1)) then
+!            write(0,*)'  processed through structure #',i
+!          endif
           do l=1,12
 !==================================================
 !jhb        add shortage calculation to bd1 output
@@ -8336,9 +8345,12 @@ C       write(413,'(a881)')
           id1=15-iparce
         write(256,644) (crpname(j,m),j=1,iparce),(as(k),k=1,id1)
         write(256,645)(atxt(i,j,m),j=1,iparce),(as(k),k=1,id1)
-          if( (mod(i,25).eq.0) .and. (m.eq.1)) then
-            write(0,*)'  processed through structure #',i
-          endif
+! smalers 2021-08-15 Comment out based on Erin Wilson's feedback that
+!                    the output may not print sequential and the
+!                    program is fast so no need for output.
+!         if( (mod(i,25).eq.0) .and. (m.eq.1)) then
+!           write(0,*)'  processed through structure #',i
+!         endif
 !jhb=&==================================================================
 !jhb  Start L (month) DO loop
 !jhb=&==================================================================
