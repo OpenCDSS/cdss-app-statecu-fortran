@@ -1927,7 +1927,7 @@ Cjhb &==================================================================
 Cjhb  
 Cjhb &==================================================================
       IF (ISUPLY.GE.1) THEN
-        write(0,*)'Preparing Water Budget:'
+        write(0,*)'Preparing Water Budget'
         write(999,*)'Preparing Water Budget:'
 c       operate a presimulation to initialize soil moisture  grb 5-04-00
         ipresim=0
@@ -1948,8 +1948,8 @@ c       operate a presimulation to initialize soil moisture  grb 5-04-00
      &    '  finished'
       ENDIF
 Cjhb &==================================================================
-      write(0,*) 'Writing consumptive use summary: '
-      write(999,*) 'Writing consumptive use summary '
+      write(0,*) 'Writing consumptive use summary'
+      write(999,*) 'Writing consumptive use summary'
       CALL PROJ
 
 C-----Include water supply in input summary file

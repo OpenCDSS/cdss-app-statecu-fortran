@@ -131,6 +131,9 @@ c_________________________________________________________________NoticeEnd___
 !                Incremental version not intended to be released.
 !                Includes initial transition to gfortran 10 64-bit compiler.
 !                Version 14.x uses a string version that allows more flexibility.
+! smalers 2021-08-14   version 14.0.0
+!                First 64-bit gfortran release.
+!                Additional cleanup may occur as automated testing is implemented.
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
