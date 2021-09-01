@@ -1,11 +1,13 @@
 # Repositories that comprise StateCU
 # - assumes that local folder name will match the repository name
-# Main repository with code
+# - all repositories are hosted at:
+#     https://github.com/OpenCDSS
+# Main repository with code.
 cdss-app-statecu-fortran
-# Developer documentation
+# Developer documentation:
 # - currently in the main repo, may split into a separate repo later
 #cdss-app-statecu-fortran-doc-dev
-# User documentation
+# User documentation.
 cdss-app-statecu-fortran-doc-user
-# Tests need to be developed
+# Automated test.
 cdss-app-statecu-fortran-test

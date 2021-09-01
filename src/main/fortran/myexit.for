@@ -53,6 +53,7 @@ C***************************************************************************
 
       INTEGER errndx
       CHARACTER*100 errmsg(99)
+      LOGICAL logopen
 
       ! Use period at the end of each error to be consistent.
       errmsg(1) = 'Scenario Control File is not found.'
@@ -163,17 +164,28 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
             call exit(1)
       endif
 
+      ! Check to see if the log file is opened:
+      ! - otherwise, writing to the log file may create output file such as 'fort.999'
+      ! - normally the log file should be open throughout the program
+      INQUIRE(unit=999, OPENED=logopen)
+
       IF (errndx.eq.0) then
          ! Output a general message and exit the program with status 0 indicating success.
-         WRITE(999,*)' Run successful - program ended normally.'
+         if ( logopen ) then
+           WRITE(999,*)' Run successful - program ended normally.'
+         endif
          WRITE(*,*)' Run successful - program ended normally.'
 
          call exit(0)
       else
          ! Output a specific message and exit the program with status 1 indicating failure.
-         WRITE(999,*)' Error encountered - program aborted.'
+         if ( logopen ) then
+           WRITE(999,*)' Error encountered - program aborted.'
+         endif
          WRITE(*,*)' Error encountered - program aborted.'
-         WRITE(999,*)'Error ',errndx,' ->  ',errmsg(errndx)
+         if ( logopen ) then
+           WRITE(999,*)'Error ',errndx,' ->  ',errmsg(errndx)
+         endif
          WRITE(*,*)'Error ',errndx,' ->  ',errmsg(errndx)
 
          call exit(1)
