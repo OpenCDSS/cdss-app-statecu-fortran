@@ -245,10 +245,10 @@ C----------------------------------------------------------------------------
       write(0,908) vers, rdate
       write(999,908) vers, rdate
       write(999,1109)dfile
-1109  FORMAT('Scenario name: ', a200)
+1109  FORMAT(' Scenario name: ', a200)
       write(999,1110)CURDATE(5:6),CURDATE(7:8),CURDATE(1:4),
      &             CURTIME(1:2),CURTIME(3:4),CURTIME(5:6)
-1110  FORMAT('Model simulation began at: ',A2,'-',A2,'-',A4,'  ',
+1110  FORMAT(' Model simulation began at: ',A2,'-',A2,'-',A4,'  ',
      &       A2,':',A2,':',A2)
       write(999,*)
       write(999,*)'Following are brief model execution status messages:'
@@ -2035,7 +2035,7 @@ C-----Read error exit calls and format statements
 900   FORMAT(A120)
 906   format(a12,f6.0,f9.0,2x,a20,a8,2x,a24,i4,f8.0)
 907   format(6x,i4,11x,i4,7x,a3)
-908   FORMAT('StateCU Version ', a12,2x,a16)
+908   FORMAT(' StateCU Version ', a12,2x,a16)
 909   CALL MYEXIT(7)
 910   format(i4,1x,a12)
 912   CALL MYEXIT(15)
