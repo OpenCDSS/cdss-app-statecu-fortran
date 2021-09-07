@@ -65,7 +65,7 @@ c      Character*30 cropn
 C-----Use mean monthly temperature for computing frost dates
       do 20 j=1, nyrs 
         call frost(ib,j)
-c	   do 10 i=1, nparce(ib,j) 
+c          do 10 i=1, nparce(ib,j) 
 c              key = bkey(ib,i,j)
 c              CROPN=cpname(key)
 c            if (cropn(1:10).eq.'WHEAT_FALL') Then  ! winter wheat begin
@@ -74,9 +74,9 @@ c               jbeg(i,j) = JULIAN(gdate1(key),gdate2(key))
 c               if (tflg2(key).eq.0) then
 c                   call fall(j,tmois2(key),jfrost)
 c               elseif (tflg2(key).eq.1) then
-c	            jfrost = t28(ib,j,2)
+c                   jfrost = t28(ib,j,2)
 c               elseif (tflg2(key).eq.2) then
-c	            jfrost = t32(ib,j,2)
+c                   jfrost = t32(ib,j,2)
 c               else 
 c                  call MYEXIT(32) 
 c               endif

@@ -190,13 +190,21 @@ C----------------------------------------------------------------------------
 C----------------------------------------------------------------------------
 C     Read response file *.rcu
 C----------------------------------------------------------------------------
+      ! Note that 'fn_len' is the filename length + 1, used to help append other filename parts.
+      ! Therefore, 'fn_len' must be >= 5 to ensure that 'fn_len - 1' is >= 1.
+      ! It also indicates the filename position where an extension can be added to base name.
+      !
       ! If the file already ends with .rcu remove it for the following logic
       ! because the name without extension is needed to determine the log file.
-      if ( (fn_len .gt. 4) .and.
-     &  ((dfile(fn_len-4:(fn_len-1)) .eq. '.rcu') .or.
-     &  (dfile(fn_len-4:(fn_len-1)) .eq. '.RCU')) ) then
+      if ( fn_len .le. 4) then
+        ! No way that the file has an extension.  OK as is.
+      else if ( 
+     &  (dfile(fn_len-4:(fn_len-1)) .eq. '.rcu') .or.
+     &  (dfile(fn_len-4:(fn_len-1)) .eq. '.RCU') ) then
         ! User specified a file with extension so remove it.
-        ! Prior to version 14.0.0 would get an error.
+        ! Other extensions can be added below as needed by appending to 'dfile',
+        ! for example '.rcu', '.xwb'.
+        ! Prior to version 14.0.0 would result in an error.
         dfile = dfile(1:fn_len - 5)
         fn_len = fn_len - 4
       endif
@@ -235,8 +243,10 @@ C----------------------------------------------------------------------------
       open (unit=25,file=rcufile,status='old',iostat=ierror)
       if ( ierror .ne. 0 ) then
         ! The given response file name does not exist.
-        WRITE(*,*) 'Response file not found.  Exiting program.'
-        WRITE(999,*) 'Response file not found.  Exiting program.'
+        WRITE(*,*) 'Response file not found: ', trim(rcufile)
+        WRITE(*,*) 'Exiting program.'
+        WRITE(999,*) 'Response file not found: ', trim(rcufile)
+        WRITE(999,*) 'Exiting program.'
         ! Exit with non-zero exit code to indicate an error.
         ! Don't call myexit subroutine because the log file is not yet open.
         call myexit(999)

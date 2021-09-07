@@ -1,15 +1,17 @@
 # build-util
 
-This folder contains utility scripts (or batch files if Windows) that are used in the build process:
+This folder contains utility scripts (or batch files if Windows) that are used in the build process.
 
-* `copy-to-co-dnr-gcp.sh` - copy the StateCU executable to Google Cloud platform, for public access
-* `eclipse/`
-	+ `run-eclipse-statecu-mingw.bat` - batch file to start correct version of Eclipse with proper Java version
-	(use if Eclipse/Photran environment is used for development rather than text editor and command line compiler)
-* `git-check-statecu.sh` - script to indicate status of all StateCU repositories
-* `git-util/` - generalized Git utility scripts
-* `mingw/' - scripts used with MINGW environment
-	+ `setup-mingw-env.bat` - batch file to configure Windows command shell environment for compiling with MINGW `gfortran`
-* `product-repo-list.txt` - repository list used by Git utility scripts
-* `run-doxygen.sh` - run Doxygen to autogenerate code documentation in `doc-dev-doxygen-project` folder
-* `search-for-edits.sh` - used to determine historical code authors
+| **File/Folder** | **Description** |
+| -- | -- |
+| `copy-to-co-dnr-gcp.bash` | Copy the StateCU executable to Google Cloud platform, for public access. |
+| `create-gcp-statecu-index.bash` | Create an `index.html` file on GCP that lists the installer downloads and associated documentation. |
+| `eclipse/`| Contains batch file to run the correct version of Eclipse with proper Java version, if using Eclipse Photran for development. |
+| `git-check-statecu.sh` | Script to indicate status of all StateCU repositories. |
+| `git-clone-all-statecu.sh` | Script to clone all StateCU repisitories, if they have not yet been cloned. |
+| `git-tag-all-statecu.sh` | Script to tag all related StateCU repisitories with the same tag. |
+| `git-util/` | Generalized Git utility scripts. |
+| `product-repo-list.txt` | Repository list used by Git utility scripts. |
+| `run-doxygen.sh` | Run Doxygen to autogenerate code documentation in `doc-dev-doxygen-project` folder. |
+| `search-for-edits.sh` | Used to determine historical code authors. |
+| `x-mingw/' | Obsolete scripts used with MinGW environment. | 

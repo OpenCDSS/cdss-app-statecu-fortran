@@ -673,7 +673,7 @@ Cjhb=&==================================================================
 Cjhb  open binary file 1
       IF (LBD1OUT) THEN
 Cjhb=&==================================================================
-Cjhb	construct the name for binary file 1 output
+Cjhb     construct the name for binary file 1 output
          BD1FN = dfile
 Cjhb     add file name extension
          BD1FN(fn_len:fn_len+4) = BD1EXT
@@ -688,7 +688,7 @@ Cjhb=&==================================================================
 Cjhb  open binary file 2
       IF (LBD2OUT) THEN
 Cjhb=&==================================================================
-Cjhb	construct the name for binary file 2 output
+Cjhb     construct the name for binary file 2 output
          BD2FN = dfile
 Cjhb     add file name extension
          BD2FN(fn_len:fn_len+4) = BD2EXT
@@ -703,7 +703,7 @@ Cjhb=&==================================================================
 Cjhb  open binary file 3
       IF (LBD3OUT) THEN
 Cjhb=&==================================================================
-Cjhb	construct the name for binary file 3 output
+Cjhb     construct the name for binary file 3 output
          BD3FN = dfile
 Cjhb     add file name extension
          BD3FN(fn_len:fn_len+4) = BD3EXT
@@ -718,7 +718,7 @@ Cjhb=&==================================================================
 Cjhb  open binary file 4
       IF (LBD4OUT) THEN
 Cjhb=&==================================================================
-Cjhb	construct the name for binary file 4 output
+Cjhb     construct the name for binary file 4 output
          BD4FN = dfile
 Cjhb     add file name extension
          BD4FN(fn_len:fn_len+4) = BD4EXT
@@ -733,7 +733,7 @@ Cjhb=&==================================================================
 Cjhb  open binary file 5
       IF (LBD5OUT) THEN
 Cjhb=&==================================================================
-Cjhb	construct the name for binary file 5 output
+Cjhb     construct the name for binary file 5 output
          BD5FN = dfile
 Cjhb     add file name extension
          BD5FN(fn_len:fn_len+4) = BD5EXT

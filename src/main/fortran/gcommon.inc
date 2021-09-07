@@ -20,6 +20,7 @@ c_________________________________________________________________NoticeEnd___
 
 !***************************************************************************
 !
+!   Original creation comment:
 !   Include File    : gcommon.inc
 !   Author          : HB Manguerra
 !   Date            : December 1994
@@ -38,8 +39,8 @@ c_________________________________________________________________NoticeEnd___
 ! rrb 2003/06/20; Add multiple subirrigation crop ID (subname)
 ! rrb 2004/01/26; Version 10.5 2004/01/26
 !                 Revise Wsupsum to correct output problems related to 
-!		  fraction of Gw and sprinkler land and Soil moisture
-!		  treatment when acres change
+!                 fraction of Gw and sprinkler land and Soil moisture
+!                 treatment when acres change
 ! ew 03/12/2004; Version 10.7 03/12/2005
 ! ew 03/12/2004; Consider drain/tailwater supply
 ! ew 08/04     ; Version 10.8
@@ -182,7 +183,7 @@ c_________________________________________________________________NoticeEnd___
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
       CHARACTER*16, PARAMETER :: VERS = '14.0.0'
-      CHARACTER*12, PARAMETER :: RDATE = '08/13/21'
+      CHARACTER*12, PARAMETER :: RDATE = '09/05/21'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
@@ -194,7 +195,7 @@ c_________________________________________________________________NoticeEnd___
 ! jhb 03-00-08 add variables to determine years of missing iwr and diversion data (if not filled)
       INTEGER missiwr(dim_na,dim_ny),missdiv(dim_na,dim_ny)
 ! _____________________________________________________
-! grb 05-20-00 added switch in crop characteristics file for modified vs. original blaney (kt=1)	   
+! grb 05-20-00 added switch in crop characteristics file for modified vs. original blaney (kt=1)   
       integer ktsw(dim_nc)
 ! _____________________________________________________
 

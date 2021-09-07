@@ -256,6 +256,7 @@ help:
 	@echo "checkarch         Check that object files are consistent with shell (32 or 64 bit)."
 	@echo "clean             Remove dynamically created files (but not final executable)."
 	@echo "help              Print this message."
+	@echo "installer         Create the StateCU software installer zip file."
 	@echo "printenv          Helper to print which operating system is used, controls configuration."
 	@echo "statecu_prog      Compile the StateCU executable, recompiling any .o if .for modified."
 	@echo "                  Same as 'statecu_o3' to compile the optimized variant for testing."
@@ -265,8 +266,8 @@ help:
 	@echo "                  USE FOR PRODUCTION RELEASE AND FULL TESTING."
 	@echo "statecu_release   Do clean compile on check and o3 release variant and copy o3 variant to plain name."
 	@echo "veryclean         Make the 'clean' target, and also remove the final executable."
-	@echo "veryclean_check   Needed by statemod_release."
-	@echo "veryclean_o3      Needed by statemod_release."
+	@echo "veryclean_check   Needed by statecu_release."
+	@echo "veryclean_o3      Needed by statecu_release."
 	@echo ""
 	@echo "file.o            Compile the source file.for file into object file file.o,"
 	@echo "                  useful to check syntax for a single file."
@@ -504,6 +505,18 @@ clean: printenv
 	@echo "-----------------------------------------------------------------------"
 	rm -f bin/*.o *.mod *.MOD *.o
 	rm -f *.for.*r.*
+
+# Create the StateCU software installer zip file:
+# - this creates the installer zip file and optionally uploads to GCP
+installer:
+	@echo "-----------------------------------------------------------------------"
+	@echo "installer"
+	@echo ""
+	@echo "Creating a StateCU software installer zip file."
+	@echo "The current software version is used for the zip file name."
+	@echo "Optionally upload the zip file to the State's GCP cloud bucket."
+	@echo "-----------------------------------------------------------------------"
+	../../../build-util/copy-to-co-dnr-gcp.bash
 
 # printenv
 #
