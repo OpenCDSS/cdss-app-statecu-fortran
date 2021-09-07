@@ -239,7 +239,7 @@ ifdef OS
 	@echo "-----------------------------------------------------------------------"
 else
 	@# Linux...
-	@cp statecu-$(STATECU_VERSION)-gfortran-win-$(EXE_BITS)bit-o3 statecu-$(STATECU_VERSION)-gfortran-win-$(EXE_BITS)bit
+	@cp statecu-$(STATECU_VERSION)-gfortran-lin-$(EXE_BITS)bit-o3 statecu-$(STATECU_VERSION)-gfortran-lin-$(EXE_BITS)bit
 	@echo "-----------------------------------------------------------------------"
 	@echo "Release executable (copy of o3 variant) is statecu-$(STATECU_VERSION)-gfortran-lin-$(EXE_BITS)bit"
 	@echo "-----------------------------------------------------------------------"
