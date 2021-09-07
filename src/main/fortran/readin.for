@@ -105,7 +105,7 @@ c grb 05-20-00 read two potential formats
           endif
           if(line(i1-1:i1-1).eq.' '.and.line(i1:i1).ne.' '
      :       .and.inote.eq.1) then
-      	    inote=2
+            inote=2
             goto 26
           endif
           if(line(i1-1:i1-1).eq.' '.and.line(i1:i1).ne.' '
