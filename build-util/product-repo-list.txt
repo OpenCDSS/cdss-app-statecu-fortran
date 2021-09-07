@@ -5,9 +5,8 @@
 # Main repository with code.
 cdss-app-statecu-fortran
 # Developer documentation:
-# - currently in the main repo, may split into a separate repo later
-#cdss-app-statecu-fortran-doc-dev
+cdss-app-statecu-fortran-doc-dev
 # User documentation.
 cdss-app-statecu-fortran-doc-user
-# Automated test.
+# Automated tests.
 cdss-app-statecu-fortran-test

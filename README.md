@@ -1,11 +1,10 @@
 # cdss-app-statecu-fortran #
 
-This repository contains the source code and source files for developer and user documentation
-for the StateCU consumptive use model.
-StateCU is part of [Colorado's Decision Support Systems (CDSS)](http://cdss.state.co.us).
+This repository contains the source code for the StateCU consumptive use model.
+StateCU is part of [Colorado's Decision Support Systems (CDSS)](https://www.colorado.gov/cdss).
 Open source CDSS is referred to as OpenCDSS.
-CDSS is supported by the [Colorado Water Conservation Board](http://cwcb.state.co.us) and
-[Colorado Division of Water Resources](http://water.state.co.us).
+CDSS is supported by the [Colorado Water Conservation Board](https://cwcb.colorado.gov/) and
+[Colorado Division of Water Resources](https://dwr.colorado.gov/).
 
 The developer documentation and guidelines will be updated as the development environment is used.
 
@@ -37,7 +36,6 @@ It is assumed that the repository folder name is the same as the repository name
 cdss-app-statecu-fortran/           Repository folder.
   build-util/                       Useful utility scripts for software developers.
   doc-dev-doxygen-project/          Doxygen project to auto-generate code documentation.
-  doc-dev-mkdocs-project/           Markdown/MkDocs project for developer documentation.
   .git                              Git repository internal files (do not modify directly!).
   .gitattributes                    Standard Git configuration file for repository properties.
   .gitignore                        Standard Git configuration file for ignoring files.
@@ -61,7 +59,9 @@ C:\User\users\                              Windows user files.
   cdss-dev/                                 Software for Colorado's Decision Support Systems.
     StateCU/                                Work related to the StateCU product.
       git-repos/                            Git repositories for StateCU.
+     ---------- above line is recommended, below is required -----------------
         cdss-app-statecu-fortran/           StateCU code and documentation repository (see above).
+        cdss-app-statecu-fortran-doc-dev/   StateCU developer documentation.
         cdss-app-statecu-fortran-doc-user/  StateCU user documentation.
         cdss-app-statecu-fortran-test/      StateCU tests.
 ```
@@ -69,20 +69,22 @@ C:\User\users\                              Windows user files.
 ## Development Environment ##
 
 Software for the development environment should be installed and configured as per the
-[StateCU Developer Documentation](http://learn.openwaterfoundation.org/owf-learn-cdss-statecu-dev/index.html).
+[StateCU Developer Documentation](https://opencdss.state.co.us/statecu/latest/doc-dev/).
 
 ## Compiling ##
 
-The Eclipse Photran integrated development environment can be used to develop StateCU.
-However, the basic instructions to compile StateCU on the command line are as follows:
+The basic instructions to compile StateCU on the command line are as follows:
 
-1. Open a Windows command prompt window.
-2. In that window cd to `build-util\mingw` and run `setup-mingw-env.bat`.
-3. In that window, change to the source code folder `src\main\fortran`.
+1. Open a MSYS2 MinGW 64-bit terminal window.
+2. In that window, change to the main repository folder based on folder structure above.
+3. In that window, change to the source code folder: `cd src/main/fortran`
 4. View `make` command targets:  `make help`
-5. Compile StateCU using the `make` command:  `make statecu`
-6. The executable program will have a name `statecu-version.exe` on Windows and `statecu-version` on Linux, where `version` is a numeric version.
+5. Compile StateCU using the `make` command:  `make statecu_prog`
+6. The executable program will have a name similar to `statecu-14.0.0-gfortran-win-64bit.exe` on Windows and `statecu-14.0.0-gfortran-lin-64bit` on Linux.
 7. Use the executable in testing.
+
+The Eclipse Photran integrated development environment can be used to develop StateCU;
+however, this is not actively used or supported.
 
 ## License ##
 
