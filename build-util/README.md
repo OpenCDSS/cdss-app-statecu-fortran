@@ -4,7 +4,7 @@ This folder contains utility scripts (or batch files if Windows) that are used i
 
 | **File/Folder** | **Description** |
 | -- | -- |
-| `copy-to-co-dnr-gcp.bash` | Copy the StateCU executable to Google Cloud platform, for public access. |
+| `copy-to-co-dnr-gcp.bash` | Create and copy the StateCU zip file installer to Google Cloud platform, for public access. |
 | `create-gcp-statecu-index.bash` | Create an `index.html` file on GCP that lists the installer downloads and associated documentation. |
 | `eclipse/`| Contains batch file to run the correct version of Eclipse with proper Java version, if using Eclipse Photran for development. |
 | `git-check-statecu.sh` | Script to indicate status of all StateCU repositories. |

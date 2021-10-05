@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Create and copy the StateCU executable zip file installer to the CO DNR GCP website:
 # - replace all the files on the web for the specific version with local files
@@ -127,7 +127,7 @@ parseCommandLine() {
   done
 }
 
-# Print the usage
+# Print the usage.
 printUsage() {
   echoStderr ""
   echoStderr "Usage: ${scriptName} [options]"
@@ -219,7 +219,7 @@ updateIndex() {
 
 # Entry point for the script.
 
-# Get the location where this script is located since it may have been run from any folder
+# Get the location where this script is located since it may have been run from any folder.
 scriptFolder=$(cd $(dirname "$0") && pwd)
 scriptName=$(basename $0)
 version="1.0.0 (2021-09-05)"
@@ -261,7 +261,7 @@ echoStderr "zipFile=${zipFile}"
 
 # Initialize controlling data.
 dryrun=""
-# TODO smalers 2021-09-02 latest is only for documentation
+# TODO smalers 2021-09-02 latest is only for documentation.
 #gsFolderLatest="gs://opencdss.state.co.us/statecu/latest/software"
 #gsFileLatestZip="${gsFolderLatest}/statecu-cdss-${statecuVersion}.zip"
 gsFolderVersion="gs://opencdss.state.co.us/statecu/${statecuVersion}/software"
