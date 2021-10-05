@@ -5,8 +5,8 @@
 #   opencdss.state.co.us/statecu/index.html
 #   opencdss.state.co.us/statecu/index.csv
 #
-# The former is used as the default web page.
-# The latter can be used by StateCU GUI and other tools to check for updates.
+# The 'index.html' file is used as the default web page.
+# The 'index.csv' file can be used by StateCU GUI and other tools to check for updates.
 #
 # MSys2 MinGW does not use the full Windows Path so the 'gsutil' program must be located.
 # MSys2 MinGW does seem to be shipped with Python3, so it can be run from 'gsutil'.
@@ -14,9 +14,8 @@
 # Supporting functions, alphabetized.
 
 # Determine the operating system that is running the script:
-# - sets the variable operatingSystem to cygwin, linux, or mingw (Git Bash)
-checkOperatingSystem()
-{
+# - sets the variable operatingSystem to 'cygwin', 'linux', or 'mingw' (Git Bash)
+checkOperatingSystem() {
   if [ ! -z "${operatingSystem}" ]; then
     # Have already checked operating system so return.
     return
@@ -59,7 +58,7 @@ gcpUtilFileExists() {
   return $?
 }
 
-# Get the user's login to local temporary files:
+# Get the user's login to use for local temporary files:
 # - Git Bash apparently does not set ${USER} environment variable
 # - Set USER as script variable only if environment variable is not already set
 # - See: https://unix.stackexchange.com/questions/76354/who-sets-user-and-username-environment-variables
@@ -183,13 +182,12 @@ setGsutilCommand() {
 }
 
 # Upload the index.html file for CDSS download page:
-# - this is basic at the moment but can be improved in the future such as
-#   software.openwaterfoundation.org page, but for only one product, with list of variants and versions
+# - this is basic at the moment but can be improved in the future
 uploadIndexHtmlFile() {
   local indexHtmlTmpFile gcpIndexHtmlUrl
   local indexCsvTmpFile gcpIndexCsvlUrl
-  # List available software installer files
-  # - $gcpFolderUrl ends with /statecu
+  # List available software installer files:
+  # - ${gcpFolderUrl} ends with /statecu
   # - the initial output will look like the following, with size, timestamp, resource URL:
   #
   # gs://opencdss.state.co.us/statecu/14.0.0/software/:

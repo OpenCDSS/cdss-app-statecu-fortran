@@ -135,6 +135,9 @@ c_________________________________________________________________NoticeEnd___
 ! smalers 2021-08-14   version 14.0.0
 !                First 64-bit gfortran release.
 !                Additional cleanup may occur as automated testing is implemented.
+! smalers 2021-10-04   version 14.0.1
+!                Fix bug in mainxc.for that caused BD1 file to not be written
+!                for scenarios without a water supply option (isuply=0).
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
@@ -182,8 +185,8 @@ c_________________________________________________________________NoticeEnd___
       ! - part 2 is minor new feature release
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
-      CHARACTER*16, PARAMETER :: VERS = '14.0.0'
-      CHARACTER*12, PARAMETER :: RDATE = '09/05/21'
+      CHARACTER*16, PARAMETER :: VERS = '14.0.1'
+      CHARACTER*12, PARAMETER :: RDATE = '10/04/21'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops

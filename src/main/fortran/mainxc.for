@@ -182,7 +182,7 @@ Cjhb=&==================================================================
 C             added use of orographic temp and precip adjustments
 c jhb 03/08     changed missing data criteria and behavior:
 c               if any data is missing for any associated weather station
-c               then the entiure month's value [tmean(iy,im),rntot(iy,im)]
+c               then the entire month's value [tmean(iy,im),rntot(iy,im)]
 c               is marked missing
 Cjhb=&==================================================================
 C             tmean(iy,im)=tmean(iy,im)+wws(ib,i)*tmpt(i,iy,im)
@@ -346,7 +346,7 @@ Cjhb       one value at at time with GET() statements without having to "hardwir
 Cjhb       a fixed record structure that would cause the VB6 code to "break"
 Cjhb       if the FORTRAN output changed.
 Cjhb       Now new values can be added to the binary output files in the FORTRAN code
-Cjhb       and the VB6 GUI will automatically accomodate them without any changes.
+Cjhb       and the VB6 GUI will automatically accommodate them without any changes.
 Cjhb       In addition, this allows the BD1 file to be different for each scenario
 Cjhb       option (ISUPLY, IFLOOD, etc) without creating a nightmare for the VB6 code
 Cjhb       attempting to read the file.
@@ -479,15 +479,15 @@ Cjhb=&==================================================================
 Cjhb       Now write the sub basin (district) and basin (all structures) data records
 Cjhb====================================================================
         if(sboutput) then
-        DO I=0,SBCOUNT
-          CHAR12_1=SBID(I)
-          CHAR12_2=SBNAME(I)(13:24)
-          WRITE(UNIT=IBD1UN)NBASIN+I+1,CHAR12_1,CHAR12_2
-        END DO
-C        CHAR12_1=BID
-C        CHAR12_2=BNAME
-C        WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
-         WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,BID,BNAME
+          DO I=0,SBCOUNT
+            CHAR12_1=SBID(I)
+            CHAR12_2=SBNAME(I)(1:12)
+            WRITE(UNIT=IBD1UN)NBASIN+I+1,CHAR12_1,CHAR12_2
+          END DO
+          CHAR12_1=BID
+          CHAR12_2=BNAME(1:12)
+          WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,CHAR12_1,CHAR12_2
+C         WRITE(UNIT=IBD1UN)NBASIN+SBCOUNT+1+1,BID,BNAME
         endif
 Cjhb=&==================================================================
       
@@ -657,4 +657,3 @@ c 888  format('WDID         Year Mo       ET  Effppt     IWR')
 
       RETURN 
       END
-
