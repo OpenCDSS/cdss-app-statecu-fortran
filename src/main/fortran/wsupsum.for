@@ -62,6 +62,7 @@ c_________________________________________________________________NoticeEnd___
 !                  changed output (DWB, SWB) header labeling to farm headgate deliv instead of river div by priority
 !                  changed output (DWB, SWB) "total" output to farm headgate deliv total, allf(), instead of river div total
 !                  changed output (binary) labeling of farm headgate deliv by priority outputs
+! klt 2023/12/29   added capability to identify surfacewater used directly in gw-sprinklers when using gmode=3 (SWD file) 
 !
 !   Calling program : statecu.f
 !   Called programs : none
@@ -214,6 +215,14 @@ c_________________________________________________________________NoticeEnd___
       REAL :: sfeffcnt=0.0
 ! jhb 05-18-07 add a system efficiency for gw lands      
       REAL :: gfeffcnt=0.0
+! klt additional variables for surface water direct use
+      REAL :: divsupt,gssharet,swdirafm,swdval
+      REAL :: gsshrac,gsshracs,gsshracj,gsshraco
+      INTEGER :: iswdtype,iswdiraf,iswdirac
+! klt additional variables for well pumping redistribution
+      INTEGER :: idistpvh
+      REAL :: mpreqtt,mpratet
+      REAL :: mpsreq(12),mpfreq(12),mpreqt(12)
 ! grb 06-05-00 change dimension to 100 from 99
       REAL :: met=0.
       REAL :: percenta(DIM_NY)=0.
@@ -865,8 +874,11 @@ c_________________________________________________________________NoticeEnd___
 !jhb=&==================================================================
 !jhb=&if the PVH file exists, read it, else jump to the drafile reading code
 !jhb=&==================================================================
+!klt  added in write to screen/log and 
       if(pvhfile.eq.'') goto 43
-      open (unit=180,file=pvhfile,status='old',err=43)
+      write(*,*) 'Reading Well Pumping File:  ', pvhfile
+      write(999,*) 'Reading Well Pumping File:  ', pvhfile
+      open (unit=180,file=pvhfile,status='old',err=41)
       call skipn(180) !skip comment records
 !jhb=&==================================================================
 ! check to see if gw data exists for all years
@@ -890,7 +902,8 @@ c_________________________________________________________________NoticeEnd___
 !jhb=& (note it adjusts for water year)
 !jhb=&==================================================================
 33    read (180,21, end=40) itmp,pvhid,(p1(k),k=1,12)
-21    format(i4,1x,a12,12f8.0)
+!kltrem 21    format(i4,1x,a12,12f8.0)
+21    format(i4,1x,a12,12f8.1)
       if(idum3 .eq. 'WYR' .and. itmp .lt. (nyr1+1)) goto 33
       if(itmp .lt. nyr1) goto 33
       if(itmp .gt. nyr2) goto 40
@@ -916,7 +929,63 @@ c_________________________________________________________________NoticeEnd___
 35    continue
       goto 33
 40    close(180)
+      goto 43
+41    continue
+      write(*,*) 'File was bad or could not find file:  ', pvhfile
+      write(0,*) 'File was bad or could not find file:  ', pvhfile
+      write(999,*) 'File was bad or could not find file:  ', pvhfile
+      stop
 43    continue
+!klt===================================================================
+!     new - if the SWD (direct surface water use) file exists, read it
+!
+!#>Yr type WDID        Value
+!#>-e-b--e-b----------eb-------e
+!2015    1 2000812        1063.9
+!
+! type = 1 if value in acre-ft, 2 if value in acres 
+!
+! putting it into a full (dim_na,dim_ny) array takes up alot of memory
+! so may want to differently
+! since probably only used it RGDSS model, only initialize here if exists
+!
+!klt===================================================================
+      if(swdfile.eq.'') goto 39
+      do i=1,dim_na
+        do j=1,dim_ny
+          swdiraf(i,j)=0.0
+          swdirac(i,j)=0.0
+        enddo
+      enddo
+      write(*,*) 'Reading Direct Surface Water Use File:  ', swdfile  
+      write(999,*) 'Reading Direct Surface Water Use File:  ', swdfile
+      open (unit=185,file=swdfile,status='old',err=38)
+      call skipn(185) !skip comment records
+23    read (185,24, end=37) itmp,iswdtype,pvhid,swdval
+24    format(i4,1x,i4,1x,a12,f9.1)
+      if(itmp .lt. nyr1) goto 23
+      if(itmp .gt. nyr2) goto 23
+      iyr=itmp-nyr1+1
+      do 36 i=1,nbasin
+        twdid=bas_id(i)(1:12)
+        if(twdid(1:12) .eq. pvhid) then
+          if(iswdtype .eq. 1) then
+             swdiraf(i,iyr)=swdval
+          elseif (iswdtype .eq. 2) then
+             swdirac(i,iyr)=swdval
+          endif
+          goto 23
+        endif
+36    continue
+      goto 23
+37    close(185)
+      goto 39
+38    continue
+      write(*,*) 'File was bad or could not find file:  ', swdfile
+      write(0,*) 'File was bad or could not find file:  ', swdfile
+      write(999,*) 'File was bad or could not find file:  ', swdfile
+      stop
+39    continue
 !jhb=&==================================================================
 ! ew 03/12/04 - open and read drain/tailwater supply file
 !               (here to 60)
@@ -3287,6 +3356,110 @@ C       write(413,'(a881)')
               endif
           end select
 !         endif
+!klt====================================================================
+!        new - surface water direct use check/calcs on annual timestep
+!         	divsupt=annual swdiversion at river
+!         	gssharet=annual swdiversion to gw-sprinklers at farmheadgate
+!                    used for scaling annual direct use values
+!klt====================================================================          
+          iswdiraf=0
+          iswdirac=0
+          gssharet=0.0
+          if(swdfile .ne. '') then
+          if(gmode(i,m) .eq. 3) then
+          if(swdiraf(i,m) .gt. 0.0) then
+              divsupt=0.0
+              do l=1,12
+                 divsupt=divsupt+divsup(i,m,l)
+              enddo
+              if(t_area(i,m).gt.0.0) then
+                 gssharet=divsupt*ceff(i,m)*swgwspac(i,m)/t_area(i,m)
+                 iswdiraf=1
+              endif
+          endif
+          if(swdirac(i,m) .gt. 0.0) then
+              iswdirac=1
+          endif
+          endif
+          endif
+!klt====================================================================
+!        new - redistribution of pvh pumping based on demand
+!              remaining after application of surface water
+!
+!           in Rio Grande, pumping is reported on annual basis and pvhfile
+!           pumping is distributed based on an average demand curve
+!           but that can lead to excess in spring and shortage in fall
+!           where really the pumps may have only been used in fall after
+!           the surface water shut off
+!
+!         	divsupt=annual swdiversion at river
+!         	gssharet=annual swdiversion to gw-sprinklers at farmheadgate
+!                    used for scaling annual direct use values
+!klt====================================================================          
+          idistpvh=2009
+          if(idistpvh .gt. 0) then
+          iyr=idistpvh-nyr1+1
+          if(m .ge. iyr) then
+          if(isuply .eq. 4) then
+          if(iflag2(i) .eq. 1) then
+!klt        -----------------------------------------------
+!           unfortunately have to redo monthly iwr calcs up here
+!klt        -----------------------------------------------
+!            mpsreqt=0.0
+!            mpfreqt=0.0
+            mpreqtt=0.0
+            mpratet=0.0
+            do l=1,12
+              mpsreq(l)=0.0
+              mpfreq(l)=0.0
+              mpreqt(l)=0.0
+            if(l .eq. 1) then
+                if(m .eq. 1) then
+                    wbu(i,m,l)=WINTPREC(i,m,l)
+                else
+                    wbu(i,m,l)=wbu(i,m-1,12)+WINTPREC(i,m,l)
+                endif
+            else
+                wbu(i,m,l)=wbu(i,m,l-1)+WINTPREC(i,m,l)
+            endif
+            wbu(i,m,l)=max(min(wbu(i,m,l),scapatot(i,m)-soiltot),0.)
+            if(reqt(i,m,l) .gt. -998) then
+              wbu_used = max(min(reqt(i,m,l),wbu(i,m,l)),0.)
+              wbused(i,m,l)=wbu_used
+              reqreq(m,l) = reqt(i,m,l) - wbu_used
+              wbu(i,m,l) = wbu(i,m,l) - wbu_used
+              if(t_area(i,m).gt.0.0)then
+                gsreq(m,l)=reqreq(m,l)*swgwspac(i,m)/t_area(i,m)
+                gfreq(m,l)=reqreq(m,l)*swgwflac(i,m)/t_area(i,m)
+                mpsreq(l)=max(gsreq(m,l)/speff(i,m)-divsup(i,m,l)
+     &           *ceff(i,m)*swgwspac(i,m)/t_area(i,m),0.0)
+!                mpsreqt=mpsreqt+mpsreq(l)
+                mpfreq(l)=max(gfreq(m,l)/fleff(i,m)-divsup(i,m,l)
+     &           *ceff(i,m)*swgwflac(i,m)/t_area(i,m),0.0)
+!                mpfreqt=mpfreqt+mpfreq(l)
+                mpreqt(l)=mpsreq(l)+mpfreq(l)
+                mpreqtt=mpreqtt+mpreqt(l)
+              else
+!                mpsreq(l)=0.0
+!                mpfreq(l)=0.0
+                mpreqt(l)=0.0
+              endif
+            else
+!              mpsreq(l)=0.
+!              mpfreq(l)=0.
+              mpreqt(l)=0.
+            endif
+              mpratet=mpratet+mprate(i,m,l)
+            enddo
+            if(mpreqtt .gt. 0.0) then
+              do l=1,12
+                mprate(i,m,l)=mpratet*mpreqt(l)/mpreqtt
+              enddo
+            endif
+          endif
+          endif
+          endif
+          endif
 !jhb=&==================================================================
 !         begin month loop
 !jhb=&==================================================================
@@ -4075,11 +4248,43 @@ C       write(413,'(a881)')
                     endif
                     gsshare=gsshares+gssharej+gsshareo
 !                   -----------------------------------------------
-                    gwshare=gfshare+gsshare
+!kltrmv             gwshare=gfshare+gsshare
+!klt                -----------------------------------------------
+!                   new surface water direct use capability for gmode=3
+!                       add in measured (af) sw use in gw-sprinklers
+!klt                -----------------------------------------------
+                    if(iswdiraf .eq. 1)then
+                      swdirafm=swdiraf(i,m)*gsshare/gssharet
+                      arech(m,l)=gsshare-swdirafm
+                      gsshare=swdirafm
+                      gsshares=swdirafm*gfshares/gfshare
+                      gssharej=swdirafm*gfsharej/gfshare
+                      gsshareo=swdirafm*gfshareo/gfshare
+                    else
+                      arech(m,l)=gsshare
+                      gsshare=0.0
+                      gsshares=0.0
+                      gssharej=0.0
+                      gsshareo=0.0
+                    endif
+!klt                -----------------------------------------------
+!                     or to account for gw sprinkler acres with sw use
+!klt                -----------------------------------------------
+                    if (iswdirac .eq. 1)then
+                      gsshracs=holdfs*swdirac(i,m)/t_area(i,m)
+                      gsshracj=holdfj*swdirac(i,m)/t_area(i,m)
+                      gsshraco=holdfo*swdirac(i,m)/t_area(i,m)
+                      gsshrac=gsshracs+gsshracj+gsshraco
+                      arech(m,l)=max(arech(m,l)-gsshrac,0.)
+                      gsshare=gsshare+gsshrac
+                      gsshares=gsshares+gsshracs
+                      gssharej=gssharej+gsshracj
+                      gsshareo=gsshareo+gsshraco
+                    endif
 !                   -----------------------------------------------
 !                   sw for gw spr acreage goes to recharge, not cu
 !                   -----------------------------------------------
-                    arech(m,l)=gsshare
+!kltrmv             arech(m,l)=gsshare
                     arech(m,13)=arech(m,13)+arech(m,l)
                     arech(nyrs1,l)=arech(nyrs1,l)+arech(m,l)
 !                   -----------------------------------------------
@@ -4093,15 +4298,16 @@ C       write(413,'(a881)')
 !                   -----------------------------------------------
 !                   reset the gw spr deliveries to 0 (went to recharge)
 !                   -----------------------------------------------
-                    gsshare=0.0
-                    gsshares=0.0
-                    gssharej=0.0
-                    gsshareo=0.0
+!kltrmv             gsshare=0.0
+!kltrmv             gsshares=0.0
+!kltrmv             gssharej=0.0
+!kltrmv             gsshareo=0.0
 !                   -----------------------------------------------
                     gwshare=gfshare+gsshare
 !                   -----------------------------------------------
                     gfcu=min(max(gfshare*fleff(i,m),0.),gfreq(m,l))
-                    gscu=0.0 !no cu from sw since no deliv from sw
+!kltrmv             gscu=0.0 !no cu from sw since no deliv from sw
+                    gscu=min(max(gsshare*speff(i,m),0.),gsreq(m,l))
                     gcu=gfcu+gscu
 !                   -----------------------------------------------
                   case (1)

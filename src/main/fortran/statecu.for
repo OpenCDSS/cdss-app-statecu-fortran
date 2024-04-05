@@ -556,6 +556,16 @@ C         write(999,*)'  PCR Input file type is only used by StateCU'
 C         write(999,*)'  EPR Input file type is only used by StateCU'
          case default
          end select
+       case(Token33,Token73)
+         swdfile=trim(file2)
+         select case (scu_debug)
+         case (0)
+         case (1)
+         write(999,*)'  SurfaceWater Direct Use filename (*.swd) = ',
+     &     trim(swdfile)
+C         write(999,*)'  SWD Input file type is only used by StateCU'
+         case default
+         end select
        case("comment_line")
        case("")
 c        catch this warning and record in new log file format...

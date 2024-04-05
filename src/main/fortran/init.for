@@ -54,6 +54,7 @@ c_________________________________________________________________NoticeEnd___
       addfile=''
       dcufile=''
       gisfile=''
+      swdfile=''
       rcrfile='xxx'
       pcrfile='xxx'
       end subroutine
