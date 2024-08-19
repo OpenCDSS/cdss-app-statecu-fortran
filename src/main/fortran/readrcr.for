@@ -49,11 +49,16 @@ C      INCLUDE 'pmdata.inc'
 
       integer initflag
       character*(*) filename
-C-----Local variable declaration
+C-----Local variable declaration----------------------------------------------
+C----------------------------------------------------------------------------
       character*3 idum3
       character*12 rcridt
       character*24 twdid
       integer i,j,k,m,ierr,itmp,itmp2,hnyr1,hnyr2
+C  bm 09/2022 added variables associated with soil moisture initalizaltion 
+      INTEGER ip, key
+      REAL scapasp
+      REAL scap(DIM_NP)
       real temp(12)
 c make sure we have a real file to read
       numch=len_trim(filename)
@@ -65,18 +70,8 @@ C initialize the arrays
         do j=1,DIM_NA
           do k=1,DIM_NY
             do i=1,12
-              reqt(j,k,i)=-999.0
-              tmprcr(j,k,i)=-999.0
-            enddo
-            reqt(j,k,13)=0.0
-            reqt(j,k,14)=0.0
-          enddo
-        enddo
-      else
-        do j=1,DIM_NA
-          do k=1,DIM_NY
-            do i=1,12
-              tmprcr(j,k,i)=-999.0
+              reqt(j,k,i)=0
+              tmprcr(j,k,i)=0
             enddo
             reqt(j,k,13)=0.0
             reqt(j,k,14)=0.0
@@ -126,4 +121,25 @@ C all the following code and logic copied from slimit.for
 190       continue
 191     continue
 192   continue
-      end
+!----------------------------------------------------------------------
+! Bm 09/2022 added in soil moisture in order to be able to avoid doing BC or PM calculations
+!	when an RCR is being used. 
+!--Initialize Soil Moisture Content-------------------------------------
+         DO 800 i=1,nbasin
+          DO 801 m=1,nyrs
+           DO 802 IP = 1, nparce(i,m)
+            key = bkey(i,IP,m)
+            awc(key)=awcr(i)
+            irz(key) = frz(key)  ! WARNING - this nullifies the fact that
+                                 ! root depth increases during the growing
+                                 ! season.  This capability is only used
+                                 ! in the Penman-Montieth method
+            rz(key) = irz(key)
+            scap(IP) = 12.0*rz(key)*awc(key)  
+            scapasp = (scap(IP)*area(i,IP,m))/12
+            scapatot(i,m) = scapatot(i,m) + scapasp
+  802      CONTINUE
+  801     CONTINUE
+  800    CONTINUE
+!---------------------------------------------------------------------
+         END

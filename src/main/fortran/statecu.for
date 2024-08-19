@@ -14,7 +14,7 @@ c     but WITHOUT ANY WARRANTY; without even the implied warranty of
 c     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 c     GNU General Public License for more details.
 c 
-c     You should have received a copy of the GNU General Public License
+c     You should have received a copy of the GNU General Public License5
 c     along with StateCU.  If not, see <https://www.gnu.org/licenses/>.
 c_________________________________________________________________NoticeEnd___
 
@@ -565,7 +565,7 @@ C         write(999,*)'  EPR Input file type is only used by StateCU'
      &     trim(swdfile)
 C         write(999,*)'  SWD Input file type is only used by StateCU'
          case default
-         end select
+         end select         
        case("comment_line")
        case("")
 c        catch this warning and record in new log file format...
@@ -612,12 +612,13 @@ c
       READ(1,*,ERR=912) NYR1,NYR2          ! subset
       NYRS = NYR2 - NYR1 + 1
       IF( NYRS .GT. DIM_NY ) CALL MYEXIT(63)
-C     Flags for ET methods
+C     Flags for ET methods - Updated 09/2022 to include RCR
 C     ET Method: FLAG1  1 - Blaney-Criddle (SCS BC Original and Enhanced) basins
 C                       2 - Calculate and Summarize "other uses"
 C                       3 - Penman-Monteith
 C                       4 - Modified Hargreaves
-c                       5 - ASCE Penman-Monteith    
+c                       5 - ASCE Penman-Monteith
+c                       6 - Using an RCR
 C----------------------------------------------------------------------------
 c rb- assume for data centered method,performing blaney criddle
 c
@@ -652,7 +653,9 @@ C                   = 5 - SCS NEH Method (read CN(1,3), runoff curve 1,2,3
             goto 11
           endif
         end do
-
+       if(flag1 .eq. 2) Then
+         RNXCO=0
+       endif
 11      j2 = j + 1
         if(RN_XCO .gt. 2) then
            if( flag1 .lt. 2) then
@@ -704,7 +707,7 @@ c       illegal value for isuply
 c
 c read climate station file
 c
-
+      if(flag1 .eq. 6) goto 202
 230   if(clifile .eq. '') then
         write(999,*)'No climate station file defined in the *.rcu file.'
         write(*,*) 'No climate station file defined in the *.rcu file.'
@@ -925,7 +928,7 @@ c jhb 2006 this will be enforced as a 1-1 relationship from now on
         enddo
       ENDIF
 
-      call sb_init !initialize the "sub-basin" i.e. district arrays
+202   call sb_init !initialize the "sub-basin" i.e. district arrays
 
       if(strfile .eq. '') then
         write(999,*) 'No structure file defined in the '//
@@ -963,6 +966,7 @@ c        put this new strucutre in the appropriate subbasin
          enddo
          rlat(nbasin)=0.0
          relev(nbasin)=0.0
+!       if(flag1 .eq. 6) goto 400
 Cjhb=&==================================================================
 C        make sure the # climate stations is >0
 Cjhb=&==================================================================
@@ -979,6 +983,11 @@ Cjhb=&==================================================================
 Cjhb=&==================================================================
 C         read(30,924,end=445) tid, twt, pwt
           read(30,924,end=445) tid, twt, pwt, OptArgs
+          if(flag1 .eq. 6) then
+           imatch=1
+           go to 401
+          else
+          endif 
 Cjhb=&==================================================================
            do 405 i=1,n_sta
            if(wsid(i) .eq. tid) then
@@ -1105,6 +1114,7 @@ c
 
 445    close(30)
        call sb_final
+       if(flag1 .eq. 6) goto 204
 c
 c check to see if climate station weights = 1
 c
@@ -1153,7 +1163,7 @@ c
 c ew- finish reading .CCU file (if iclim=1)
 c      if iclim=0, set default output to *.iwr file and *.obc file
 c
-      if(iclim .eq. 0) then
+204   if(iclim .eq. 0) then
         do  i=1,nbasin
            typout(i)=1
         enddo
@@ -1192,6 +1202,7 @@ c      read(1,*) ismcar
 c      smef = ismcar/100.0
       read(1,*) smcar
       smef = smcar
+c
 c
 c rb-   read default report level, modify with replace file 
 c
@@ -1654,7 +1665,8 @@ c                sum of crop %s are far off enough from 100% to warrant a warnin
           enddo
         endif
       enddo
-
+c
+       if(flag1 .eq. 6) goto 700
 c rb- read and process frost date data
 c ew- allow for missing frost date data
 c
@@ -1851,7 +1863,7 @@ C-----Calculate total area by crops
 729     continue
 730   continue
 
-
+! bm - removed summary file from all scenarios
 C-----Start Calculation
 735   select case (flag1)
         case(1)
@@ -1909,29 +1921,22 @@ C-----Start Calculation
           write(*,*) 'Starting ASCE Penman-Monteith Process.'
           write(999,*) 'Starting ASCE Penman-Monteith Process.'
           CALL PROTO
-        Case Default
-      end select
-Cjhb &==================================================================
-Cjhb  12/07/2011 - add the RCR and PCR input file processing
-Cjhb  these files completely or partially replace the calculated IWR
-Cjhb    in the REQT array
-Cjhb &==================================================================
+c bm 9/15/moved the below up, removed the ability to do a partial replacement
+        case(6)
       if(rcrfile .eq. 'xxx') then
 c-------do nothing
       else
-c-------init the reqt array to all -999 values (initflag=1) and
+c-------init the reqt array to all 0 values (initflag=1) and
 c-------read the rcrfile and replace the reqt array entries as necessary
-        initflag=1
+          write(*,*) 'Summarizing input to file *.sum and processing.'
+          write(999,*) 'Summarizing input to file *.sum and processing.'
+          CALL SUMMARY
+      initflag=1
         call readrcr(initflag,rcrfile)
+           initflag=0      
       endif
-      if(pcrfile .eq. 'xxx') then
-c-------do nothing
-      else
-c-------leave the reqt array unchanged (initflag=0) and
-c-------read the pcrfile and replace the reqt array entries as necessary
-        initflag=0
-        call readrcr(initflag,pcrfile)
-      endif
+        Case Default
+      end select
 C ew
 C ew - replace excess precipitation NOTE - all or nothing, no partial replace
 C ew

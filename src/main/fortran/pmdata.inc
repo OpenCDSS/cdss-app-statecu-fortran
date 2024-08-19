@@ -142,7 +142,7 @@ C klt SWD file is for surface water used in gmode=3 gw-sprinklers
 C klt
       character(len=*),parameter :: Token33="swd"
       character(len=*),parameter :: 
-     & Token73="SurfaceWater_Direct_Use"
+     & Token73="SurfaceWater_Direct_Use"     
 C0000000011111111112222222222333333333344444444445555555555666666666677777777778
 C2345678901234567890123456789012345678901234567890123456789012345678901234567890
 Cjhb=&==================================================================

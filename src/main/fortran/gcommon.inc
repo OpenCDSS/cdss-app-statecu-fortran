@@ -138,16 +138,24 @@ c_________________________________________________________________NoticeEnd___
 ! smalers 2021-10-04   version 14.0.1
 !                Fix bug in mainxc.for that caused BD1 file to not be written
 !                for scenarios without a water supply option (isuply=0).
-! version 14.0.2
-!                This version had been floating around, not sure of source code
-! klt (Kelley Thompson) 2024-01-02   version 14.1.0
+! bm 2022-09-22   version 14.0.2
+!                Increase the number of structures to 1300 for compatability with ArkDSS
+!                Add in new flag1 to allow for RCR and skip IWR calculations if RCR is present
+!                No longer need Climate files if RCR File is present and Flag1 set to 6
+!                Fix bug where if pumping is greater or less than needed to meet IWR, water balance does not work
+! bm 2024-05-22  version 14.2.0
+!                Integrate changes made by Kelley Thompson with WWG version of code:
 !                Added capability to identify surfacewater used directly in gw-sprinklers when using gmode=3
 !                As used in RGDSS model, gmode=3 gw-sprinklers otherwise recharge all available surface water
 !
+! bm 2024-08-19  version 14.3.0
+!                Fixed issued with Water Rights Priority, can now use daily and monthly water rights administration with this version
+! 		
+! 
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
-!                     number of subareas (or structures)    = 1200
+!                     number of subareas (or structures)    = 1300
 !                     number of parcels per structure       = 50
 !                     number of years                       = 130 
 !                     number of crop types                  = 70
@@ -162,7 +170,7 @@ c_________________________________________________________________NoticeEnd___
 
 !-----Dimension (Corresponding dimension parameters in other include files
 !-----should be changed)
-      INTEGER, PARAMETER :: DIM_NA = 1200
+      INTEGER, PARAMETER :: DIM_NA = 1300
       INTEGER, PARAMETER :: DIM_NP = 50
       INTEGER, PARAMETER :: DIM_NY = 130
       INTEGER, PARAMETER :: DIM_NC = 70
@@ -191,8 +199,8 @@ c_________________________________________________________________NoticeEnd___
       ! - part 2 is minor new feature release
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
-      CHARACTER*16, PARAMETER :: VERS = '14.2.0'
-      CHARACTER*12, PARAMETER :: RDATE = '01/04/24'
+      CHARACTER*16, PARAMETER :: VERS = '14.3.0'
+      CHARACTER*12, PARAMETER :: RDATE = '06/3/2024'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
@@ -233,7 +241,7 @@ c_________________________________________________________________NoticeEnd___
       CHARACTER*15 SOIL(DIM_NC), SNAME(14)
       CHARACTER*24 NAMEASP(DIM_NA)
       CHARACTER*200 dfile
-! rb- add input filenames - klt add swdfile
+! rb- add input filenames
       character*200 rcufile,ccufile,kbcfile,tmpfile,pptfile
       character*200 ddhfile,othfile,logfile,cdsfile,fdfile,cchfile
       character*200 kpmfile,strfile,ddsfile,kmhfile
@@ -480,7 +488,7 @@ c EW TEST
       COMMON /G5a/ GNYRS, GNYR1, GNYR2
       COMMON /G6/ T_AREA, M_AREA, MAD, NU_NME, NU_SUM, SUM_Y
       COMMON /G6a/C_AREA, TFLG1, TFLG2, NU_DIM
-      COMMON /G7/ ISM,SMEF,WBU,WINTPREC,WBUSED
+      COMMON /G7/ ISM,SMEF,SMDOGLEG,WBU,WINTPREC,WBUSED
       COMMON /G8/ RPARA
       COMMON /G9/ N_SOIL,CRPTYP
       COMMON /G10/ TMOIS1, TMOIS2, AWC
@@ -499,7 +507,7 @@ c EW TEST
       COMMON /GG2a/ DBYEAR,DEYEAR,IFIR
       COMMON /GG2b/ ddstrctt,ddindex,iddrec
       COMMON /GG2c/ ddstruct,imissflg,TRIGHTS
-c jhb 07-12-00 add gisfile (known, but unused in statecu) klt add swdfile
+c jhb 07-12-00 add gisfile (known, but unused in statecu) - klt add swdfile
       common /gg2d/ admfile,dddfile,addfile,dcufile,gisfile
       common /gg2e/ rcufile,ccufile,kbcfile,tmpfile,pptfile
       common /gg2f/ ddhfile,othfile,logfile,cdsfile,fdfile,cchfile

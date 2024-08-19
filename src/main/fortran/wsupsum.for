@@ -970,9 +970,9 @@ c_________________________________________________________________NoticeEnd___
         twdid=bas_id(i)(1:12)
         if(twdid(1:12) .eq. pvhid) then
           if(iswdtype .eq. 1) then
-             swdiraf(i,iyr)=swdval
+             swdiraf(i,iyr)=swdiraf(i,iyr)+swdval
           elseif (iswdtype .eq. 2) then
-             swdirac(i,iyr)=swdval
+             swdirac(i,iyr)=swdirac(i,iyr)+swdval
           endif
           goto 23
         endif
@@ -3854,7 +3854,9 @@ C       write(413,'(a881)')
                   HOLDPS=PERSEN(I,M,L)*divsup(i,m,l)
                 endif
               ENDIF
-              if (idaily.eq.0 .or. idaily .eq. 1) THEN
+! bm changed 1 to 5
+              if (idaily.eq.0 .or. idaily .eq. 5) THEN
+!              if (idaily.eq.0 .or. idaily .eq. 1) THEN
                 if(persen(i,m,l) .lt. -998) then
                   HOLDPS=MIN(DIVSUP(I,M,L),SENASP(I)*1.9835*month(L))
                 else
@@ -4971,10 +4973,11 @@ C       write(413,'(a881)')
             soiltotto(m,13)     = soiltotto(m,13)     + soiltotto(m,l)
             soiltotto(nyrs1,l)  = soiltotto(nyrs1,l)  + soiltoto
             soiltotto(nyrs1,13) = soiltotto(nyrs1,13) + soiltoto
-            soiltott(m,l)       = soiltott(m,l)       + soiltot
-            soiltott(m,13)      = soiltott(m,13)      + soiltott(m,l) 
-            soiltott(nyrs1,l)   = soiltott(nyrs1,l)   + soiltot
-            soiltott(nyrs1,13)  = soiltott(nyrs1,13)  + soiltot
+! BM - Commented out Soiltot , calculating it after GW.
+!            soiltott(m,l)       = soiltott(m,l)       + soiltot
+!            soiltott(m,13)      = soiltott(m,13)      + soiltott(m,l) 
+!            soiltott(nyrs1,l)   = soiltott(nyrs1,l)   + soiltot
+!            soiltott(nyrs1,13)  = soiltott(nyrs1,13)  + soiltot
             wbu(i,nyrs1,13)     = wbu(i,nyrs1,13)     + wbu(i,m,l)
             wbu(i,nyrs1,l)      = wbu(i,nyrs1,l)      + wbu(i,m,l)
 !jhb        ------------------------------------------------------------
@@ -5224,6 +5227,11 @@ C       write(413,'(a881)')
               gsdiv(nyrs1,l) = gsdiv(nyrs1,l) + gsdiv(m,l)
               gfdiv(m,13)    = gfdiv(m,13)    + gfdiv(m,l)
               gfdiv(nyrs1,l) = gfdiv(nyrs1,l) + gfdiv(m,l)
+! BM added soiltot check here 10/4-------------------------------------------------------------------------
+              soiltott(m,l)       = soiltott(m,l)       + soiltot
+              soiltott(m,13)      = soiltott(m,13)      + soiltott(m,l) 
+              soiltott(nyrs1,l)   = soiltott(nyrs1,l)   + soiltot
+              soiltott(nyrs1,13)  = soiltott(nyrs1,13)  + soiltot
 !jhb          ----------------------------------------------------------
 !jhb          added the gw to sm component to the balance 
               gwdivsm(m,13)    = gwdivsm(m,13)    + gwdivsm(m,l)
