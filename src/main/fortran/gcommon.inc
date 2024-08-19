@@ -143,14 +143,12 @@ c_________________________________________________________________NoticeEnd___
 !                Add in new flag1 to allow for RCR and skip IWR calculations if RCR is present
 !                No longer need Climate files if RCR File is present and Flag1 set to 6
 !                Fix bug where if pumping is greater or less than needed to meet IWR, water balance does not work
+! klt 2024-01-02 version 14.1.0
+!                Added new .swd file to identify AF or acres of surface water used directly in gw-sprinklers when using gmode=3
 ! bm 2024-05-22  version 14.2.0
-!                Integrate changes made by Kelley Thompson with WWG version of code:
-!                Added capability to identify surfacewater used directly in gw-sprinklers when using gmode=3
-!                As used in RGDSS model, gmode=3 gw-sprinklers otherwise recharge all available surface water
-!
-! bm 2024-08-19  version 14.3.0
-!                Fixed issued with Water Rights Priority, can now use daily and monthly water rights administration with this version
-! 		
+!                Add Dog Leg soil moisture function
+! bm 2024-08-19  version 14.2.1
+!                Fixed issued with Water Rights Priority, can now use daily and monthly water rights administration with this version		
 ! 
 !                
 !***************************************************************************
@@ -199,8 +197,8 @@ c_________________________________________________________________NoticeEnd___
       ! - part 2 is minor new feature release
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
-      CHARACTER*16, PARAMETER :: VERS = '14.3.0'
-      CHARACTER*12, PARAMETER :: RDATE = '06/3/2024'
+      CHARACTER*16, PARAMETER :: VERS = '14.2.1'
+      CHARACTER*12, PARAMETER :: RDATE = '08/19/2024'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
