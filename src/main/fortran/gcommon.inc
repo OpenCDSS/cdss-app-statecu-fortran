@@ -142,6 +142,9 @@ c_________________________________________________________________NoticeEnd___
 !                Increase the number of structures to 1300 for compatability with ArkDSS
 !                Add in new flag1 to allow for RCR and skip IWR calculations if RCR is present
 !                No longer need Climate files if RCR File is present and Flag1 set to 6
+! klt 2024-01-05 version 14.1.0 (Kelley Thompson)
+!                Added .swd file - to identify surfacewater used directly in gw-sprinklers when using gmode=3
+!                either as a type 1 (for annual acre-feet) or type 2 (for acres) entries in file
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
@@ -189,8 +192,8 @@ c_________________________________________________________________NoticeEnd___
       ! - part 2 is minor new feature release
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
-      CHARACTER*16, PARAMETER :: VERS = '14.0.2'
-      CHARACTER*12, PARAMETER :: RDATE = '09/22/22'
+      CHARACTER*16, PARAMETER :: VERS = '14.1.0'
+      CHARACTER*12, PARAMETER :: RDATE = '01/05/24'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
@@ -231,13 +234,13 @@ c_________________________________________________________________NoticeEnd___
       CHARACTER*15 SOIL(DIM_NC), SNAME(14)
       CHARACTER*24 NAMEASP(DIM_NA)
       CHARACTER*200 dfile
-! rb- add input filenames
+! rb- add input filenames - klt add swdfile
       character*200 rcufile,ccufile,kbcfile,tmpfile,pptfile
       character*200 ddhfile,othfile,logfile,cdsfile,fdfile,cchfile
       character*200 kpmfile,strfile,ddsfile,kmhfile
       character*200 ddrfile,penfile,tmxfile,tmnfile
       character*200 pdyfile,solfile,vapfile,wndfile,dlyfile
-      character*200 ipyfile,pvhfile,dlafile,clifile
+      character*200 ipyfile,pvhfile,dlafile,clifile,swdfile
 ! grb 06-29-00 add admfile and dddfile
       character*200 admfile,dddfile,addfile,dcufile,gisfile
 ! jhb 12-07-11 add rcr file types - only used by statecu, not statecui
@@ -329,8 +332,8 @@ c EW TEST
       INTEGER iflag(DIM_NA,DIM_NY)
       REAL :: swflcu(dim_na,dim_ny),swspcu(dim_na,dim_ny)
       REAL :: swgwflcu(dim_na,dim_ny),swgwspcu(dim_na,dim_ny)
-
-      
+! klt 01-01-24 additional variables for surface water direct use
+      REAL :: swdiraf(dim_na,dim_ny),swdirac(dim_na,dim_ny)
 ! ew dimensioned arrays to go with new common block G12 to carry variables
 !    that used to be written to tmp files
       REAL REQT(DIM_NA,DIM_NY,14),DEPLET(DIM_NA,DIM_NY,12)
@@ -497,14 +500,14 @@ c EW TEST
       COMMON /GG2a/ DBYEAR,DEYEAR,IFIR
       COMMON /GG2b/ ddstrctt,ddindex,iddrec
       COMMON /GG2c/ ddstruct,imissflg,TRIGHTS
-c jhb 07-12-00 add gisfile (known, but unused in statecu)
+c jhb 07-12-00 add gisfile (known, but unused in statecu) klt add swdfile
       common /gg2d/ admfile,dddfile,addfile,dcufile,gisfile
       common /gg2e/ rcufile,ccufile,kbcfile,tmpfile,pptfile
       common /gg2f/ ddhfile,othfile,logfile,cdsfile,fdfile,cchfile
       common /gg2g/ kpmfile,strfile,ddsfile,kmhfile
       common /gg2h/ wsid,divsup,ddrfile,penfile,vapfile
       common /gg2i/ tmxfile,tmnfile,pdyfile,solfile,wndfile
-      common /gg2j/ dlyfile,ipyfile,pvhfile,clifile,dlafile
+      common /gg2j/ dlyfile,ipyfile,pvhfile,clifile,dlafile,swdfile
 !  grb add soil mositure priority and presimulation variables as well as ending soil moisture values
       common /gg2k/ ipresim,iprtysm,iagg,ipdy,imiss2
       common /gg2l/ endsoils,endsoilj,endsoilo
@@ -523,7 +526,7 @@ c jhb 07-12-00 add gisfile (known, but unused in statecu)
      
       COMMON /G13/GRASS,fleff,speff,gper,sper,mprate,sfeff,gfeff,
      !         custot,tail,swflac,swspac,swgwflac,swgwspac,swflsm,
-     !         swspsm,swgwflsm,swgwspsm,gmode,iflag
+     !         swspsm,swgwflsm,swgwspsm,gmode,iflag,swdiraf,swdirac
       
 !
 ! ew added common block for supply limit variables, diversions and water rights
