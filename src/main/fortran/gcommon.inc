@@ -138,10 +138,12 @@ c_________________________________________________________________NoticeEnd___
 ! smalers 2021-10-04   version 14.0.1
 !                Fix bug in mainxc.for that caused BD1 file to not be written
 !                for scenarios without a water supply option (isuply=0).
+! bm 2022-09-22   version 14.0.2
+!                Increase the number of structures to 1300 for compatability with ArkDSS
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
-!                     number of subareas (or structures)    = 1200
+!                     number of subareas (or structures)    = 1300
 !                     number of parcels per structure       = 50
 !                     number of years                       = 130 
 !                     number of crop types                  = 70
@@ -156,7 +158,7 @@ c_________________________________________________________________NoticeEnd___
 
 !-----Dimension (Corresponding dimension parameters in other include files
 !-----should be changed)
-      INTEGER, PARAMETER :: DIM_NA = 1200
+      INTEGER, PARAMETER :: DIM_NA = 1300
       INTEGER, PARAMETER :: DIM_NP = 50
       INTEGER, PARAMETER :: DIM_NY = 130
       INTEGER, PARAMETER :: DIM_NC = 70
@@ -185,8 +187,8 @@ c_________________________________________________________________NoticeEnd___
       ! - part 2 is minor new feature release
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
-      CHARACTER*16, PARAMETER :: VERS = '14.0.1'
-      CHARACTER*12, PARAMETER :: RDATE = '10/04/21'
+      CHARACTER*16, PARAMETER :: VERS = '14.0.2'
+      CHARACTER*12, PARAMETER :: RDATE = '09/22/2022'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
