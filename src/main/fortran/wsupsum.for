@@ -4893,10 +4893,11 @@ C       write(413,'(a881)')
             soiltotto(m,13)     = soiltotto(m,13)     + soiltotto(m,l)
             soiltotto(nyrs1,l)  = soiltotto(nyrs1,l)  + soiltoto
             soiltotto(nyrs1,13) = soiltotto(nyrs1,13) + soiltoto
-            soiltott(m,l)       = soiltott(m,l)       + soiltot
-            soiltott(m,13)      = soiltott(m,13)      + soiltott(m,l) 
-            soiltott(nyrs1,l)   = soiltott(nyrs1,l)   + soiltot
-            soiltott(nyrs1,13)  = soiltott(nyrs1,13)  + soiltot
+! bm - Commented out Soiltot , calculating it after GW.
+!            soiltott(m,l)       = soiltott(m,l)       + soiltot
+!            soiltott(m,13)      = soiltott(m,13)      + soiltott(m,l) 
+!            soiltott(nyrs1,l)   = soiltott(nyrs1,l)   + soiltot
+!            soiltott(nyrs1,13)  = soiltott(nyrs1,13)  + soiltot
             wbu(i,nyrs1,13)     = wbu(i,nyrs1,13)     + wbu(i,m,l)
             wbu(i,nyrs1,l)      = wbu(i,nyrs1,l)      + wbu(i,m,l)
 !jhb        ------------------------------------------------------------
@@ -5135,6 +5136,11 @@ C       write(413,'(a881)')
                 soiltotj = soiltotj + gwholdj1
                 soiltoto = soiltoto + gwholdo1
               endif
+! bm added soiltot check here 10/4-------------------------------------------------------------------------
+              soiltott(m,l)       = soiltott(m,l)       + soiltot
+              soiltott(m,13)      = soiltott(m,13)      + soiltott(m,l) 
+              soiltott(nyrs1,l)   = soiltott(nyrs1,l)   + soiltot
+              soiltott(nyrs1,13)  = soiltott(nyrs1,13)  + soiltot
 !jhb          ----------------------------------------------------------
 !jhb          added the gw to sm component to the balance 
 !              gdiv(m,l)      = gsdiv(m,l)    + gfdiv(m,l)
