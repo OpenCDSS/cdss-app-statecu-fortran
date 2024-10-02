@@ -140,6 +140,8 @@ c_________________________________________________________________NoticeEnd___
 !                for scenarios without a water supply option (isuply=0).
 ! bm 2022-09-22   version 14.0.2
 !                Increase the number of structures to 1300 for compatability with ArkDSS
+!                Add in new flag1 to allow for RCR and skip IWR calculations if RCR is present
+!                No longer need Climate files if RCR File is present and Flag1 set to 6
 !                
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
@@ -188,7 +190,7 @@ c_________________________________________________________________NoticeEnd___
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
       CHARACTER*16, PARAMETER :: VERS = '14.0.2'
-      CHARACTER*12, PARAMETER :: RDATE = '09/22/2022'
+      CHARACTER*12, PARAMETER :: RDATE = '09/22/22'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops
