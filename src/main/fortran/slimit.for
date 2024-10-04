@@ -64,7 +64,9 @@ c_________________________________________________________________NoticeEnd___
         OPEN (UNIT=400,FILE=ddrfile,Status='old',iostat=ierr)
         IF (IERR.NE.0) CALL MYEXIT(13)
       endif
-!
+! bm skip initializing variables if already through the loop once (eyetime = 2)
+      if(eyetime.eq.2) goto 9 
+      !
 !-----initialize variables to assure all structures are accounted for
 !
       do j=1,DIM_NA
@@ -80,6 +82,7 @@ c_________________________________________________________________NoticeEnd___
       enddo
       senadmint=0
       junadmint=0
+! bm changed from nbasin to DIM_NA 
 
       do j=1,nbasin
            numright(j)=0
@@ -93,7 +96,7 @@ c_________________________________________________________________NoticeEnd___
           awcr(j)=0.0
         enddo
       endif
-      if(eyetime.eq.2) goto 9
+!      if(eyetime.eq.2) goto 9
       if(isuply .ge. 1) then 
         write(*,*) 'Reading in historic diversion file'
 !-----read in *.ddh file
@@ -278,6 +281,10 @@ c_________________________________________________________________NoticeEnd___
 !'c
       senadmint=0
       junadmint=0
+! bm added this to reset numright to zero 
+      do j=1,nbasin
+            numright(j)=0
+       enddo
         call skipn(400)
 450     read(400,500,end = 55) temp2,namet,ddridt,admint,rightt
 500     format (a12,a24,a12,f16.0,f8.0)     
@@ -497,7 +504,6 @@ c_________________________________________________________________NoticeEnd___
                          ENDIF
 9508                  continue
                  endif
-
                  if (idaily.eq.3.or.idaily.eq.5) then
                      persen(k,i,j)=0
                      do 9509 m=1,numright(k)
@@ -508,7 +514,6 @@ c_________________________________________________________________NoticeEnd___
                  endif
                 goto 507
           endif             !end of missing diversion data
-
               if (idaily.le.3) then
 !  process daily diversion data with daily, monthly or constant admin date
               iddrec=ddindex+((nyr1-1-dbyear+i)*(ddstrctt*12))+
@@ -558,7 +563,7 @@ c_________________________________________________________________NoticeEnd___
                if (divnmo.ne.0) persen(k,i,j)=sendivn/divnmo
                if (divnmo.ne.0) peroth(k,i,j)=othdivn/divnmo
               endif         !end of (idaily .le. 3)
-
+      
             endif !(imissflg.eq.1.or.twdid(4:5).eq.'AD'.or.twdid(3:4).eq.'AD')
 
 !  process monthly diversion data with monthly or constant admin date
@@ -589,11 +594,16 @@ c_________________________________________________________________NoticeEnd___
      1          =othdivn+(divsup(K,I,J)-(trights(K)*1.9835*month(j)))
                 if (divsup(k,i,j).eq.0) persen(k,i,j)=1.0
                 if (divsup(k,i,j).eq.0) peroth(k,i,j)=0
+!          write (999,*) 'persen line 597 =', persen
+!         write (999,*) 'peroth =', peroth
 ! GRB 11-08-00 MAKE SURE FOLLOWING LINES DO NOT EXTEND PAST 72 CHARACTERS
-          if (divsup(k,i,j).ne.0) persen(k,i,j)=sendivn/divsup(K,I,J)
+          if (divsup(k,i,j).ne.0.and.divsup(k,i,j).gt.-998.0)then
+              persen(k,i,j)=sendivn/divsup(K,I,J)
+          ENDIF               
+! bm changed the if to account for missing data in junior diversions. 
+!         if(divsup(k,i,j).ne.0) persen(k,i,j)=sendivn/divsup(K,I,J)
           if (divsup(k,i,j).ne.0) peroth(k,i,j)=othdivn/divsup(K,I,J)
                endif
- 
  507          if (j.eq.12) then 
                 write(502,506) (I+NYR1-1),twdid,(persen(k,i,j1),j1=1,12)
  506            format(i4,2x,a12,12f8.3)
@@ -603,7 +613,8 @@ c_________________________________________________________________NoticeEnd___
 
  650      continue        !end of month loop
  550    continue          !end of year loop
- 
+!      write (999,*) 'persen =', persen
+!     write (999,*) 'peroth =', peroth
       close(500)
       close(501)
 
