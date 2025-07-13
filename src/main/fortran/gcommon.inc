@@ -148,6 +148,8 @@ c_________________________________________________________________NoticeEnd___
 ! bm 2024-08-19  version 14.1.1
 !                Fix issue related to soil moisture reporting when using pumping file
 !                Fixed issued with Water Rights Priority, can now use daily and monthly water rights administration with this version		
+! bm 2025-03-26  version 14.1.2
+!                For Water Rights Priority issues, changed 1 line of code back to how it was in version 14.1.0  	
 !
 !***************************************************************************
 !   Notes           : Current Dimensions of the program.
@@ -195,8 +197,8 @@ c_________________________________________________________________NoticeEnd___
       ! - part 2 is minor new feature release
       ! - part 3 is bug fix
       ! - optional part 4 is ".beta", "dev1", etc.
-      CHARACTER*16, PARAMETER :: VERS = '14.1.1'
-      CHARACTER*12, PARAMETER :: RDATE = '08/19/24'
+      CHARACTER*16, PARAMETER :: VERS = '14.1.2'
+      CHARACTER*12, PARAMETER :: RDATE = '03/26/25'
 
 ! _____________________________________________________
 ! rrb 2003/06/20; Allow multiple subirrigation crops

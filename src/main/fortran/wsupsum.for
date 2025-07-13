@@ -3776,9 +3776,8 @@ C       write(413,'(a881)')
                   HOLDPS=PERSEN(I,M,L)*divsup(i,m,l)
                 endif
               ENDIF
-! bm changed 1 to 5
-              if (idaily.eq.0 .or. idaily .eq. 5) THEN
-!              if (idaily.eq.0 .or. idaily .eq. 1) THEN
+! bm changed 1 to 5 v14.1.1 - changed back to 1 on 3/26/25 v14.1.2
+              if (idaily.eq.0 .or. idaily .eq. 1) THEN
                 if(persen(i,m,l) .lt. -998) then
                   HOLDPS=MIN(DIVSUP(I,M,L),SENASP(I)*1.9835*month(L))
                 else
